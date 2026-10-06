@@ -33,11 +33,25 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-  frontend:
-    build: ./frontend
-    container_name: tour_booking_fe
+  frontend-customer:
+    build: ./frontend-customer
+    container_name: tour_booking_fe_customer
     ports:
       - "5173:80"
+    depends_on:
+      - backend
+  frontend-staff:
+    build: ./frontend-staff
+    container_name: tour_booking_fe_staff
+    ports:
+      - "5174:80"
+    depends_on:
+      - backend
+  frontend-admin:
+    build: ./frontend-admin
+    container_name: tour_booking_fe_admin
+    ports:
+      - "5175:80"
     depends_on:
       - backend
 
