@@ -357,6 +357,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users(id),
   INDEX idx_audit_entity (entity_type, entity_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Seed demo. Chay sau schema.sql: mysql -u root -p tour_booking < seed.sql
 USE tour_booking;
 
