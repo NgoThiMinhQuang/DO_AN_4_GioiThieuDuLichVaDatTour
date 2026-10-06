@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, formatVND, bookingStatusVi, paymentStatusVi, paymentMethodVi, passengerTypeVi } from '../components/ui.jsx';
+import { ErrorBox, formatVND, bookingStatusVi, paymentStatusVi, paymentMethodVi, passengerTypeVi, formatDateVi } from '../components/ui.jsx';
+
+function badgeClass(s) {
+  const v = String(s || '').toUpperCase();
+  if (['CONFIRMED', 'COMPLETED', 'PAID', 'SUCCESS', 'DEPOSITED'].includes(v)) return 'badge green';
+  if (['PENDING', 'DEPOSIT_PENDING', 'PARTIAL', 'PARTIALLY_PAID', 'PENDING_PAYMENT'].includes(v)) return 'badge amber';
+  if (['CANCELLED', 'FAILED', 'EXPIRED'].includes(v)) return 'badge red';
+  return 'badge';
+}
 
 export default function BookingDetail() {
   const { id } = useParams();
@@ -50,28 +58,61 @@ export default function BookingDetail() {
 
   if (error) return <div className="container"><ErrorBox error={error} /></div>;
   if (!b) return <div className="container"><p>Đang tải...</p></div>;
+  const canPay = Number(b.remaining_amount) > 0 && !['CANCELLED', 'EXPIRED'].includes(String(b.booking_status).toUpperCase());
+  const canCancel = !['CANCELLED', 'COMPLETED', 'EXPIRED'].includes(String(b.booking_status).toUpperCase());
 
   return (
     <div className="container">
       <div className="page-head">
         <span className="eyebrow">Chi tiết đặt tour</span>
         <h2>Đặt tour {b.booking_code}</h2>
-        <div><span className="badge">{bookingStatusVi(b.booking_status)}</span> <span className="badge">{paymentStatusVi(b.payment_status)}</span></div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <span className={badgeClass(b.booking_status)}>{bookingStatusVi(b.booking_status)}</span>
+          <span className={badgeClass(b.payment_status)}>{paymentStatusVi(b.payment_status)}</span>
+        </div>
+        <p className="muted" style={{ marginTop: 8 }}><Link to="/my-bookings">← Về danh sách đặt tour</Link></p>
       </div>
       {msg && <div className="alert info">{msg}</div>}
-      <div className="grid cols-2" style={{ alignItems: 'start' }}>
-        <div className="panel">
-          <h3 style={{ marginTop: 0 }}>Thông tin chuyến đi</h3>
-          <div className="form">
-            <div><b>Tour:</b> {b.tour_name}</div>
-            <div><b>Khởi hành:</b> {b.departure_date ? new Date(b.departure_date).toLocaleDateString('vi-VN') : ''} — về {b.return_date ? new Date(b.return_date).toLocaleDateString('vi-VN') : ''}</div>
-            <div><b>Liên hệ:</b> {b.contact_name} • {b.contact_phone} • {b.contact_email}</div>
-            <div><b>Giá tại thời điểm đặt (người lớn / trẻ em / em bé):</b> {formatVND(b.adult_price)} / {formatVND(b.child_price)} / {formatVND(b.infant_price)}</div>
-            <div><b>Tạm tính:</b> {formatVND(b.subtotal)} • <b>Giảm:</b> {formatVND(b.discount_amount)} • <b>Tổng:</b> <span className="price">{formatVND(b.total_amount)}</span></div>
-            <div><b>Đã trả:</b> {formatVND(b.paid_amount)} • <b>Còn lại:</b> <span className="price">{formatVND(b.remaining_amount)}</span></div>
+      <div className="grid cols-2 tv-detail-grid" style={{ alignItems: 'start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
+          <div className="panel">
+            <h3 style={{ marginTop: 0 }}>Thông tin chuyến đi</h3>
+            <div className="form">
+              <div><b>Tour:</b> {b.tour_name}</div>
+              <div><b>Khởi hành:</b> {b.departure_date ? formatDateVi(b.departure_date) : ''} — về {b.return_date ? formatDateVi(b.return_date) : ''}</div>
+              <div><b>Liên hệ:</b> {b.contact_name} • {b.contact_phone} • {b.contact_email}</div>
+              <div><b>Giá tại thời điểm đặt (người lớn / trẻ em / em bé):</b> {formatVND(b.adult_price)} / {formatVND(b.child_price)} / {formatVND(b.infant_price)}</div>
+              <div><b>Tạm tính:</b> {formatVND(b.subtotal)} • <b>Giảm:</b> {formatVND(b.discount_amount)} • <b>Tổng:</b> <span className="price">{formatVND(b.total_amount)}</span></div>
+              <div><b>Đã trả:</b> {formatVND(b.paid_amount)} • <b>Còn lại:</b> <span className="price">{formatVND(b.remaining_amount)}</span></div>
+            </div>
+          </div>
+          <div className="panel">
+            <h3 style={{ marginTop: 0 }}>Hành khách ({(b.passengers || []).length})</h3>
+            <div className="table-wrap"><table>
+              <thead><tr><th>Họ tên</th><th>Loại</th><th>Ngày sinh</th></tr></thead>
+              <tbody>{(b.passengers || []).map((p) => <tr key={p.id}><td>{p.full_name}</td><td><span className="badge">{passengerTypeVi(p.passenger_type)}</span></td><td>{p.date_of_birth ? String(p.date_of_birth).slice(0, 10) : ''}</td></tr>)}</tbody>
+            </table></div>
+          </div>
+          <div className="panel">
+            <h3 style={{ marginTop: 0 }}>Lịch sử thanh toán</h3>
+            {(b.payments || []).length === 0 && <div className="muted">Chưa có giao dịch nào.</div>}
+            {(b.payments || []).length > 0 && (
+              <div className="tv-pay-timeline">
+                {(b.payments || []).map((p) => (
+                  <div className="tv-pay-item" key={p.id}>
+                    <div><b>{formatVND(p.amount)}</b> • {paymentMethodVi(p.payment_method)} • <span className={badgeClass(p.status)}>{paymentStatusVi(p.status)}</span></div>
+                    <div className="muted">{p.transaction_code} {p.paid_at ? `• ${formatDateVi(p.paid_at)}` : ''}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="table-wrap" style={{ marginTop: 12 }}><table>
+              <thead><tr><th>Mã giao dịch</th><th>Số tiền</th><th>Phương thức</th><th>Trạng thái</th></tr></thead>
+              <tbody>{(b.payments || []).map((p) => <tr key={p.id}><td>{p.transaction_code}</td><td>{formatVND(p.amount)}</td><td>{paymentMethodVi(p.payment_method)}</td><td><span className={badgeClass(p.status)}>{paymentStatusVi(p.status)}</span></td></tr>)}</tbody>
+            </table></div>
           </div>
         </div>
-        <div className="panel">
+        <div className="panel tv-sticky">
           <h3 style={{ marginTop: 0 }}>Thanh toán thêm</h3>
           <div className="form-row">
             <input type="number" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} placeholder="Số tiền" />
@@ -83,8 +124,8 @@ export default function BookingDetail() {
             </select>
           </div>
           <div className="form-row" style={{ marginTop: 8 }}>
-            <button className="btn" onClick={doPay}>Thanh toán</button>
-            <button className="btn danger" onClick={doCancel}>Hủy đặt tour</button>
+            <button className="btn" onClick={doPay} disabled={!canPay}>Thanh toán</button>
+            <button className="btn danger" onClick={doCancel} disabled={!canCancel}>Hủy đặt tour</button>
           </div>
           <h3>Đánh giá (khi hoàn thành)</h3>
           <div className="form-row">
@@ -96,16 +137,6 @@ export default function BookingDetail() {
           <div style={{ marginTop: 8 }}><button className="btn secondary" onClick={doReview}>Gửi đánh giá</button></div>
         </div>
       </div>
-      <h3>Hành khách</h3>
-      <div className="table-wrap"><table>
-        <thead><tr><th>Họ tên</th><th>Loại</th><th>Ngày sinh</th></tr></thead>
-        <tbody>{(b.passengers || []).map((p) => <tr key={p.id}><td>{p.full_name}</td><td><span className="badge">{passengerTypeVi(p.passenger_type)}</span></td><td>{p.date_of_birth ? String(p.date_of_birth).slice(0, 10) : ''}</td></tr>)}</tbody>
-      </table></div>
-      <h3>Lịch sử thanh toán</h3>
-      <div className="table-wrap"><table>
-        <thead><tr><th>Mã giao dịch</th><th>Số tiền</th><th>Phương thức</th><th>Trạng thái</th></tr></thead>
-        <tbody>{(b.payments || []).map((p) => <tr key={p.id}><td>{p.transaction_code}</td><td>{formatVND(p.amount)}</td><td>{paymentMethodVi(p.payment_method)}</td><td><span className="badge">{paymentStatusVi(p.status)}</span></td></tr>)}</tbody>
-      </table></div>
     </div>
   );
 }

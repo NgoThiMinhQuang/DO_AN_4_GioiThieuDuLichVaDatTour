@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, formatVND } from '../components/ui.jsx';
+import { ErrorBox, formatVND, formatDateVi } from '../components/ui.jsx';
 
 function emptyPassenger(type) {
   return { full_name: '', date_of_birth: '', gender: '', passenger_type: type, identity_number: '', nationality: '', note: '' };
 }
 
-const STEP_LABELS = ['1. Lịch & số khách', '2. Liên hệ & hành khách', '3. Mã giảm giá', '4. Xác nhận'];
+const STEP_LABELS = ['Chọn lịch', 'Thông tin', 'Xác nhận'];
 
 export default function Booking() {
   const { departureId } = useParams();
@@ -110,25 +110,30 @@ export default function Booking() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 980 }}>
+    <div className="container" style={{ maxWidth: 1020 }}>
       <div className="page-head">
         <span className="eyebrow">Đặt tour</span>
-        <h2>Hoàn tất đặt tour trong 4 bước</h2>
+        <h2>Hoàn tất đặt tour trong 3 bước</h2>
         <p>Giá do hệ thống tự tính lại và kiểm tra số chỗ còn trống.</p>
       </div>
-      <div className="steps">
-        {[1, 2, 3, 4].map((s) => (
-          <span key={s} className={`step${step === s ? ' active' : ''}${step > s ? ' done' : ''}`}>
-            {STEP_LABELS[s - 1]}
+      <div className="steps booking-steps">
+        {[1, 2, 3].map((s) => (
+          <span key={s} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <span className={`step${step === s ? ' active' : ''}${step > s ? ' done' : ''}`}>
+              <span className="step-num">{step > s ? '✓' : s}</span> {STEP_LABELS[s - 1]}
+            </span>
+            {s < 3 && <span className="step-sep">→</span>}
           </span>
         ))}
       </div>
       <ErrorBox error={error} />
 
-      <div className="grid cols-2 booking-layout" style={{ alignItems: 'start' }}>
+      <div className="grid cols-2 booking-layout tv-booking-grid" style={{ alignItems: 'start' }}>
         <div className="panel">
           {step === 1 && (
             <div className="form">
+              <h3 style={{ margin: '0 0 4px' }}>1. Chọn lịch & số khách</h3>
+              <p className="muted" style={{ margin: 0 }}>Chọn tour và lịch khởi hành còn chỗ.</p>
               <label>Tour
                 <select value={tourId} onChange={(e) => setTourId(e.target.value)}>
                   <option value="">-- Chọn tour --</option>
@@ -140,7 +145,7 @@ export default function Booking() {
                   <option value="">-- Chọn lịch khởi hành --</option>
                   {departures.map((d) => (
                     <option key={d.id} value={d.id}>
-                      {new Date(d.departure_date).toLocaleDateString('vi-VN')} — còn {d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)} chỗ — {formatVND(d.adult_price)}
+                      {formatDateVi(d.departure_date)} — còn {d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)} chỗ — {formatVND(d.adult_price)}
                     </option>
                   ))}
                 </select>
@@ -156,6 +161,8 @@ export default function Booking() {
 
           {step === 2 && (
             <div className="form">
+              <h3 style={{ margin: '0 0 4px' }}>2. Thông tin liên hệ & hành khách</h3>
+              <p className="muted" style={{ margin: 0 }}>Thông tin dùng để giữ chỗ và gửi xác nhận.</p>
               <div className="form-row">
                 <label>Họ tên liên hệ*<input value={contact.name} onChange={(e) => setContact({ ...contact, name: e.target.value })} placeholder="Nguyễn Văn A" /></label>
                 <label>SĐT*<input value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} placeholder="09xx xxx xxx" /></label>
@@ -166,8 +173,8 @@ export default function Booking() {
               </div>
               <h3>Danh sách hành khách ({passengers.length})</h3>
               {passengers.map((p, i) => (
-                <div className="form-row" key={i}>
-                  <label>Họ tên<input value={p.full_name} onChange={(e) => { const n = [...passengers]; n[i].full_name = e.target.value; setPassengers(n); }} /></label>
+                <div className="tv-pax-card form-row" key={i}>
+                  <label>Họ tên<input value={p.full_name} onChange={(e) => { const n = [...passengers]; n[i].full_name = e.target.value; setPassengers(n); }} placeholder={`Khách ${i + 1}`} /></label>
                   <label>Ngày sinh<input type="date" value={p.date_of_birth || ''} onChange={(e) => { const n = [...passengers]; n[i].date_of_birth = e.target.value; setPassengers(n); }} /></label>
                   <label>Loại
                     <select value={p.passenger_type} onChange={(e) => { const n = [...passengers]; n[i].passenger_type = e.target.value; setPassengers(n); }}>
@@ -178,6 +185,13 @@ export default function Booking() {
                   </label>
                 </div>
               ))}
+              <label>Mã giảm giá (nếu có)
+                <div className="tv-promo-row">
+                  <input value={promoCode} onChange={(e) => setPromoCode(e.target.value)} placeholder="VD: SALE10" />
+                  <button type="button" className="btn secondary" onClick={validatePromo} style={{ flex: '0 0 auto' }}>Áp mã</button>
+                </div>
+              </label>
+              {promoMsg && <div className="alert info" style={{ margin: 0 }}>{promoMsg}</div>}
               <div className="form-row">
                 <button className="btn secondary" onClick={() => setStep(1)}>← Quay lại</button>
                 <button className="btn" disabled={!contact.name || !contact.phone} onClick={() => setStep(3)}>Tiếp tục →</button>
@@ -187,44 +201,36 @@ export default function Booking() {
 
           {step === 3 && (
             <div className="form">
-              <label>Mã giảm giá
-                <div className="form-row">
-                  <input value={promoCode} onChange={(e) => setPromoCode(e.target.value)} placeholder="VD: SALE10" />
-                  <button type="button" className="btn secondary" onClick={validatePromo} style={{ flex: '0 0 auto' }}>Áp mã</button>
-                </div>
-              </label>
-              {promoMsg && <div className="alert info">{promoMsg}</div>}
-              <div className="form-row">
-                <button className="btn secondary" onClick={() => setStep(2)}>← Quay lại</button>
-                <button className="btn" onClick={() => setStep(4)}>Tiếp tục →</button>
-              </div>
-            </div>
-          )}
-
-          {step === 4 && (
-            <div className="form">
+              <h3 style={{ margin: '0 0 4px' }}>3. Xác nhận đặt tour</h3>
+              <p className="muted" style={{ margin: 0 }}>Kiểm tra lại thông tin trước khi xác nhận.</p>
               <div className="card"><div className="card-body">
                 <div><b>Tour:</b> {tour?.name}</div>
-                <div><b>Khởi hành:</b> {dep ? new Date(dep.departure_date).toLocaleDateString('vi-VN') : '—'}</div>
+                <div><b>Khởi hành:</b> {dep ? formatDateVi(dep.departure_date) : '—'}</div>
                 <div><b>Khách:</b> {counts.adultCount} NL + {counts.childCount} TE + {counts.infantCount} EB</div>
                 <div><b>Liên hệ:</b> {contact.name} — {contact.phone}</div>
+                {promoCode && <div><b>Mã giảm giá:</b> {promoCode} (−{formatVND(discount)})</div>}
                 <div><b>Tổng dự kiến:</b> <span className="price">{formatVND(total)}</span></div>
               </div></div>
               <div className="form-row">
-                <button className="btn secondary" onClick={() => setStep(3)}>← Quay lại</button>
+                <button className="btn secondary" onClick={() => setStep(2)}>← Quay lại</button>
                 <button className="btn" disabled={submitting} onClick={submitBooking}>{submitting ? 'Đang xử lý đặt tour...' : 'Xác nhận đặt tour'}</button>
               </div>
             </div>
           )}
         </div>
 
-        <div className="panel" style={{ position: 'sticky', top: 84 }}>
-          <h3 style={{ marginTop: 0 }}>Tóm tắt</h3>
+        <div className="panel tv-summary" style={{ position: 'sticky', top: 84 }}>
+          <h3 style={{ marginTop: 0 }}>Tóm tắt đặt tour</h3>
           <div className="muted">{tour?.name || 'Chưa chọn tour'}</div>
+          {dep && <div className="muted">Khởi hành: {formatDateVi(dep.departure_date)} • {counts.adultCount + counts.childCount + counts.infantCount} khách</div>}
           <div style={{ margin: '10px 0', borderTop: '1px dashed #e2e8f0', paddingTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Tạm tính</span><b>{formatVND(subtotal)}</b></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Giảm giá</span><b>−{formatVND(discount)}</b></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}><span>Tổng dự kiến</span><span className="price">{formatVND(total)}</span></div>
+            <div className="tv-summary-row"><span>Tạm tính</span><b>{formatVND(subtotal)}</b></div>
+            <div className="tv-summary-row"><span>Giảm giá {promoCode ? `(${promoCode})` : ''}</span><b>−{formatVND(discount)}</b></div>
+            <div className="tv-summary-row total"><span>Tổng dự kiến</span><span className="price">{formatVND(total)}</span></div>
+          </div>
+          <div className="tv-promo-row" style={{ marginBottom: 10 }}>
+            <input value={promoCode} onChange={(e) => setPromoCode(e.target.value)} placeholder="Nhập mã giảm giá" aria-label="Mã giảm giá" />
+            <button type="button" className="btn secondary btn-sm" onClick={validatePromo} style={{ flex: '0 0 auto' }}>Áp mã</button>
           </div>
           <div className="alert info" style={{ marginBottom: 0 }}>Giá hiển thị chỉ để tham khảo — hệ thống sẽ tính lại giá và kiểm tra số chỗ còn trống.</div>
         </div>

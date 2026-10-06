@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/client.js';
 import { ErrorBox, TourCard } from '../components/ui.jsx';
 
@@ -29,12 +30,19 @@ export default function Favorites() {
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
-      {rows.length === 0 && !error && <div className="empty-box">Chưa có tour yêu thích nào. Khám phá ngay!</div>}
+      {rows.length === 0 && !error && (
+        <div className="tv-empty">
+          <div className="tv-empty-icon">♡</div>
+          <b>Chưa có tour yêu thích nào</b>
+          <p>Nhấn biểu tượng tim ở mỗi tour để lưu lại hành trình bạn thích.</p>
+          <Link className="btn" to="/tours">Khám phá tour ngay</Link>
+        </div>
+      )}
       <div className="grid tours">
         {rows.map((t) => (
-          <div key={t.id} style={{ display: 'flex', flexDirection: 'column' }}>
-            <TourCard t={t} />
-            <button className="btn secondary btn-sm" style={{ marginTop: 8 }} onClick={() => remove(t.id)}>✕ Xóa khỏi yêu thích</button>
+          <div key={t.tour_id || t.id} className="tv-fav-wrap">
+            <TourCard t={t.tour_id ? { ...t, id: t.tour_id } : t} />
+            <button className="btn secondary btn-sm tv-fav-remove" onClick={() => remove(t.tour_id || t.id)}>✕ Xóa khỏi yêu thích</button>
           </div>
         ))}
       </div>

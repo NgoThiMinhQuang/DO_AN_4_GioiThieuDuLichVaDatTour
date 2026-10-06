@@ -47,52 +47,57 @@ export default function Profile() {
   const initial = ((form.full_name || user?.email || 'T').trim().charAt(0) || 'T').toUpperCase();
 
   return (
-    <div className="container" style={{ maxWidth: 720 }}>
+    <div className="container" style={{ maxWidth: 860 }}>
       <div className="page-head" style={{ textAlign: 'center' }}>
         <span className="eyebrow">Tài khoản</span>
         <h2>Hồ sơ cá nhân</h2>
+        <p>Cập nhật thông tin để đặt tour nhanh hơn và nhận ưu đãi phù hợp.</p>
       </div>
-      <div className="panel" style={{ textAlign: 'center', marginBottom: 16 }}>
-        <span className="user-avatar" style={{ width: 72, height: 72, fontSize: 28, margin: '0 auto' }}>
+      <div className="panel tv-profile-head" style={{ textAlign: 'center', marginBottom: 16 }}>
+        <span className="user-avatar tv-profile-avatar">
           {form.avatar ? <img src={form.avatar} alt="avatar" /> : initial}
         </span>
-        <div style={{ marginTop: 10, fontWeight: 600, fontSize: 17, color: '#0f172a' }}>{form.full_name || user?.email || ''}</div>
+        <div className="tv-profile-name">{form.full_name || user?.email || ''}</div>
         <div className="muted">{user?.email || ''}</div>
+        <div style={{ marginTop: 8 }}><span className="badge green">Thành viên TravelViet</span></div>
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
-      <div className="panel" style={{ marginBottom: 16 }}>
-        <h3 style={{ marginTop: 0 }}>Thông tin chung</h3>
-        <form className="form" onSubmit={save}>
-          <label>Họ tên<input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></label>
-          <div className="form-row">
-            <label>SĐT<input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></label>
-            <label>Ngày sinh<input type="date" value={form.date_of_birth} onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })} /></label>
-          </div>
-          <div className="form-row">
-            <label>Giới tính
-              <select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })}>
-                <option value="">—</option>
-                <option value="MALE">Nam</option>
-                <option value="FEMALE">Nữ</option>
-                <option value="OTHER">Khác</option>
-              </select>
-            </label>
-            <label>Địa chỉ<input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></label>
-          </div>
-          <label>Ảnh đại diện (đường dẫn ảnh)<input value={form.avatar} onChange={(e) => setForm({ ...form, avatar: e.target.value })} placeholder="https://..." /></label>
-          <button className="btn" type="submit">Lưu thay đổi</button>
-        </form>
-      </div>
-      <div className="panel">
-        <h3 style={{ marginTop: 0 }}>Đổi mật khẩu</h3>
-        <form className="form" onSubmit={changePw}>
-          <div className="form-row">
-            <label>Mật khẩu hiện tại<input type="password" value={pw.old_password} onChange={(e) => setPw({ ...pw, old_password: e.target.value })} /></label>
-            <label>Mật khẩu mới<input type="password" value={pw.new_password} onChange={(e) => setPw({ ...pw, new_password: e.target.value })} /></label>
-          </div>
-          <button className="btn secondary" type="submit">Đổi mật khẩu</button>
-        </form>
+      <div className="tv-profile-grid">
+        <div className="panel profile-panel" style={{ marginBottom: 0 }}>
+          <h3 style={{ marginTop: 0 }}>Thông tin chung</h3>
+          <form className="form" onSubmit={save}>
+            <div className="tv-form-2col">
+              <label>Họ tên<input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Nguyễn Văn A" /></label>
+              <label>SĐT<input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="09xx xxx xxx" /></label>
+            </div>
+            <div className="tv-form-2col">
+              <label>Ngày sinh<input type="date" value={form.date_of_birth} onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })} /></label>
+              <label>Giới tính
+                <select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })}>
+                  <option value="">—</option>
+                  <option value="MALE">Nam</option>
+                  <option value="FEMALE">Nữ</option>
+                  <option value="OTHER">Khác</option>
+                </select>
+              </label>
+            </div>
+            <label>Địa chỉ<input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Số nhà, đường, quận/huyện, tỉnh/thành" /></label>
+            <label>Ảnh đại diện (đường dẫn ảnh)<input value={form.avatar} onChange={(e) => setForm({ ...form, avatar: e.target.value })} placeholder="https://..." /></label>
+            <div><button className="btn" type="submit">Lưu thay đổi</button></div>
+          </form>
+        </div>
+        <div className="panel profile-panel">
+          <h3 style={{ marginTop: 0 }}>Đổi mật khẩu</h3>
+          <p className="muted" style={{ marginTop: 0 }}>Dùng mật khẩu mạnh ≥6 ký tự để bảo vệ tài khoản.</p>
+          <form className="form" onSubmit={changePw}>
+            <div className="tv-form-2col">
+              <label>Mật khẩu hiện tại<input type="password" value={pw.old_password} onChange={(e) => setPw({ ...pw, old_password: e.target.value })} placeholder="••••••••" /></label>
+              <label>Mật khẩu mới<input type="password" value={pw.new_password} onChange={(e) => setPw({ ...pw, new_password: e.target.value })} placeholder="••••••••" /></label>
+            </div>
+            <div><button className="btn secondary" type="submit">Đổi mật khẩu</button></div>
+          </form>
+        </div>
       </div>
     </div>
   );

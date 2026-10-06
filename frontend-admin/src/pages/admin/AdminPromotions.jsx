@@ -4,6 +4,8 @@ import { ErrorBox, StatusBadge, viStatus } from '../../components/ui.jsx';
 
 export default function AdminPromotions() {
   const [rows, setRows] = useState([]);
+  const [q, setQ] = useState('');
+  const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
   const [form, setForm] = useState({ code: '', name: '', discount_type: 'PERCENT', discount_value: 10, status: 'ACTIVE' });
@@ -39,16 +41,23 @@ export default function AdminPromotions() {
     return `${Number(p.discount_value).toLocaleString('vi-VN')}đ`;
   }
 
+  const filtered = rows.filter((p) => {
+    const okQ = !q || `${p.code} ${p.name}`.toLowerCase().includes(q.toLowerCase());
+    const okS = !status || p.status === status;
+    return okQ && okS;
+  });
+
   return (
     <div>
-      <div className="tv-pagehead">
+      <div className="tv-pagehead page-header">
         <div><h2>Khuyến mãi</h2><p>Mã giảm giá và bật/tắt chương trình khuyến mãi.</p></div>
+        <div className="page-actions"><span className="badge b-blue">{filtered.length} mã</span></div>
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
       <form className="filters" onSubmit={create}>
         <b>✚ Thêm mã khuyến mãi</b>
-        <div className="form-row">
+        <div className="form-grid-2">
           <input placeholder="Mã (ví dụ: CHAO10)" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required />
           <input placeholder="Tên chương trình" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <select value={form.discount_type} onChange={(e) => setForm({ ...form, discount_type: e.target.value })}>
@@ -59,13 +68,28 @@ export default function AdminPromotions() {
         </div>
         <div><button className="btn sm" type="submit">＋ Thêm mã</button></div>
       </form>
+      <div className="filters">
+        <b>Bộ lọc khuyến mãi</b>
+        <div className="form-row">
+          <input placeholder="🔍 Tìm theo mã / tên chương trình..." value={q} onChange={(e) => setQ(e.target.value)} />
+          <select value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="">Tất cả trạng thái</option>
+            <option value="ACTIVE">Đang áp dụng</option>
+            <option value="INACTIVE">Ngừng áp dụng</option>
+          </select>
+          <select value="" onChange={() => {}} aria-label="Loại giảm">
+            <option value="">Mọi loại giảm</option>
+          </select>
+          <button className="btn secondary sm" type="button" onClick={() => { setQ(''); setStatus(''); }}>Đặt lại</button>
+        </div>
+      </div>
       <div className="table-wrap"><table>
         <thead><tr><th>Mã giảm giá</th><th>Tên chương trình</th><th>Loại giảm</th><th>Giá trị</th><th>Đã dùng</th><th>Trạng thái</th><th>Đổi trạng thái</th></tr></thead>
         <tbody>
-          {rows.length === 0 && <tr><td colSpan={7}><div className="tv-empty">Chưa có khuyến mãi nào.</div></td></tr>}
-          {rows.map((p) => (
+          {filtered.length === 0 && <tr><td colSpan={7}><div className="tv-empty">Chưa có khuyến mãi nào.</div></td></tr>}
+          {filtered.map((p) => (
             <tr key={p.id}>
-              <td><b style={{ color: '#1d4ed8' }}>{p.code}</b></td><td>{p.name}</td><td>{viStatus(p.discount_type)}</td><td style={{ fontWeight: 500 }}>{discountText(p)}</td>
+              <td><b style={{ color: '#1d4ed8' }}>{p.code}</b></td><td>{p.name}</td><td>{viStatus(p.discount_type)}</td><td style={{ fontWeight: 700 }}>{discountText(p)}</td>
               <td>{p.used_count}/{p.usage_limit ?? '∞'}</td>
               <td><StatusBadge value={p.status} /></td>
               <td>

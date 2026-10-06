@@ -9,6 +9,7 @@ export default function AdminDepartures() {
   const { role } = useAuth();
   const readOnly = role === 'STAFF'; // Nhân viên chỉ theo dõi lịch khởi hành, không thêm/sửa
   const [tourId, setTourId] = useState('');
+  const [status, setStatus] = useState('');
   const [deps, setDeps] = useState([]);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
@@ -45,37 +46,47 @@ export default function AdminDepartures() {
     } catch (e) { setMsg(e.response?.data?.message || e.message); }
   }
 
+  const filtered = deps.filter((d) => !status || d.status === status);
+
   return (
     <div>
-      <div className="tv-pagehead">
+      <div className="tv-pagehead page-header">
         <div><h2>Lịch khởi hành</h2><p>Lịch khởi hành theo từng tour — đổi trạng thái khi cần.</p></div>
+        <div className="page-actions"><span className="badge b-blue">{filtered.length} lịch khởi hành</span></div>
       </div>
       {error && <div className="alert error">{error}</div>}
       {msg && <div className="alert info">{msg}</div>}
       <div className="alert info">Nhập mã tour (để trống là xem tất cả){readOnly ? ' — tài khoản nhân viên chỉ được xem theo dõi.' : '.'}</div>
       <div className="filters">
+        <b>Bộ lọc lịch khởi hành</b>
         <div className="form-row">
           <input placeholder="Mã tour (ví dụ: 1)" value={tourId} onChange={(e) => setTourId(e.target.value)} />
+          <select value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="">Tất cả trạng thái</option>
+            {STATUSES.map((s) => <option key={s} value={s}>{viStatus(s)}</option>)}
+          </select>
+          <input type="date" value={createForm.departure_date} onChange={(e) => setCreateForm({ ...createForm, departure_date: e.target.value })} aria-label="Ngày khởi hành" />
           <button className="btn sm" onClick={loadByTour}>Tải lịch khởi hành</button>
         </div>
         {!readOnly && (
-        <div className="form-row">
-          <input type="date" value={createForm.departure_date} onChange={(e) => setCreateForm({ ...createForm, departure_date: e.target.value })} />
+        <div className="form-grid-2">
           <input type="number" placeholder="Sức chứa" value={createForm.capacity} onChange={(e) => setCreateForm({ ...createForm, capacity: Number(e.target.value) })} />
-          <button className="btn secondary sm" onClick={create}>Thêm lịch khởi hành</button>
+          <div className="filter-actions">
+            <button className="btn secondary sm" onClick={create}>Thêm lịch khởi hành</button>
+          </div>
         </div>
         )}
       </div>
       <div className="table-wrap"><table>
         <thead><tr><th>Mã số</th><th>Ngày khởi hành</th><th>Chỗ còn lại</th><th>Giá người lớn</th><th>Trạng thái</th>{!readOnly && <th>Đổi trạng thái</th>}</tr></thead>
         <tbody>
-          {deps.length === 0 && <tr><td colSpan={6}><div className="tv-empty">Nhập mã tour rồi bấm “Tải lịch khởi hành”.</div></td></tr>}
-          {deps.map((d) => (
+          {filtered.length === 0 && <tr><td colSpan={6}><div className="tv-empty">Nhập mã tour rồi bấm “Tải lịch khởi hành”.</div></td></tr>}
+          {filtered.map((d) => (
             <tr key={d.id}>
               <td className="muted">#{d.id}</td>
               <td><b>{String(d.departure_date).slice(0, 10)}</b></td>
               <td>{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</td>
-              <td style={{ fontWeight: 500 }}>{formatVND(d.adult_price)}</td>
+              <td style={{ fontWeight: 700 }}>{formatVND(d.adult_price)}</td>
               <td><StatusBadge value={d.status} /></td>
               {!readOnly && (
               <td>

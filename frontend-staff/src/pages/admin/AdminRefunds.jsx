@@ -43,40 +43,72 @@ export default function AdminRefunds() {
     } catch (e) { setMsg(e.response?.data?.message || e.message); }
   }
 
+  const pendingCount = rows.filter((r) => ['PENDING', 'PROCESSING'].includes(String(r.status || '').toUpperCase())).length;
+
   return (
     <div className="staff-page">
       <div className="page-head">
-        <h2>↩️ Hoàn tiền</h2>
-        <p>Tạo yêu cầu hoàn cho đơn bị hủy và cập nhật trạng thái xử lý.</p>
+        <div>
+          <h2>↩️ Hoàn tiền</h2>
+          <p>Tạo yêu cầu hoàn cho đơn bị hủy và cập nhật trạng thái xử lý.</p>
+        </div>
+        <div className="page-head-actions">
+          <span className="page-head-count">⏳ {pendingCount} chờ xử lý / {rows.length} yêu cầu</span>
+          <button className="btn secondary" onClick={load}>Tải lại</button>
+        </div>
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
+      <div className="sub-head"><h3>Tạo yêu cầu hoàn mới</h3><span className="muted">Số tiền không vượt quá số đã thanh toán</span></div>
       <div className="filters">
-        <div className="form-row">
-          <input placeholder="Mã đơn đặt tour" value={form.booking_id} onChange={(e) => setForm({ ...form, booking_id: e.target.value })} />
+        <div className="form-row quad">
+          <input placeholder="Mã đơn đặt tour *" value={form.booking_id} onChange={(e) => setForm({ ...form, booking_id: e.target.value })} />
           <input placeholder="Mã thanh toán (không bắt buộc)" value={form.payment_id} onChange={(e) => setForm({ ...form, payment_id: e.target.value })} />
-          <input placeholder="Số tiền hoàn" type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
-          <input placeholder="Lý do hoàn tiền" value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} />
+          <input placeholder="Số tiền hoàn *" type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
           <button className="btn" onClick={create}>Tạo yêu cầu hoàn</button>
         </div>
+        <div className="form-row single">
+          <input placeholder="Lý do hoàn tiền (ví dụ: khách hủy tour, tour không khởi hành...)" value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} />
+        </div>
       </div>
+      <div className="sub-head"><h3>Danh sách yêu cầu hoàn</h3><span className="muted">{rows.length} yêu cầu</span></div>
       <div className="table-wrap"><table>
-        <thead><tr><th>Mã hoàn</th><th>Mã đơn</th><th>Số tiền</th><th>Lý do</th><th>Trạng thái</th><th>Cập nhật</th></tr></thead>
+        <thead><tr><th>Mã hoàn</th><th>Mã đơn</th><th>Số tiền</th><th>Lý do</th><th>Trạng thái</th><th>Duyệt</th></tr></thead>
         <tbody>
-          {rows.length === 0 && <tr><td colSpan={6} className="empty-row">Chưa có yêu cầu hoàn tiền nào.</td></tr>}
+          {rows.length === 0 && (
+            <tr><td colSpan={6}>
+              <div className="empty-state">
+                <div className="empty-state-ic">↩️</div>
+                <b>Chưa có yêu cầu hoàn tiền nào</b>
+                <p>Nhập mã đơn và số tiền ở biểu mẫu trên để tạo yêu cầu mới.</p>
+              </div>
+            </td></tr>
+          )}
           {rows.map((r) => (
             <tr key={r.id}>
               <td><span className="table-code">{r.refund_code}</span></td><td>{r.booking_code}</td><td><span className="money">{formatVND(r.amount)}</span></td>
-              <td>{r.reason}</td><td><span className={statusBadge(r.status)}>{viStatus(r.status)}</span></td>
+              <td>{r.reason || '—'}</td><td><span className={statusBadge(r.status)}>{viStatus(r.status)}</span></td>
               <td>
-                <select value={r.status} onChange={(e) => patch(r.id, e.target.value)}>
-                  {RSTATES.map((s) => <option key={s} value={s}>{viStatus(s)}</option>)}
-                </select>
+                <div className="row-actions">
+                  <select value={r.status} onChange={(e) => patch(r.id, e.target.value)}>
+                    {RSTATES.map((s) => <option key={s} value={s}>{viStatus(s)}</option>)}
+                  </select>
+                  {String(r.status || '').toUpperCase() === 'PENDING' && (
+                    <button className="btn small secondary" onClick={() => patch(r.id, 'SUCCESS')}>Duyệt</button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table></div>
+      <div className="details-card">
+        <h4>📌 Lưu ý nghiệp vụ hoàn tiền</h4>
+        <div className="details-grid">
+          <div className="kv"><small>Điều kiện</small><span>Số tiền hoàn ≤ số đã thanh toán</span></div>
+          <div className="kv"><small>Quy trình</small><span>Chờ xử lý → Đang xử lý → Thành công / Thất bại</span></div>
+        </div>
+      </div>
     </div>
   );
 }

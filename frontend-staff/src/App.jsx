@@ -1,5 +1,7 @@
 import { Link, NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useAuth } from './context/AuthContext.jsx';
+import api from './api/client.js';
 import Login from './pages/Login.jsx';
 import AdminDepartures from './pages/admin/AdminDepartures.jsx';
 import AdminBookings from './pages/admin/AdminBookings.jsx';
@@ -59,6 +61,41 @@ function Home() {
     { to: '/payments', icon: '💳', title: 'Thanh toán', desc: 'Xác nhận và ghi nhận thanh toán.' },
     { to: '/refunds', icon: '↩️', title: 'Hoàn tiền', desc: 'Xử lý hủy đơn và hoàn tiền.' },
   ];
+  const [stats, setStats] = useState({ pendingBookings: null, openDepartures: null, pendingPayments: null, pendingRefunds: null });
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const [b, d, p, r] = await Promise.all([
+          api.get('/admin/bookings', { params: { limit: 100 } }).catch(() => ({ data: { data: [] } })),
+          api.get('/admin/departures').catch(() => ({ data: { data: [] } })),
+          api.get('/admin/payments').catch(() => ({ data: { data: [] } })),
+          api.get('/admin/refunds').catch(() => ({ data: { data: [] } })),
+        ]);
+        if (!alive) return;
+        const bookings = b.data.data || [];
+        const deps = d.data.data || [];
+        const payments = p.data.data || [];
+        const refunds = r.data.data || [];
+        setStats({
+          pendingBookings: bookings.filter((x) => ['PENDING', 'DEPOSIT_PENDING'].includes(String(x.booking_status || '').toUpperCase())).length,
+          openDepartures: deps.filter((x) => ['OPEN', 'ALMOST_FULL', 'AVAILABLE'].includes(String(x.status || '').toUpperCase())).length,
+          pendingPayments: payments.filter((x) => !['SUCCESS', 'FAILED'].includes(String(x.status || '').toUpperCase())).length,
+          pendingRefunds: refunds.filter((x) => ['PENDING', 'PROCESSING'].includes(String(x.status || '').toUpperCase())).length,
+        });
+      } catch (_) { /* giu nguyen null -> hien thi — */ }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  const cards = [
+    { ic: '📋', cls: '', label: 'Đơn chờ xác nhận', value: stats.pendingBookings },
+    { ic: '🗓️', cls: 'g2', label: 'Lịch đang mở', value: stats.openDepartures },
+    { ic: '💳', cls: 'g3', label: 'Thanh toán chờ duyệt', value: stats.pendingPayments },
+    { ic: '↩️', cls: 'g4', label: 'Hoàn tiền chờ xử lý', value: stats.pendingRefunds },
+  ];
+
   return (
     <div className="container">
       <div className="hero hero-staff">
@@ -70,6 +107,14 @@ function Home() {
           <span>↩️ Hoàn tiền</span>
           <span>🗓️ Lịch khởi hành</span>
         </div>
+      </div>
+      <div className="stat-cards">
+        {cards.map((c) => (
+          <div className="stat" key={c.label}>
+            <span className={`stat-ic ${c.cls}`}>{c.ic}</span>
+            <div><span className="muted">{c.label}</span><b>{c.value === null || c.value === undefined ? '—' : c.value}</b><div className="stat-sub">Cập nhật theo dữ liệu hiện tại</div></div>
+          </div>
+        ))}
       </div>
       <div className="section">
         <h2>Công việc hôm nay</h2>

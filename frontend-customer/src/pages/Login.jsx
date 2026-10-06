@@ -28,22 +28,32 @@ export default function Login() {
   }
 
   return (
-    <div className="container">
-      <div className="auth-wrap">
-        <div className="auth-card">
-          <div style={{ textAlign: 'center', marginBottom: 12 }}>
-            <span style={{ fontSize: 22, fontWeight: 600 }}>Travel<span style={{ color: '#2563eb' }}>Viet</span></span>
+    <div className="container auth-page">
+      <div className="auth-wrap auth-split-wrap">
+        <div className="auth-card auth-split-card">
+          <div className="auth-side">
+            <div className="auth-side-overlay" />
+            <div className="auth-side-inner">
+              <div className="auth-logo">
+                <img src="/images/logo.png" alt="TravelViet" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+              </div>
+              <h3>Khởi đầu hành trình đáng nhớ của bạn</h3>
+              <p>Hàng trăm tour khởi hành mỗi tuần với lịch trình rõ ràng, giá minh bạch và đội ngũ đồng hành 24/7.</p>
+              <div className="auth-side-quote">✈ Đặt tour chỉ mất 5 phút — giữ chỗ tức thì, thanh toán an toàn.</div>
+            </div>
           </div>
-          <h2>Chào mừng trở lại</h2>
-          <p className="sub">Đăng nhập để đặt tour và theo dõi chuyến đi</p>
-          {error && <div className="alert error">{error}</div>}
-          <form className="form" onSubmit={submit}>
-            <label>Email hoặc SĐT<input value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="customer@gmail.com" /></label>
-            <label>Mật khẩu<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" /></label>
-            <button className="btn" type="submit">Đăng nhập</button>
-          </form>
-          <p className="auth-switch">Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p>
-          <div className="alert info">Demo: customer@gmail.com / Customer123!</div>
+          <div className="auth-main">
+            <h2>Chào mừng trở lại</h2>
+            <p className="sub">Đăng nhập để đặt tour và theo dõi chuyến đi</p>
+            {error && <div className="alert error">{error}</div>}
+            <form className="form" onSubmit={submit}>
+              <label>Email hoặc SĐT<input value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="customer@gmail.com" /></label>
+              <label>Mật khẩu<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" /></label>
+              <button className="btn auth-submit" type="submit">Đăng nhập</button>
+            </form>
+            <p className="auth-switch">Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p>
+            <div className="alert info">Demo: customer@gmail.com / Customer123!</div>
+          </div>
         </div>
       </div>
     </div>

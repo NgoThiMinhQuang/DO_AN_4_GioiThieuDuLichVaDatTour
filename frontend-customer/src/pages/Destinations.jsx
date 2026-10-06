@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/client.js';
 import { ErrorBox, handleImgError, fallbackDestImg } from '../components/ui.jsx';
@@ -6,6 +6,8 @@ import { ErrorBox, handleImgError, fallbackDestImg } from '../components/ui.jsx'
 export default function Destinations() {
   const [rows, setRows] = useState([]);
   const [error, setError] = useState('');
+  const [q, setQ] = useState('');
+  const [region, setRegion] = useState('');
   useEffect(() => {
     (async () => {
       try {
@@ -14,6 +16,22 @@ export default function Destinations() {
       } catch (e) { setError(e.response?.data?.message || e.message); }
     })();
   }, []);
+
+  const regions = useMemo(() => {
+    const s = new Set();
+    rows.forEach((d) => { if (d.region) s.add(d.region); });
+    return [...s];
+  }, [rows]);
+
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return rows.filter((d) => {
+      if (region && d.region !== region) return false;
+      if (!needle) return true;
+      return [d.name, d.province, d.region, d.description].filter(Boolean).join(' ').toLowerCase().includes(needle);
+    });
+  }, [rows, q, region]);
+
   return (
     <div className="container">
       <div className="page-head" style={{ textAlign: 'center' }}>
@@ -21,10 +39,19 @@ export default function Destinations() {
         <h2>Điểm đến nổi bật</h2>
         <p>Từ biển đảo đến núi rừng — chọn điểm đến cho chuyến đi của bạn.</p>
       </div>
+      <div className="tv-dest-filter">
+        <input placeholder="Tìm điểm đến, tỉnh thành..." value={q} onChange={(e) => setQ(e.target.value)} aria-label="Tìm điểm đến" />
+        <select value={region} onChange={(e) => setRegion(e.target.value)} aria-label="Lọc theo miền">
+          <option value="">Tất cả miền</option>
+          {regions.map((r) => <option key={r} value={r}>{r}</option>)}
+        </select>
+        {(q || region) && <button className="btn ghost btn-sm" type="button" onClick={() => { setQ(''); setRegion(''); }}>Xóa lọc</button>}
+        <span className="tv-filter-count">{filtered.length}/{rows.length} điểm đến</span>
+      </div>
       <ErrorBox error={error} />
-      {rows.length === 0 && !error && <div className="empty-box">Chưa có điểm đến nào.</div>}
-      <div className="bento-grid">
-        {rows.map((d, i) => {
+      {filtered.length === 0 && !error && <div className="empty-box">Không tìm thấy điểm đến phù hợp.</div>}
+      <div className="bento-grid tv-bento">
+        {filtered.map((d, i) => {
           const fb = fallbackDestImg(d.id, i);
           return (
             <div className="card bento-item" key={d.id}>
@@ -34,11 +61,8 @@ export default function Destinations() {
                   alt={d.name} loading="lazy" data-fallback={fb} onError={handleImgError}
                 />
                 <div className="dest-overlay"><b>{d.name}</b><br /><span>{[d.province, d.region].filter(Boolean).join(' • ') || 'Việt Nam'}</span></div>
+                {d.tour_count != null && <span className="tv-dest-count">{d.tour_count} tour</span>}
               </Link>
-              <div className="card-body">
-                <div className="card-title"><Link to={`/destinations/${d.id}`}>{d.name}</Link></div>
-                <div className="muted">{(d.description || '').slice(0, 120)}</div>
-              </div>
             </div>
           );
         })}

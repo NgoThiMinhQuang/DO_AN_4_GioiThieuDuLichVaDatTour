@@ -29,19 +29,42 @@ export default function AdminPayments() {
     } catch (e) { setMsg(e.response?.data?.message || e.message); }
   }
 
+  const successCount = rows.filter((p) => String(p.status || '').toUpperCase() === 'SUCCESS').length;
+  const pendingCount = rows.filter((p) => !['SUCCESS', 'FAILED'].includes(String(p.status || '').toUpperCase())).length;
+
   return (
     <div className="staff-page">
       <div className="page-head">
-        <h2>💳 Thanh toán</h2>
-        <p>Xác nhận giao dịch thành công hay thất bại, đồng thời theo dõi các yêu cầu hoàn tiền.</p>
+        <div>
+          <h2>💳 Thanh toán</h2>
+          <p>Xác nhận giao dịch thành công hay thất bại, đồng thời theo dõi các yêu cầu hoàn tiền.</p>
+        </div>
+        <div className="page-head-actions">
+          <span className="page-head-count">💳 {rows.length} giao dịch</span>
+          <button className="btn secondary" onClick={load}>Tải lại</button>
+        </div>
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
-      <div className="page-head"><h2 style={{ fontSize: 17 }}>Danh sách thanh toán</h2></div>
+      <div className="stat-cards">
+        <div className="stat"><span className="stat-ic">💳</span><div><span className="muted">Tổng giao dịch</span><b>{rows.length}</b><div className="stat-sub">Tất cả phương thức</div></div></div>
+        <div className="stat"><span className="stat-ic g2">✅</span><div><span className="muted">Đã thành công</span><b>{successCount}</b><div className="stat-sub">Ghi nhận doanh thu</div></div></div>
+        <div className="stat"><span className="stat-ic g3">⏳</span><div><span className="muted">Chờ xác nhận</span><b>{pendingCount}</b><div className="stat-sub">Cần nhân viên duyệt</div></div></div>
+        <div className="stat"><span className="stat-ic g4">↩️</span><div><span className="muted">Yêu cầu hoàn</span><b>{refunds.length}</b><div className="stat-sub">Theo dõi bên dưới</div></div></div>
+      </div>
+      <div className="sub-head"><h3>Danh sách thanh toán</h3><span className="muted">{rows.length} giao dịch</span></div>
       <div className="table-wrap"><table>
         <thead><tr><th>Mã giao dịch</th><th>Mã đơn</th><th>Số tiền</th><th>Trạng thái</th><th>Xác nhận</th></tr></thead>
         <tbody>
-          {rows.length === 0 && <tr><td colSpan={5} className="empty-row">Chưa có giao dịch thanh toán nào.</td></tr>}
+          {rows.length === 0 && (
+            <tr><td colSpan={5}>
+              <div className="empty-state">
+                <div className="empty-state-ic">💳</div>
+                <b>Chưa có giao dịch thanh toán nào</b>
+                <p>Giao dịch mới của khách sẽ hiện tại đây để xác nhận.</p>
+              </div>
+            </td></tr>
+          )}
           {rows.map((p) => (
             <tr key={p.id}>
               <td><span className="table-code">{p.transaction_code}</span></td><td>{p.booking_code}</td><td><span className="money">{formatVND(p.amount)}</span></td>
@@ -56,11 +79,19 @@ export default function AdminPayments() {
           ))}
         </tbody>
       </table></div>
-      <div className="page-head"><h2 style={{ fontSize: 17 }}>Danh sách hoàn tiền</h2></div>
+      <div className="sub-head"><h3>Danh sách hoàn tiền</h3><span className="muted">{refunds.length} yêu cầu</span></div>
       <div className="table-wrap"><table>
         <thead><tr><th>Mã hoàn</th><th>Mã đơn</th><th>Số tiền</th><th>Trạng thái</th></tr></thead>
         <tbody>
-          {refunds.length === 0 && <tr><td colSpan={4} className="empty-row">Chưa có yêu cầu hoàn tiền nào.</td></tr>}
+          {refunds.length === 0 && (
+            <tr><td colSpan={4}>
+              <div className="empty-state">
+                <div className="empty-state-ic">↩️</div>
+                <b>Chưa có yêu cầu hoàn tiền nào</b>
+                <p>Sang trang “Hoàn tiền” để tạo yêu cầu mới.</p>
+              </div>
+            </td></tr>
+          )}
           {refunds.map((r) => <tr key={r.id}><td><span className="table-code">{r.refund_code}</span></td><td>{r.booking_code}</td><td><span className="money">{formatVND(r.amount)}</span></td><td><span className={statusBadge(r.status)}>{viStatus(r.status)}</span></td></tr>)}
         </tbody>
       </table></div>

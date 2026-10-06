@@ -7,6 +7,7 @@ const STATUSES = ['DRAFT', 'OPEN', 'PAUSED', 'CLOSED'];
 export default function AdminTours() {
   const [rows, setRows] = useState([]);
   const [q, setQ] = useState('');
+  const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
   const [form, setForm] = useState({ code: '', name: '', departure_location: '', adult_price: '', status: 'OPEN' });
@@ -38,18 +39,23 @@ export default function AdminTours() {
     } catch (err) { setMsg(err.response?.data?.message || err.message); }
   }
 
-  const filtered = rows.filter((r) => !q || `${r.code} ${r.name}`.toLowerCase().includes(q.toLowerCase()));
+  const filtered = rows.filter((r) => {
+    const okQ = !q || `${r.code} ${r.name}`.toLowerCase().includes(q.toLowerCase());
+    const okS = !status || r.status === status;
+    return okQ && okS;
+  });
 
   return (
     <div>
-      <div className="tv-pagehead">
+      <div className="tv-pagehead page-header">
         <div><h2>Quản lý tour</h2><p>{rows.length} tour trong hệ thống — thêm mới và đổi trạng thái.</p></div>
+        <div className="page-actions"><span className="badge b-blue">{filtered.length} tour hiển thị</span></div>
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
       <form className="filters" onSubmit={create}>
         <b>✚ Thêm tour mới</b>
-        <div className="form-row">
+        <div className="form-grid-2">
           <input placeholder="Mã tour (ví dụ: TOUR-DN-01)" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
           <input placeholder="Tên tour" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <input placeholder="Điểm khởi hành" value={form.departure_location} onChange={(e) => setForm({ ...form, departure_location: e.target.value })} />
@@ -57,7 +63,20 @@ export default function AdminTours() {
         </div>
         <div><button className="btn sm" type="submit">＋ Thêm tour</button></div>
       </form>
-      <div className="filters"><input placeholder="🔍 Tìm kiếm theo mã / tên tour..." value={q} onChange={(e) => setQ(e.target.value)} /></div>
+      <div className="filters">
+        <b>Bộ lọc tour</b>
+        <div className="form-row">
+          <input placeholder="🔍 Tìm kiếm theo mã / tên tour..." value={q} onChange={(e) => setQ(e.target.value)} />
+          <select value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="">Tất cả trạng thái</option>
+            {STATUSES.map((s) => <option key={s} value={s}>{viStatus(s)}</option>)}
+          </select>
+          <select value="" onChange={() => {}} aria-label="Sắp xếp">
+            <option value="">Sắp xếp: Mới nhất</option>
+          </select>
+          <button className="btn secondary sm" type="button" onClick={() => { setQ(''); setStatus(''); }}>Đặt lại</button>
+        </div>
+      </div>
       <div className="table-wrap"><table>
         <thead><tr><th>Mã số</th><th>Ảnh</th><th>Mã tour</th><th>Tên tour</th><th>Giá người lớn</th><th>Trạng thái</th><th>Đổi trạng thái</th></tr></thead>
         <tbody>
@@ -74,7 +93,7 @@ export default function AdminTours() {
                   onError={handleImgError}
                 />
               </td>
-              <td><b>{r.code}</b></td><td>{r.name}</td><td style={{ fontWeight: 500, color: '#1d4ed8' }}>{formatVND(r.adult_price)}</td>
+              <td><b>{r.code}</b></td><td>{r.name}</td><td style={{ fontWeight: 700, color: '#1d4ed8' }}>{formatVND(r.adult_price)}</td>
               <td><StatusBadge value={r.status} /></td>
               <td>
                 <select value={r.status} onChange={(e) => changeStatus(r.id, e.target.value)}>

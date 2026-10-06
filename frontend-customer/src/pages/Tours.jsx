@@ -67,28 +67,45 @@ export default function Tours() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
+  function clearFilter() {
+    const cleared = { q: '', category: '', destination: '', minPrice: '', maxPrice: '', days: '', departDate: '', sort: 'newest' };
+    setF(cleared);
+    fetchTours(cleared);
+  }
+
   return (
     <div className="container">
-      <div className="page-head">
-        <span className="eyebrow">Danh sách tour</span>
-        <h2>Tìm tour phù hợp ({total})</h2>
-        <p>Lọc theo điểm đến, ngân sách và thời gian khởi hành mong muốn.</p>
+      <div className="tv-tours-hero">
+        <div className="tv-tours-hero-inner">
+          <span className="eyebrow" style={{ color: '#bfdbfe' }}>Danh sách tour</span>
+          <h2>Tìm tour phù hợp ({total})</h2>
+          <p>Lọc theo điểm đến, ngân sách và thời gian khởi hành mong muốn.</p>
+        </div>
       </div>
-      <div className="filters">
+      <div className="page-head tv-page-hero">
+        <span className="eyebrow">Danh sách tour</span>
+        <h2 style={{ display: 'none' }}>Tìm tour phù hợp</h2>
+      </div>
+      <div className="filters tv-filter">
         <div className="form-row">
-          <input placeholder="Tìm kiếm tên / mã / điểm khởi hành..." value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
-          <select value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
+          <div className="tv-filter-search">
+            <span>⌕</span>
+            <input placeholder="Tìm kiếm tên / mã / điểm khởi hành..." value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} aria-label="Tìm kiếm tour" />
+          </div>
+          <select value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} aria-label="Loại tour">
             <option value="">Tất cả loại tour</option>
             {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
-          <select value={f.destination} onChange={(e) => setF({ ...f, destination: e.target.value })}>
+          <select value={f.destination} onChange={(e) => setF({ ...f, destination: e.target.value })} aria-label="Điểm đến">
             <option value="">Tất cả điểm đến</option>
             {destinations.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
           </select>
         </div>
         <div className="form-row">
-          <input type="number" placeholder="Giá tối thiểu" value={f.minPrice} onChange={(e) => setF({ ...f, minPrice: e.target.value })} />
-          <input type="number" placeholder="Giá tối đa" value={f.maxPrice} onChange={(e) => setF({ ...f, maxPrice: e.target.value })} />
+          <div className="tv-price-range">
+            <input type="number" placeholder="Giá tối thiểu" value={f.minPrice} onChange={(e) => setF({ ...f, minPrice: e.target.value })} />
+            <input type="number" placeholder="Giá tối đa" value={f.maxPrice} onChange={(e) => setF({ ...f, maxPrice: e.target.value })} />
+          </div>
           <input type="number" placeholder="Số ngày đi tour" value={f.days} onChange={(e) => setF({ ...f, days: e.target.value })} />
           <input type="date" value={f.departDate} onChange={(e) => setF({ ...f, departDate: e.target.value })} title="Ngày khởi hành (xem ngày cụ thể ở trang chi tiết tour)" />
           <select value={f.sort} onChange={(e) => setF({ ...f, sort: e.target.value })}>
@@ -102,7 +119,11 @@ export default function Tours() {
             Bạn đang ưu tiên lịch khởi hành gần ngày {formatDateVi(f.departDate)} — ngày cụ thể của từng tour xem ở trang chi tiết.
           </div>
         )}
-        <div><button className="btn" onClick={() => fetchTours()}>Tìm kiếm / Lọc</button></div>
+        <div className="tv-filter-foot">
+          <button className="btn" onClick={() => fetchTours()}>Tìm kiếm / Lọc</button>
+          <button className="btn ghost" onClick={clearFilter} type="button">Xóa lọc</button>
+          <span className="tv-filter-count">Tìm thấy {total} tour phù hợp</span>
+        </div>
       </div>
       <ErrorBox error={error} />
       {tours.length === 0 && !error && <div className="empty-box">Không tìm thấy tour phù hợp. Thử nới lỏng điều kiện lọc.</div>}
