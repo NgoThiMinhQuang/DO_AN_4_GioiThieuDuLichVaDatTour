@@ -17,6 +17,8 @@ const STAFF_RULES = [
   { method: 'POST', prefix: '/refunds' }, // tao yeu cau hoan (muc 37)
   { method: 'PATCH', prefix: '/refunds/' }, // duyet hoan tien
   { method: 'GET', prefix: '/departures' }, // theo doi lich khoi hanh (chi doc)
+  { method: 'GET', prefix: '/support' }, // xem yeu cau ho tro
+  { method: 'PATCH', prefix: '/support/' }, // phan hoi / xu ly ho tro
 ];
 router.use(requireAuth);
 router.use((req, res, next) => {
@@ -90,7 +92,7 @@ router.get('/tours', async (req, res) => {
 });
 router.post('/tours', async (req, res) => {
   try {
-    const f = ['category_id', 'code', 'name', 'departure_location', 'duration_days', 'duration_nights', 'transport', 'description', 'adult_price', 'child_price', 'infant_price', 'included_services', 'excluded_services', 'policy', 'cancellation_policy', 'minimum_guests', 'thumbnail', 'status'];
+    const f = ['category_id', 'code', 'name', 'departure_location', 'duration_days', 'duration_nights', 'transport', 'description', 'adult_price', 'child_price', 'infant_price', 'included_services', 'excluded_services', 'policy', 'cancellation_policy', 'minimum_guests', 'thumbnail', 'is_featured', 'status'];
     const ins = await query(`INSERT INTO tours (${f.join(',')}) VALUES (${f.map(() => '?').join(',')})`, f.map((k) => req.body[k] ?? null));
     const tourId = ins.insertId;
     if (Array.isArray(req.body.destination_ids)) {
@@ -106,7 +108,7 @@ router.put('/tours/:id', async (req, res) => {
   try {
     const old = await query('SELECT * FROM tours WHERE id = ? LIMIT 1', [req.params.id]);
     if (!old.length) return res.status(404).json({ message: 'Khong tim thay tour' });
-    const f = ['category_id', 'code', 'name', 'departure_location', 'duration_days', 'duration_nights', 'transport', 'description', 'adult_price', 'child_price', 'infant_price', 'included_services', 'excluded_services', 'policy', 'cancellation_policy', 'minimum_guests', 'thumbnail', 'status'];
+    const f = ['category_id', 'code', 'name', 'departure_location', 'duration_days', 'duration_nights', 'transport', 'description', 'adult_price', 'child_price', 'infant_price', 'included_services', 'excluded_services', 'policy', 'cancellation_policy', 'minimum_guests', 'thumbnail', 'is_featured', 'status'];
     const set = f.filter((k) => req.body[k] !== undefined);
     if (set.length) await query(`UPDATE tours SET ${set.map((k) => `${k} = ?`).join(',')} WHERE id = ?`, [...set.map((k) => req.body[k]), req.params.id]);
     await audit(req.user.id, 'UPDATE', 'tours', req.params.id, old[0], req.body);
@@ -129,16 +131,16 @@ router.delete('/tours/:tourId/images/:imgId', async (req, res) => {
 });
 router.post('/tours/:id/itinerary', async (req, res) => {
   try {
-    const { day_number, title, description, meals, accommodation, note } = req.body || {};
+    const { day_number, title, description, start_time, end_time, meals, accommodation, note } = req.body || {};
     if (!day_number || !title) return res.status(400).json({ message: 'Thieu day_number/title' });
-    const ins = await query('INSERT INTO tour_itineraries (tour_id, day_number, title, description, meals, accommodation, note, sort_order) VALUES (?,?,?,?,?,?,?,?)',
-      [req.params.id, day_number, title, description || null, meals || null, accommodation || null, note || null, day_number]);
+    const ins = await query('INSERT INTO tour_itineraries (tour_id, day_number, title, description, start_time, end_time, meals, accommodation, note, sort_order) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      [req.params.id, day_number, title, description || null, start_time || null, end_time || null, meals || null, accommodation || null, note || null, day_number]);
     return res.status(201).json({ id: ins.insertId });
   } catch (e) { return res.status(500).json({ message: 'Loi server', error: e.message }); }
 });
 router.put('/tours/:tourId/itinerary/:itId', async (req, res) => {
   try {
-    const f = ['day_number', 'title', 'description', 'meals', 'accommodation', 'note'];
+    const f = ['day_number', 'title', 'description', 'start_time', 'end_time', 'meals', 'accommodation', 'note'];
     const set = f.filter((k) => req.body[k] !== undefined);
     if (!set.length) return res.status(400).json({ message: 'Khong co gi de cap nhat' });
     await query(`UPDATE tour_itineraries SET ${set.map((k) => `${k} = ?`).join(',')} WHERE id = ? AND tour_id = ?`,
@@ -148,21 +150,21 @@ router.put('/tours/:tourId/itinerary/:itId', async (req, res) => {
 });
 router.post('/tours/:id/departures', async (req, res) => {
   try {
-    const { departure_date, return_date, capacity = 30, adult_price, child_price, infant_price, minimum_guests = 1, status = 'OPEN' } = req.body || {};
+    const { departure_date, return_date, capacity = 30, adult_price, child_price, infant_price, minimum_guests = 1, meeting_point, status = 'OPEN' } = req.body || {};
     if (!departure_date) return res.status(400).json({ message: 'Thieu departure_date' });
     const t = await query('SELECT adult_price, child_price, infant_price FROM tours WHERE id = ? LIMIT 1', [req.params.id]);
     if (!t.length) return res.status(404).json({ message: 'Khong tim thay tour' });
     const ins = await query(
-      'INSERT INTO departures (tour_id, departure_date, return_date, capacity, adult_price, child_price, infant_price, minimum_guests, status) VALUES (?,?,?,?,?,?,?,?,?)',
+      'INSERT INTO departures (tour_id, departure_date, return_date, capacity, adult_price, child_price, infant_price, minimum_guests, meeting_point, status) VALUES (?,?,?,?,?,?,?,?,?,?)',
       [req.params.id, departure_date, return_date || null, capacity,
-        adult_price ?? t[0].adult_price, child_price ?? t[0].child_price, infant_price ?? t[0].infant_price, minimum_guests, status]
+        adult_price ?? t[0].adult_price, child_price ?? t[0].child_price, infant_price ?? t[0].infant_price, minimum_guests, meeting_point || null, status]
     );
     return res.status(201).json({ id: ins.insertId });
   } catch (e) { return res.status(500).json({ message: 'Loi server', error: e.message }); }
 });
 router.put('/departures/:id', async (req, res) => {
   try {
-    const f = ['departure_date', 'return_date', 'capacity', 'adult_price', 'child_price', 'infant_price', 'minimum_guests', 'status'];
+    const f = ['departure_date', 'return_date', 'capacity', 'adult_price', 'child_price', 'infant_price', 'minimum_guests', 'meeting_point', 'status'];
     const set = f.filter((k) => req.body[k] !== undefined);
     if (!set.length) return res.status(400).json({ message: 'Khong co gi de cap nhat' });
     await query(`UPDATE departures SET ${set.map((k) => `${k} = ?`).join(',')} WHERE id = ?`, [...set.map((k) => req.body[k]), req.params.id]);
@@ -283,9 +285,48 @@ router.patch('/payments/:id/verify', async (req, res) => {
   try {
     const { status } = req.body || {};
     if (!['SUCCESS', 'FAILED'].includes(status)) return res.status(400).json({ message: 'status phai la SUCCESS/FAILED' });
-    await query('UPDATE payments SET status = ? WHERE id = ?', [status, req.params.id]);
-    await audit(req.user.id, 'VERIFY_PAYMENT', 'payments', req.params.id, null, { status });
-    return res.json({ message: 'Xac minh thanh toan thanh cong' });
+    const { getConnection } = require('../config/db');
+    const conn = await getConnection();
+    try {
+      await conn.beginTransaction();
+      const [rows] = await conn.query('SELECT * FROM payments WHERE id = ? FOR UPDATE', [req.params.id]);
+      if (!rows.length) { await conn.rollback(); return res.status(404).json({ message: 'Khong tim thay giao dich' }); }
+      const p = rows[0];
+      if (p.status === status) { await conn.rollback(); return res.json({ message: 'Giao dich da o trang thai nay' }); }
+      await conn.query('UPDATE payments SET status = ?, paid_at = CASE WHEN ? = \'SUCCESS\' THEN COALESCE(paid_at, NOW()) ELSE paid_at END WHERE id = ?',
+        [status, status, req.params.id]);
+      // Chi SUCCESS moi duoc cong don (BR48-BR49): chuyen FAILED->SUCCESS thi cong them; SUCCESS->FAILED thi tru ra
+      if (p.status !== 'SUCCESS' && status === 'SUCCESS') {
+        const [bRows] = await conn.query('SELECT * FROM bookings WHERE id = ? FOR UPDATE', [p.booking_id]);
+        if (bRows.length && !['CANCELLED', 'EXPIRED', 'COMPLETED'].includes(bRows[0].booking_status)) {
+          const b = bRows[0];
+          const paid = Number(b.paid_amount) + Number(p.amount);
+          const remaining = Number(b.total_amount) - paid;
+          let paymentStatus = 'PARTIAL';
+          if (remaining <= 0) paymentStatus = 'PAID';
+          else if (paid >= Number(b.total_amount) * 0.3) paymentStatus = 'DEPOSITED';
+          let bookingStatus = b.booking_status;
+          if ((remaining <= 0 || paid >= Number(b.total_amount) * 0.3) && ['PENDING', 'DEPOSIT_PENDING'].includes(b.booking_status)) {
+            bookingStatus = 'CONFIRMED';
+          }
+          await conn.query('UPDATE bookings SET paid_amount = ?, remaining_amount = ?, payment_status = ?, booking_status = ? WHERE id = ?',
+            [paid, Math.max(0, remaining), paymentStatus, bookingStatus, b.id]);
+          if (bookingStatus === 'CONFIRMED' && b.booking_status !== 'CONFIRMED') {
+            const guests = b.adult_count + b.child_count + b.infant_count;
+            await conn.query('UPDATE departures SET held_seats = GREATEST(0, held_seats - ?), confirmed_seats = confirmed_seats + ? WHERE id = ?',
+              [guests, guests, b.departure_id]);
+          }
+        }
+      }
+      await audit(req.user.id, 'VERIFY_PAYMENT', 'payments', req.params.id, { status: p.status }, { status });
+      await conn.commit();
+      return res.json({ message: 'Xac minh thanh toan thanh cong' });
+    } catch (e) {
+      try { await conn.rollback(); } catch (_) {}
+      throw e;
+    } finally {
+      conn.release();
+    }
   } catch (e) { return res.status(500).json({ message: 'Loi server', error: e.message }); }
 });
 
@@ -359,6 +400,47 @@ router.patch('/users/:id/lock', async (req, res) => {
     await query('UPDATE users SET status = ? WHERE id = ?', [status, req.params.id]);
     await audit(req.user.id, 'LOCK_USER', 'users', req.params.id, null, { status });
     return res.json({ message: 'Cap nhat trang thai user thanh cong' });
+  } catch (e) { return res.status(500).json({ message: 'Loi server', error: e.message }); }
+});
+
+// ---- Support tickets: STAFF + ADMIN tiep nhan / phan hoi ----
+router.get('/support', async (req, res) => {
+  try {
+    const { status, type, q } = req.query;
+    const conds = ['1=1'];
+    const params = [];
+    if (status) { conds.push('s.status = ?'); params.push(status); }
+    if (type) { conds.push('s.type = ?'); params.push(type); }
+    if (q) { conds.push('(s.ticket_code LIKE ? OR s.title LIKE ? OR s.contact_name LIKE ? OR s.contact_email LIKE ?)'); params.push(`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`); }
+    const rows = await query(
+      `SELECT s.*, b.booking_code FROM support_tickets s LEFT JOIN bookings b ON b.id = s.booking_id
+       WHERE ${conds.join(' AND ')} ORDER BY s.created_at DESC LIMIT 100`, params);
+    return res.json({ data: rows });
+  } catch (e) { return res.status(500).json({ message: 'Loi server', error: e.message }); }
+});
+router.patch('/support/:id', async (req, res) => {
+  try {
+    const { status, admin_reply, assigned_to, priority } = req.body || {};
+    if (status && !['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(status)) {
+      return res.status(400).json({ message: 'status khong hop le' });
+    }
+    const rows = await query('SELECT * FROM support_tickets WHERE id = ? LIMIT 1', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ message: 'Khong tim thay yeu cau' });
+    const t = rows[0];
+    const ns = status || t.status;
+    await query(
+      `UPDATE support_tickets SET status = ?, admin_reply = COALESCE(?, admin_reply),
+        assigned_to = COALESCE(?, assigned_to), priority = COALESCE(?, priority),
+        resolved_at = CASE WHEN ? IN ('RESOLVED','CLOSED') THEN NOW() ELSE resolved_at END
+       WHERE id = ?`,
+      [ns, admin_reply ?? null, assigned_to ?? null, priority ?? null, ns, req.params.id]
+    );
+    if (t.user_id) {
+      await query('INSERT INTO notifications (user_id, title, content, type) VALUES (?,?,?,?)',
+        [t.user_id, 'Phan hoi ho tro', `Yeu cau ${t.ticket_code} da duoc cap nhat: ${ns}.`, 'SUPPORT']);
+    }
+    await audit(req.user.id, 'REPLY_SUPPORT', 'support_tickets', req.params.id, { status: t.status }, { status: ns });
+    return res.json({ message: 'Xu ly yeu cau ho tro thanh cong' });
   } catch (e) { return res.status(500).json({ message: 'Loi server', error: e.message }); }
 });
 

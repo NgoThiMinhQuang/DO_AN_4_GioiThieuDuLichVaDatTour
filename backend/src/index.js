@@ -19,6 +19,7 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/favorites', require('./routes/favorites'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/promotions', require('./routes/promotions'));
+app.use('/api/support', require('./routes/support'));
 app.use('/api/admin', require('./routes/admin'));
 
 // 404 JSON

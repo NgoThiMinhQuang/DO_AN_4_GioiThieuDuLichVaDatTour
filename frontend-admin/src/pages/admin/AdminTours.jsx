@@ -10,7 +10,8 @@ export default function AdminTours() {
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
-  const [form, setForm] = useState({ code: '', name: '', departure_location: '', adult_price: '', status: 'OPEN' });
+  const [form, setForm] = useState({ code: '', name: '', departure_location: '', adult_price: '', status: 'OPEN', is_featured: false });
+  const [itin, setItin] = useState({ tour_id: '', day_number: '', title: '', start_time: '', end_time: '' });
 
   async function load() {
     setError('');
@@ -24,10 +25,36 @@ export default function AdminTours() {
   async function create(e) {
     e.preventDefault();
     try {
-      await api.post('/admin/tours', { ...form, adult_price: Number(form.adult_price) || 0, duration_days: 3, duration_nights: 2 });
+      await api.post('/admin/tours', { ...form, adult_price: Number(form.adult_price) || 0, duration_days: 3, duration_nights: 2, is_featured: form.is_featured ? 1 : 0 });
       setMsg('Thêm tour mới thành công.');
-      setForm({ code: '', name: '', departure_location: '', adult_price: '', status: 'OPEN' });
+      setForm({ code: '', name: '', departure_location: '', adult_price: '', status: 'OPEN', is_featured: false });
       load();
+    } catch (err) { setMsg(err.response?.data?.message || err.message); }
+  }
+
+  async function toggleFeatured(id, current) {
+    try {
+      await api.put(`/admin/tours/${id}`, { is_featured: current ? 0 : 1 });
+      setMsg(current ? `Đã bỏ ghim tour nổi bật #${id}.` : `Đã ghim tour #${id} lên nổi bật.`);
+      load();
+    } catch (err) { setMsg(err.response?.data?.message || err.message); }
+  }
+
+  async function createItinerary(e) {
+    e.preventDefault();
+    if (!itin.tour_id || !itin.day_number || !itin.title) {
+      setMsg('Vui lòng nhập mã tour, số ngày và tiêu đề lịch trình.');
+      return;
+    }
+    try {
+      const res = await api.post(`/admin/tours/${itin.tour_id}/itinerary`, {
+        day_number: Number(itin.day_number),
+        title: itin.title,
+        start_time: itin.start_time || null,
+        end_time: itin.end_time || null,
+      });
+      setMsg(`Thêm lịch trình #${res.data.id} cho tour #${itin.tour_id} thành công.`);
+      setItin({ tour_id: '', day_number: '', title: '', start_time: '', end_time: '' });
     } catch (err) { setMsg(err.response?.data?.message || err.message); }
   }
 
@@ -61,7 +88,22 @@ export default function AdminTours() {
           <input placeholder="Điểm khởi hành" value={form.departure_location} onChange={(e) => setForm({ ...form, departure_location: e.target.value })} />
           <input type="number" placeholder="Giá người lớn" value={form.adult_price} onChange={(e) => setForm({ ...form, adult_price: e.target.value })} />
         </div>
+        <label style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8, fontWeight: 400 }}>
+          <input type="checkbox" style={{ width: 'auto', minHeight: 'auto' }} checked={!!form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} />
+          Tour nổi bật
+        </label>
         <div><button className="btn sm" type="submit">＋ Thêm tour</button></div>
+      </form>
+      <form className="filters" onSubmit={createItinerary}>
+        <b>✚ Thêm lịch trình cho tour</b>
+        <div className="form-grid-2">
+          <input placeholder="Mã tour (ví dụ: 1)" value={itin.tour_id} onChange={(e) => setItin({ ...itin, tour_id: e.target.value })} />
+          <input type="number" min="1" placeholder="Ngày thứ mấy" value={itin.day_number} onChange={(e) => setItin({ ...itin, day_number: e.target.value })} />
+          <input placeholder="Tiêu đề lịch trình" value={itin.title} onChange={(e) => setItin({ ...itin, title: e.target.value })} />
+          <label>Giờ bắt đầu<input type="time" value={itin.start_time} onChange={(e) => setItin({ ...itin, start_time: e.target.value })} /></label>
+          <label>Giờ kết thúc<input type="time" value={itin.end_time} onChange={(e) => setItin({ ...itin, end_time: e.target.value })} /></label>
+        </div>
+        <div><button className="btn secondary sm" type="submit">＋ Thêm lịch trình</button></div>
       </form>
       <div className="filters">
         <b>Bộ lọc tour</b>
@@ -78,9 +120,9 @@ export default function AdminTours() {
         </div>
       </div>
       <div className="table-wrap"><table>
-        <thead><tr><th>Mã số</th><th>Ảnh</th><th>Mã tour</th><th>Tên tour</th><th>Giá người lớn</th><th>Trạng thái</th><th>Đổi trạng thái</th></tr></thead>
+        <thead><tr><th>Mã số</th><th>Ảnh</th><th>Mã tour</th><th>Tên tour</th><th>Giá người lớn</th><th>Nổi bật</th><th>Trạng thái</th><th>Đổi trạng thái</th></tr></thead>
         <tbody>
-          {filtered.length === 0 && <tr><td colSpan={7}><div className="tv-empty">Không có tour nào khớp.</div></td></tr>}
+          {filtered.length === 0 && <tr><td colSpan={8}><div className="tv-empty">Không có tour nào khớp.</div></td></tr>}
           {filtered.map((r) => (
             <tr key={r.id}>
               <td className="muted">#{r.id}</td>
@@ -93,7 +135,11 @@ export default function AdminTours() {
                   onError={handleImgError}
                 />
               </td>
-              <td><b>{r.code}</b></td><td>{r.name}</td><td style={{ fontWeight: 700, color: '#1d4ed8' }}>{formatVND(r.adult_price)}</td>
+              <td><b>{r.code}</b></td><td>{r.name}</td><td style={{ fontWeight: 600, color: '#1d4ed8' }}>{formatVND(r.adult_price)}</td>
+              <td>
+                {Number(r.is_featured) === 1 ? <span className="badge b-amber">Nổi bật</span> : <span className="muted">—</span>}
+                <div><button className="btn secondary sm" type="button" onClick={() => toggleFeatured(r.id, Number(r.is_featured) === 1)}>{Number(r.is_featured) === 1 ? 'Bỏ ghim' : 'Ghim'}</button></div>
+              </td>
               <td><StatusBadge value={r.status} /></td>
               <td>
                 <select value={r.status} onChange={(e) => changeStatus(r.id, e.target.value)}>

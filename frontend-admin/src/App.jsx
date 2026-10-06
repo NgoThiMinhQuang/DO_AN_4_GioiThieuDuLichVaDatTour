@@ -10,6 +10,7 @@ import AdminPayments from './pages/admin/AdminPayments.jsx';
 import AdminRefunds from './pages/admin/AdminRefunds.jsx';
 import AdminPromotions from './pages/admin/AdminPromotions.jsx';
 import AdminReviews from './pages/admin/AdminReviews.jsx';
+import AdminSupport from './pages/admin/AdminSupport.jsx';
 import AdminUsers from './pages/admin/AdminUsers.jsx';
 
 function RequireAdmin({ children }) {
@@ -28,6 +29,7 @@ const MENU = [
   { to: '/refunds', icon: '↩', label: 'Hoàn tiền' },
   { to: '/promotions', icon: '🏷', label: 'Khuyến mãi' },
   { to: '/reviews', icon: '★', label: 'Đánh giá' },
+  { to: '/support', icon: '💬', label: 'Hỗ trợ' },
   { to: '/users', icon: '👥', label: 'Người dùng' },
 ];
 
@@ -40,6 +42,8 @@ const TITLES = {
   '/refunds': ['Hoàn tiền', 'Tạo và duyệt yêu cầu hoàn tiền'],
   '/promotions': ['Khuyến mãi', 'Mã giảm giá và bật/tắt chương trình'],
   '/reviews': ['Đánh giá', 'Ẩn / hiện đánh giá của khách hàng'],
+  '/support': ['Hỗ trợ', 'Tiếp nhận, gán người xử lý và phản hồi yêu cầu hỗ trợ'],
+  '/admin/support': ['Hỗ trợ', 'Tiếp nhận, gán người xử lý và phản hồi yêu cầu hỗ trợ'],
   '/users': ['Người dùng', 'Khóa / mở khóa tài khoản người dùng'],
 };
 
@@ -114,6 +118,8 @@ export default function App() {
       <Route path="/refunds" element={<RequireAdmin><AdminLayout><AdminRefunds /></AdminLayout></RequireAdmin>} />
       <Route path="/promotions" element={<RequireAdmin><AdminLayout><AdminPromotions /></AdminLayout></RequireAdmin>} />
       <Route path="/reviews" element={<RequireAdmin><AdminLayout><AdminReviews /></AdminLayout></RequireAdmin>} />
+      <Route path="/support" element={<RequireAdmin><AdminLayout><AdminSupport /></AdminLayout></RequireAdmin>} />
+      <Route path="/admin/support" element={<RequireAdmin><AdminLayout><AdminSupport /></AdminLayout></RequireAdmin>} />
       <Route path="/users" element={<RequireAdmin><AdminLayout><AdminUsers /></AdminLayout></RequireAdmin>} />
       <Route path="*" element={<div className="container"><h2>404 - Không tìm thấy trang</h2><Link to="/">Về trang tổng quan</Link></div>} />
     </Routes>

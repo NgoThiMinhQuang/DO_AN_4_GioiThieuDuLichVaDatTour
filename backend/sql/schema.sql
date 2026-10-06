@@ -119,6 +119,7 @@ CREATE TABLE IF NOT EXISTS tours (
   cancellation_policy TEXT NULL,
   minimum_guests INT NOT NULL DEFAULT 1,
   thumbnail VARCHAR(500) NULL,
+  is_featured TINYINT(1) NOT NULL DEFAULT 0,
   status ENUM('DRAFT','OPEN','PAUSED','CLOSED') NOT NULL DEFAULT 'DRAFT',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -155,6 +156,8 @@ CREATE TABLE IF NOT EXISTS tour_itineraries (
   day_number INT NOT NULL,
   title VARCHAR(255) NOT NULL,
   description TEXT NULL,
+  start_time TIME NULL,
+  end_time TIME NULL,
   meals VARCHAR(255) NULL,
   accommodation VARCHAR(255) NULL,
   note VARCHAR(500) NULL,
@@ -176,6 +179,7 @@ CREATE TABLE IF NOT EXISTS departures (
   child_price DECIMAL(12,0) NOT NULL DEFAULT 0,
   infant_price DECIMAL(12,0) NOT NULL DEFAULT 0,
   minimum_guests INT NOT NULL DEFAULT 1,
+  meeting_point VARCHAR(255) NULL,
   status ENUM('NOT_OPEN','OPEN','ALMOST_FULL','FULL','CLOSED','ONGOING','COMPLETED','CANCELLED') NOT NULL DEFAULT 'NOT_OPEN',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -331,6 +335,32 @@ CREATE TABLE IF NOT EXISTS refunds (
   CONSTRAINT fk_ref_booking FOREIGN KEY (booking_id) REFERENCES bookings(id),
   CONSTRAINT fk_ref_pay FOREIGN KEY (payment_id) REFERENCES payments(id),
   INDEX idx_ref_booking (booking_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS support_tickets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  ticket_code VARCHAR(20) NOT NULL UNIQUE,
+  user_id INT NULL,
+  booking_id INT NULL,
+  contact_name VARCHAR(120) NOT NULL,
+  contact_email VARCHAR(160) NULL,
+  contact_phone VARCHAR(20) NULL,
+  type ENUM('BOOKING','PAYMENT','TOUR_INFO','COMPLAINT','OTHER') NOT NULL DEFAULT 'OTHER',
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  status ENUM('OPEN','IN_PROGRESS','RESOLVED','CLOSED') NOT NULL DEFAULT 'OPEN',
+  priority ENUM('LOW','MEDIUM','HIGH') NOT NULL DEFAULT 'MEDIUM',
+  assigned_to INT NULL,
+  admin_reply TEXT NULL,
+  resolved_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_st_user FOREIGN KEY (user_id) REFERENCES users(id),
+  CONSTRAINT fk_st_booking FOREIGN KEY (booking_id) REFERENCES bookings(id),
+  CONSTRAINT fk_st_assignee FOREIGN KEY (assigned_to) REFERENCES users(id),
+  INDEX idx_st_code (ticket_code),
+  INDEX idx_st_status (status),
+  INDEX idx_st_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS notifications (

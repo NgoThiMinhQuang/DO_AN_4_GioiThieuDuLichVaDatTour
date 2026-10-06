@@ -442,6 +442,7 @@ export default function Home() {
             <p>Những chuyến đi gần nhất còn giữ chỗ — đặt sớm để có giá tốt</p>
           </div>
           {departures.length > 0 ? (
+            <>
             <div className="tv-dep-grid">
               {departures.map((dep) => (
                 <div className="tv-dep-card" key={dep.id}>
@@ -461,6 +462,10 @@ export default function Home() {
                 </div>
               ))}
             </div>
+            <div style={{ textAlign: 'center', marginTop: 22 }}>
+              <Link className="btn secondary" to="/lich-khoi-hanh">Xem tất cả lịch khởi hành</Link>
+            </div>
+            </>
           ) : (
             <div className="tv-empty">
               <div className="tv-empty-icon">📅</div>

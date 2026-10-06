@@ -22,6 +22,14 @@ router.post('/validate', async (req, res) => {
     if (Number(subtotal || 0) < Number(p.minimum_order_value || 0)) {
       return res.status(400).json({ valid: false, message: `Chua dat gia tri toi thieu ${p.minimum_order_value}` });
     }
+    if (p.applicable_tour_ids && tourId) {
+      try {
+        const ids = JSON.parse(p.applicable_tour_ids);
+        if (Array.isArray(ids) && ids.length && !ids.map(Number).includes(Number(tourId))) {
+          return res.status(400).json({ valid: false, message: 'Ma giam gia khong ap dung cho tour nay' });
+        }
+      } catch (_) {}
+    }
     const discount = calcPromotionDiscount(p, Number(subtotal) || 0);
     return res.json({ valid: true, discount, promotion: { code: p.code, name: p.name, discount_type: p.discount_type, discount_value: p.discount_value } });
   } catch (e) {

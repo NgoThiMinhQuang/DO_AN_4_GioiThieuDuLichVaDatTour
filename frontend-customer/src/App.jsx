@@ -11,6 +11,8 @@ import ArticleDetail from './pages/ArticleDetail.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Booking from './pages/Booking.jsx';
+import LichKhoiHanh from './pages/LichKhoiHanh.jsx';
+import LienHe from './pages/LienHe.jsx';
 import MyBookings from './pages/MyBookings.jsx';
 import BookingDetail from './pages/BookingDetail.jsx';
 import Favorites from './pages/Favorites.jsx';
@@ -94,8 +96,10 @@ function Header() {
         <nav className="nav">
           <NavLink to="/" end>Trang chủ</NavLink>
           <NavLink to="/tours">Tour</NavLink>
+          <NavLink to="/lich-khoi-hanh">Lịch khởi hành</NavLink>
           <NavLink to="/destinations">Điểm đến</NavLink>
           <NavLink to="/articles">Bài viết</NavLink>
+          <NavLink to="/lien-he">Liên hệ</NavLink>
         </nav>
         <div className="header-spacer" />
         <div className="header-actions">
@@ -175,6 +179,7 @@ function Footer() {
             <h4 className="footer-section-title">Khám phá</h4>
             <ul className="footer-nav-links">
               <li><Link to="/tours">Tất cả tour</Link></li>
+              <li><Link to="/lich-khoi-hanh">Lịch khởi hành</Link></li>
               <li><Link to="/destinations">Điểm đến</Link></li>
               <li><Link to="/articles">Bài viết du lịch</Link></li>
               <li><Link to="/favorites">Tour yêu thích</Link></li>
@@ -184,6 +189,7 @@ function Footer() {
             <h4 className="footer-section-title">Dịch vụ</h4>
             <ul className="footer-nav-links">
               <li><Link to="/my-bookings">Đặt tour của tôi</Link></li>
+              <li><Link to="/lien-he">Liên hệ hỗ trợ</Link></li>
               <li><Link to="/profile">Hồ sơ cá nhân</Link></li>
               <li><Link to="/notifications">Thông báo</Link></li>
               <li><Link to="/register">Đăng ký thành viên</Link></li>
@@ -231,6 +237,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/tours" element={<Tours />} />
           <Route path="/tours/:id" element={<TourDetail />} />
+          <Route path="/lich-khoi-hanh" element={<LichKhoiHanh />} />
+          <Route path="/lien-he" element={<LienHe />} />
           <Route path="/destinations" element={<Destinations />} />
           <Route path="/destinations/:id" element={<DestinationDetail />} />
           <Route path="/articles" element={<Articles />} />

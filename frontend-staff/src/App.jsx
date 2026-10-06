@@ -7,6 +7,7 @@ import AdminDepartures from './pages/admin/AdminDepartures.jsx';
 import AdminBookings from './pages/admin/AdminBookings.jsx';
 import AdminPayments from './pages/admin/AdminPayments.jsx';
 import AdminRefunds from './pages/admin/AdminRefunds.jsx';
+import AdminSupport from './pages/admin/AdminSupport.jsx';
 
 // Tat ca trang nghiep vu (tru /login) yeu cau role STAFF.
 function RequireStaff({ children }) {
@@ -32,6 +33,7 @@ function Header() {
           <NavLink to="/bookings" className={linkClass}>Đơn đặt tour</NavLink>
           <NavLink to="/payments" className={linkClass}>Thanh toán</NavLink>
           <NavLink to="/refunds" className={linkClass}>Hoàn tiền</NavLink>
+          <NavLink to="/support" className={linkClass}>Hỗ trợ</NavLink>
         </nav>
         <div className="header-spacer" />
         <nav className="nav">
@@ -60,29 +62,33 @@ function Home() {
     { to: '/bookings', icon: '📋', title: 'Đơn đặt tour', desc: 'Tra cứu, lọc và xác nhận đơn đặt tour.' },
     { to: '/payments', icon: '💳', title: 'Thanh toán', desc: 'Xác nhận và ghi nhận thanh toán.' },
     { to: '/refunds', icon: '↩️', title: 'Hoàn tiền', desc: 'Xử lý hủy đơn và hoàn tiền.' },
+    { to: '/support', icon: '💬', title: 'Hỗ trợ', desc: 'Tiếp nhận và phản hồi yêu cầu hỗ trợ.' },
   ];
-  const [stats, setStats] = useState({ pendingBookings: null, openDepartures: null, pendingPayments: null, pendingRefunds: null });
+  const [stats, setStats] = useState({ pendingBookings: null, openDepartures: null, pendingPayments: null, pendingRefunds: null, openSupport: null });
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const [b, d, p, r] = await Promise.all([
+        const [b, d, p, r, s] = await Promise.all([
           api.get('/admin/bookings', { params: { limit: 100 } }).catch(() => ({ data: { data: [] } })),
           api.get('/admin/departures').catch(() => ({ data: { data: [] } })),
           api.get('/admin/payments').catch(() => ({ data: { data: [] } })),
           api.get('/admin/refunds').catch(() => ({ data: { data: [] } })),
+          api.get('/admin/support').catch(() => ({ data: { data: [] } })),
         ]);
         if (!alive) return;
         const bookings = b.data.data || [];
         const deps = d.data.data || [];
         const payments = p.data.data || [];
         const refunds = r.data.data || [];
+        const tickets = s.data.data || [];
         setStats({
           pendingBookings: bookings.filter((x) => ['PENDING', 'DEPOSIT_PENDING'].includes(String(x.booking_status || '').toUpperCase())).length,
           openDepartures: deps.filter((x) => ['OPEN', 'ALMOST_FULL', 'AVAILABLE'].includes(String(x.status || '').toUpperCase())).length,
           pendingPayments: payments.filter((x) => !['SUCCESS', 'FAILED'].includes(String(x.status || '').toUpperCase())).length,
           pendingRefunds: refunds.filter((x) => ['PENDING', 'PROCESSING'].includes(String(x.status || '').toUpperCase())).length,
+          openSupport: tickets.filter((x) => ['OPEN', 'IN_PROGRESS'].includes(String(x.status || '').toUpperCase())).length,
         });
       } catch (_) { /* giu nguyen null -> hien thi — */ }
     })();
@@ -94,18 +100,20 @@ function Home() {
     { ic: '🗓️', cls: 'g2', label: 'Lịch đang mở', value: stats.openDepartures },
     { ic: '💳', cls: 'g3', label: 'Thanh toán chờ duyệt', value: stats.pendingPayments },
     { ic: '↩️', cls: 'g4', label: 'Hoàn tiền chờ xử lý', value: stats.pendingRefunds },
+    { ic: '💬', cls: '', label: 'Hỗ trợ chờ xử lý', value: stats.openSupport },
   ];
 
   return (
     <div className="container">
       <div className="hero hero-staff">
         <h1>Xin chào nhân viên TravelViet</h1>
-        <p>Tra cứu đơn đặt tour, xác nhận đơn, xác nhận thanh toán, theo dõi lịch khởi hành, xử lý hủy và hoàn tiền.</p>
+        <p>Tra cứu đơn đặt tour, xác nhận đơn, xác nhận thanh toán, theo dõi lịch khởi hành, xử lý hủy và hoàn tiền, hỗ trợ khách hàng.</p>
         <div className="hero-badges">
           <span>📋 Đơn đặt tour</span>
           <span>💳 Thanh toán</span>
           <span>↩️ Hoàn tiền</span>
           <span>🗓️ Lịch khởi hành</span>
+          <span>💬 Hỗ trợ</span>
         </div>
       </div>
       <div className="stat-cards">
@@ -146,6 +154,7 @@ export default function App() {
           <Route path="/bookings" element={<RequireStaff><div className="container" style={{ marginTop: 16 }}><AdminBookings /></div></RequireStaff>} />
           <Route path="/payments" element={<RequireStaff><div className="container" style={{ marginTop: 16 }}><AdminPayments /></div></RequireStaff>} />
           <Route path="/refunds" element={<RequireStaff><div className="container" style={{ marginTop: 16 }}><AdminRefunds /></div></RequireStaff>} />
+          <Route path="/support" element={<RequireStaff><div className="container" style={{ marginTop: 16 }}><AdminSupport /></div></RequireStaff>} />
           <Route path="*" element={<div className="container"><h2>404 - Không tìm thấy trang</h2><Link to="/">Về trang chủ</Link></div>} />
         </Routes>
       </main>

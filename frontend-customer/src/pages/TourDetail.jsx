@@ -153,6 +153,11 @@ export default function TourDetail() {
                     </div>
                     <div className="tour-detail-timeline-body">
                       <div>{it.description}</div>
+                      {(it.start_time || it.end_time) && (
+                        <div className="tour-detail-timeline-meta">
+                          🕑 Thời gian: {it.start_time ? String(it.start_time).slice(0, 5) : '—'} – {it.end_time ? String(it.end_time).slice(0, 5) : '—'}
+                        </div>
+                      )}
                       {it.meals && <div className="tour-detail-timeline-meta">🍽 Ăn uống: {it.meals}</div>}
                       {it.accommodation && <div className="tour-detail-timeline-meta">🏨 Lưu trú: {it.accommodation}</div>}
                     </div>
@@ -187,11 +192,19 @@ export default function TourDetail() {
                           <div className="tour-detail-departure-grid">
                             <div>
                               <div className="tour-detail-departure-label">Ngày khởi hành</div>
-                              <p className="tour-detail-departure-value">{formatDateVi(d.departure_date)}</p>
+                              <p className="tour-detail-departure-value">
+                                {formatDateVi(d.departure_date)}{d.return_date ? ` → ${formatDateVi(d.return_date)}` : ''}
+                              </p>
                             </div>
                             <div>
                               <div className="tour-detail-departure-label">Số chỗ còn lại</div>
                               <p className="tour-detail-departure-value">{left} chỗ</p>
+                            </div>
+                          </div>
+                          <div className="tour-detail-departure-grid" style={{ marginTop: 8 }}>
+                            <div>
+                              <div className="tour-detail-departure-label">Điểm tập trung</div>
+                              <p className="tour-detail-departure-value">📍 {d.meeting_point || 'Liên hệ 1900 6868 để biết điểm tập trung'}</p>
                             </div>
                           </div>
                         </div>
@@ -254,7 +267,7 @@ export default function TourDetail() {
                     </option>
                   ))}
                 </select>
-                {selDepObj && <div className="alert info" style={{ margin: 0 }}>Đã chọn: {formatDateVi(selDepObj.departure_date)} — {formatVND(selDepObj.adult_price)}/khách</div>}
+                {selDepObj && <div className="alert info" style={{ margin: 0 }}>Đã chọn: {formatDateVi(selDepObj.departure_date)} — {formatVND(selDepObj.adult_price)}/khách{selDepObj.meeting_point ? ` • Tập trung: ${selDepObj.meeting_point}` : ''}</div>}
               </div>
               <div className="tour-detail-sidebar-actions">
                 <button

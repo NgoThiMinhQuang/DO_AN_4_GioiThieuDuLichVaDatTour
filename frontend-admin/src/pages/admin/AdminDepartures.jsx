@@ -13,7 +13,7 @@ export default function AdminDepartures() {
   const [deps, setDeps] = useState([]);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
-  const [createForm, setCreateForm] = useState({ departure_date: '', capacity: 30, status: 'OPEN' });
+  const [createForm, setCreateForm] = useState({ departure_date: '', capacity: 30, status: 'OPEN', meeting_point: '' });
 
   async function loadByTour() {
     setError('');
@@ -71,6 +71,7 @@ export default function AdminDepartures() {
         {!readOnly && (
         <div className="form-grid-2">
           <input type="number" placeholder="Sức chứa" value={createForm.capacity} onChange={(e) => setCreateForm({ ...createForm, capacity: Number(e.target.value) })} />
+          <input placeholder="Điểm tập trung (ví dụ: 123 Nguyễn Huệ, Q.1)" value={createForm.meeting_point} onChange={(e) => setCreateForm({ ...createForm, meeting_point: e.target.value })} />
           <div className="filter-actions">
             <button className="btn secondary sm" onClick={create}>Thêm lịch khởi hành</button>
           </div>
@@ -78,15 +79,16 @@ export default function AdminDepartures() {
         )}
       </div>
       <div className="table-wrap"><table>
-        <thead><tr><th>Mã số</th><th>Ngày khởi hành</th><th>Chỗ còn lại</th><th>Giá người lớn</th><th>Trạng thái</th>{!readOnly && <th>Đổi trạng thái</th>}</tr></thead>
+        <thead><tr><th>Mã số</th><th>Ngày khởi hành</th><th>Điểm tập trung</th><th>Chỗ còn lại</th><th>Giá người lớn</th><th>Trạng thái</th>{!readOnly && <th>Đổi trạng thái</th>}</tr></thead>
         <tbody>
-          {filtered.length === 0 && <tr><td colSpan={6}><div className="tv-empty">Nhập mã tour rồi bấm “Tải lịch khởi hành”.</div></td></tr>}
+          {filtered.length === 0 && <tr><td colSpan={7}><div className="tv-empty">Nhập mã tour rồi bấm “Tải lịch khởi hành”.</div></td></tr>}
           {filtered.map((d) => (
             <tr key={d.id}>
               <td className="muted">#{d.id}</td>
               <td><b>{String(d.departure_date).slice(0, 10)}</b></td>
+              <td>{d.meeting_point || '—'}</td>
               <td>{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</td>
-              <td style={{ fontWeight: 700 }}>{formatVND(d.adult_price)}</td>
+              <td style={{ fontWeight: 600 }}>{formatVND(d.adult_price)}</td>
               <td><StatusBadge value={d.status} /></td>
               {!readOnly && (
               <td>
