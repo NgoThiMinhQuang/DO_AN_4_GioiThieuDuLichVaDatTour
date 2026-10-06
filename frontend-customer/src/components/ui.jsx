@@ -89,10 +89,10 @@ export function tourStatusVi(status) {
 
 export function tourStatusClass(status) {
   const v = String(status || '').toUpperCase();
-  if (['OPEN'].includes(v)) return 'tour-status open';
-  if (['ALMOST_FULL', 'PAUSED', 'NOT_OPEN'].includes(v)) return 'tour-status warn';
-  if (['FULL', 'CLOSED', 'CANCELLED'].includes(v)) return 'tour-status closed';
-  return 'tour-status';
+  if (['OPEN'].includes(v)) return 'tour-card-status';
+  if (['ALMOST_FULL', 'PAUSED', 'NOT_OPEN'].includes(v)) return 'tour-card-status tour-card-status-warn';
+  if (['FULL', 'CLOSED', 'CANCELLED'].includes(v)) return 'tour-card-status tour-card-status-closed';
+  return 'tour-card-status';
 }
 
 export function bookingStatusVi(s) {
@@ -235,48 +235,58 @@ export function TourCard({ t, hot }) {
   }
 
   return (
-    <div className="card tour-card">
-      <div className="tour-media">
-        <Link to={`/tours/${t.id}`}>
-          <img src={img} alt={t.name} loading="lazy" data-fallback={FALLBACK_BANNER} onError={handleImgError} />
-        </Link>
-        <span className={tourStatusClass(t?.status)}>{tourStatusVi(t?.status)}</span>
-        {showHot && <span className="tour-hot">Bán chạy</span>}
-        <button
-          className={`tour-fav${fav ? ' active' : ''}`}
-          onClick={toggleFav}
-          title={fav ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'}
-          aria-label={fav ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'}
-        >
-          {fav ? '♥' : '♡'}
-        </button>
-        {t?.code && <span className="tour-code">{t.code}</span>}
+    <div className="tour-card">
+      <div
+        className="tour-card-cover"
+        style={{ backgroundImage: `url("${img}")` }}
+        onClick={() => navigate(`/tours/${t.id}`)}
+        role="link"
+        aria-label={t.name}
+        title={t.name}
+      >
+        <div className="tour-card-badges">
+          <span className={tourStatusClass(t?.status)}>{tourStatusVi(t?.status)}</span>
+          {showHot && <span className="tour-card-badge-hot">Bán chạy</span>}
+        </div>
+        {t?.code && <span className="tour-card-code">{t.code}</span>}
       </div>
-      <div className="card-body">
-        <div className="tour-rating-row">
-          <span className="stars">★</span> <b>{rating}</b>
-          <span className="muted">({reviewCount} đánh giá)</span>
-        </div>
-        <div className="card-title"><Link to={`/tours/${t.id}`}>{t.name}</Link></div>
-        {t?.departure_location && <div className="tour-meta">Khởi hành từ: {t.departure_location}</div>}
-        {metaBits.length > 0 && <div className="tour-meta">{metaBits.join(' • ')}</div>}
-        {t?.category_name == null && t?.tour_type ? <div className="tour-meta">Loại tour: {t.tour_type}</div> : null}
-        {(remaining !== null || nextDep) && (
-          <div className="tour-meta">
-            {remaining !== null && <span>Còn {remaining} chỗ</span>}
-            {remaining !== null && nextDep && <span> • </span>}
-            {nextDep && <span>Khởi hành: {formatDateVi(nextDep)}</span>}
+      <button
+        className={`tour-card-favorite${fav ? ' tour-card-favorite-active' : ''}`}
+        onClick={toggleFav}
+        title={fav ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'}
+        aria-label={fav ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'}
+      >
+        {fav ? '♥' : '♡'}
+      </button>
+      <div className="tour-card-body">
+        <div className="tour-card-main">
+          <div className="tour-card-rating-row">
+            <span className="tour-card-rate">★ {rating}</span>
+            <span className="tour-card-review-count">({reviewCount} đánh giá)</span>
           </div>
-        )}
-        <div className="tour-price-row">
-          <div>
-            <div className="tour-price-label">Giá trọn gói</div>
-            <span className="price">{formatVND(t.adult_price)}</span>
-            {old && old > Number(t.adult_price) && <span className="old-price">{formatVND(old)}</span>}
+          <h3 className="tour-card-title"><Link to={`/tours/${t.id}`}>{t.name}</Link></h3>
+          <div className="tour-card-meta-list">
+            {t?.departure_location && <span className="tour-card-meta">Khởi hành từ: {t.departure_location}</span>}
+            {metaBits.length > 0 && <span className="tour-card-meta">{metaBits.join(' • ')}</span>}
+            {t?.category_name == null && t?.tour_type ? <span className="tour-card-meta">Loại tour: {t.tour_type}</span> : null}
+            {(remaining !== null || nextDep) && (
+              <span className="tour-card-meta">
+                {remaining !== null && <span className="tour-card-seats-available">Còn {remaining} chỗ</span>}
+                {remaining !== null && nextDep && <span> • </span>}
+                {nextDep && <span className="tour-card-next-departure">Khởi hành: {formatDateVi(nextDep)}</span>}
+              </span>
+            )}
           </div>
         </div>
-        <div className="tour-foot">
-          <button className="btn btn-sm" onClick={() => navigate(`/tours/${t.id}`)}>Xem chi tiết</button>
+        <div className="tour-card-footer">
+          <div className="tour-card-price-block">
+            <span className="tour-card-price-label">Giá trọn gói</span>
+            <span className="tour-card-price-row">
+              <span className="tour-card-price-current">{formatVND(t.adult_price)}</span>
+              {old && old > Number(t.adult_price) && <span className="tour-card-price-old">{formatVND(old)}</span>}
+            </span>
+          </div>
+          <button className="btn tour-card-button" onClick={() => navigate(`/tours/${t.id}`)}>Xem chi tiết</button>
         </div>
       </div>
     </div>

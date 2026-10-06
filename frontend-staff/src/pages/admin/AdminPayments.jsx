@@ -33,33 +33,33 @@ export default function AdminPayments() {
   const pendingCount = rows.filter((p) => !['SUCCESS', 'FAILED'].includes(String(p.status || '').toUpperCase())).length;
 
   return (
-    <div className="staff-page">
-      <div className="page-head">
+    <div className="admin-page">
+      <div className="admin-page-header">
         <div>
           <h2>💳 Thanh toán</h2>
           <p>Xác nhận giao dịch thành công hay thất bại, đồng thời theo dõi các yêu cầu hoàn tiền.</p>
         </div>
-        <div className="page-head-actions">
+        <div className="admin-page-header-actions">
           <span className="page-head-count">💳 {rows.length} giao dịch</span>
-          <button className="btn secondary" onClick={load}>Tải lại</button>
+          <button className="admin-filter-button" onClick={load}>Tải lại</button>
         </div>
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
-      <div className="stat-cards">
-        <div className="stat"><span className="stat-ic">💳</span><div><span className="muted">Tổng giao dịch</span><b>{rows.length}</b><div className="stat-sub">Tất cả phương thức</div></div></div>
-        <div className="stat"><span className="stat-ic g2">✅</span><div><span className="muted">Đã thành công</span><b>{successCount}</b><div className="stat-sub">Ghi nhận doanh thu</div></div></div>
-        <div className="stat"><span className="stat-ic g3">⏳</span><div><span className="muted">Chờ xác nhận</span><b>{pendingCount}</b><div className="stat-sub">Cần nhân viên duyệt</div></div></div>
-        <div className="stat"><span className="stat-ic g4">↩️</span><div><span className="muted">Yêu cầu hoàn</span><b>{refunds.length}</b><div className="stat-sub">Theo dõi bên dưới</div></div></div>
+      <div className="admin-kpi-grid">
+        <div className="admin-kpi-card"><span className="admin-kpi-icon">💳</span><div className="admin-kpi-body"><span className="admin-muted">Tổng giao dịch</span><b>{rows.length}</b><div className="admin-muted">Tất cả phương thức</div></div></div>
+        <div className="admin-kpi-card"><span className="admin-kpi-icon g2">✅</span><div className="admin-kpi-body"><span className="admin-muted">Đã thành công</span><b>{successCount}</b><div className="admin-muted">Ghi nhận doanh thu</div></div></div>
+        <div className="admin-kpi-card"><span className="admin-kpi-icon g3">⏳</span><div className="admin-kpi-body"><span className="admin-muted">Chờ xác nhận</span><b>{pendingCount}</b><div className="admin-muted">Cần nhân viên duyệt</div></div></div>
+        <div className="admin-kpi-card"><span className="admin-kpi-icon g4">↩️</span><div className="admin-kpi-body"><span className="admin-muted">Yêu cầu hoàn</span><b>{refunds.length}</b><div className="admin-muted">Theo dõi bên dưới</div></div></div>
       </div>
-      <div className="sub-head"><h3>Danh sách thanh toán</h3><span className="muted">{rows.length} giao dịch</span></div>
-      <div className="table-wrap"><table>
+      <div className="sub-head"><h3>Danh sách thanh toán</h3><span className="admin-muted">{rows.length} giao dịch</span></div>
+      <div className="admin-page-card"><table className="admin-table">
         <thead><tr><th>Mã giao dịch</th><th>Mã đơn</th><th>Số tiền</th><th>Trạng thái</th><th>Xác nhận</th></tr></thead>
         <tbody>
           {rows.length === 0 && (
             <tr><td colSpan={5}>
-              <div className="empty-state">
-                <div className="empty-state-ic">💳</div>
+              <div className="admin-empty-block">
+                <div className="admin-empty-icon">💳</div>
                 <b>Chưa có giao dịch thanh toán nào</b>
                 <p>Giao dịch mới của khách sẽ hiện tại đây để xác nhận.</p>
               </div>
@@ -67,32 +67,32 @@ export default function AdminPayments() {
           )}
           {rows.map((p) => (
             <tr key={p.id}>
-              <td><span className="table-code">{p.transaction_code}</span></td><td>{p.booking_code}</td><td><span className="money">{formatVND(p.amount)}</span></td>
+              <td><span className="table-code">{p.transaction_code}</span></td><td>{p.booking_code}</td><td><span className="admin-price">{formatVND(p.amount)}</span></td>
               <td><span className={statusBadge(p.status)}>{viStatus(p.status)}</span></td>
               <td>
-                <div className="row-actions">
-                  <button className="btn small secondary" onClick={() => verify(p.id, 'SUCCESS')}>Thành công</button>
-                  <button className="btn small danger" onClick={() => verify(p.id, 'FAILED')}>Thất bại</button>
+                <div className="admin-inline-actions">
+                  <button className="admin-filter-button" onClick={() => verify(p.id, 'SUCCESS')}>Thành công</button>
+                  <button className="admin-danger-button" onClick={() => verify(p.id, 'FAILED')}>Thất bại</button>
                 </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table></div>
-      <div className="sub-head"><h3>Danh sách hoàn tiền</h3><span className="muted">{refunds.length} yêu cầu</span></div>
-      <div className="table-wrap"><table>
+      <div className="sub-head"><h3>Danh sách hoàn tiền</h3><span className="admin-muted">{refunds.length} yêu cầu</span></div>
+      <div className="admin-page-card"><table className="admin-table">
         <thead><tr><th>Mã hoàn</th><th>Mã đơn</th><th>Số tiền</th><th>Trạng thái</th></tr></thead>
         <tbody>
           {refunds.length === 0 && (
             <tr><td colSpan={4}>
-              <div className="empty-state">
-                <div className="empty-state-ic">↩️</div>
+              <div className="admin-empty-block">
+                <div className="admin-empty-icon">↩️</div>
                 <b>Chưa có yêu cầu hoàn tiền nào</b>
                 <p>Sang trang “Hoàn tiền” để tạo yêu cầu mới.</p>
               </div>
             </td></tr>
           )}
-          {refunds.map((r) => <tr key={r.id}><td><span className="table-code">{r.refund_code}</span></td><td>{r.booking_code}</td><td><span className="money">{formatVND(r.amount)}</span></td><td><span className={statusBadge(r.status)}>{viStatus(r.status)}</span></td></tr>)}
+          {refunds.map((r) => <tr key={r.id}><td><span className="table-code">{r.refund_code}</span></td><td>{r.booking_code}</td><td><span className="admin-price">{formatVND(r.amount)}</span></td><td><span className={statusBadge(r.status)}>{viStatus(r.status)}</span></td></tr>)}
         </tbody>
       </table></div>
     </div>

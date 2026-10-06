@@ -41,6 +41,33 @@ function BellIcon() {
   );
 }
 
+function UserIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+function ReceiptIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z" />
+      <path d="M8 7h8M8 11h8M8 15h5" />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="M16 17l5-5-5-5M21 12H9" />
+    </svg>
+  );
+}
+
 function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -62,7 +89,7 @@ function Header() {
     <header className="site-header">
       <div className="header-inner">
         <Link to="/" className="logo brand logo-img" aria-label="TravelViet - Trang chủ">
-          <img src="/images/logo.png" alt="TravelViet" style={{ height: 48 }} />
+          <img src="/images/logo.png" alt="TravelViet" />
         </Link>
         <nav className="nav">
           <NavLink to="/" end>Trang chủ</NavLink>
@@ -91,19 +118,26 @@ function Header() {
               </button>
               {open && (
                 <div className="user-dropdown">
-                  <div className="dd-head"><b>{displayName}</b><span>{user.email || user.phone || ''}</span></div>
-                  <Link to="/profile" onClick={() => setOpen(false)}>👤 Hồ sơ cá nhân</Link>
-                  <Link to="/my-bookings" onClick={() => setOpen(false)}>🧾 Đặt tour của tôi</Link>
-                  <Link to="/favorites" onClick={() => setOpen(false)}>♡ Tour yêu thích</Link>
-                  <Link to="/notifications" onClick={() => setOpen(false)}>🔔 Thông báo</Link>
+                  <div className="dd-head">
+                    <span className="user-avatar dd-avatar">
+                      {user.avatar ? <img src={user.avatar} alt={displayName} /> : initial}
+                    </span>
+                    <div className="dd-id"><b>{displayName}</b><span>{user.email || user.phone || ''}</span></div>
+                  </div>
+                  <Link to="/profile" onClick={() => setOpen(false)}><UserIcon /> Hồ sơ cá nhân</Link>
+                  <Link to="/my-bookings" onClick={() => setOpen(false)}><ReceiptIcon /> Đặt tour của tôi</Link>
+                  <Link to="/favorites" onClick={() => setOpen(false)}><HeartIcon /> Tour yêu thích</Link>
+                  <Link to="/notifications" onClick={() => setOpen(false)}><BellIcon /> Thông báo</Link>
+                  <div className="dd-divider" />
                   <button
+                    className="dd-logout"
                     onClick={() => {
                       logout();
                       setOpen(false);
                       navigate('/');
                     }}
                   >
-                    ⎋ Đăng xuất
+                    <LogoutIcon /> Đăng xuất
                   </button>
                 </div>
               )}
@@ -117,50 +151,71 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="site-footer">
-      <svg className="footer-wave" viewBox="0 0 1440 70" preserveAspectRatio="none" style={{ height: 60 }}>
-        <path d="M0,40 C240,80 480,0 720,25 C960,50 1200,70 1440,30 L1440,0 L0,0 Z" fill="#f4f7fb" />
-      </svg>
-      <div className="footer-inner">
-        <div className="container">
-          <div className="footer-grid">
-            <div>
-              <div className="footer-brand">Travel<span style={{ color: '#60a5fa' }}>Viet</span></div>
-              <p className="footer-slogan">Khám phá Việt Nam — đặt tour dễ dàng, thanh toán an toàn, trải nghiệm trọn vẹn.</p>
-              <div className="social-row">
-                <a className="social-btn" href="#" aria-label="Facebook">f</a>
-                <a className="social-btn" href="#" aria-label="Youtube">▶</a>
-                <a className="social-btn" href="#" aria-label="Instagram">◎</a>
-                <a className="social-btn" href="#" aria-label="Tiktok">♪</a>
+    <footer className="main-footer">
+      <div className="footer-wave" aria-hidden="true">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path className="shape-fill" d="M0,0 C300,90 900,90 1200,30 L1200,0 L0,0 Z" />
+        </svg>
+      </div>
+      <div className="footer-container">
+        <div className="footer-grid">
+          <div className="footer-brand-section">
+            <Link to="/" className="footer-logo-link" aria-label="TravelViet - Trang chủ">
+              <span className="footer-logo">Travel<span>Viet</span></span>
+            </Link>
+            <p className="footer-slogan">Khám phá Việt Nam — đặt tour dễ dàng, thanh toán an toàn, trải nghiệm trọn vẹn.</p>
+            <div className="footer-social-wrapper">
+              <a className="footer-social-icon facebook" href="#" aria-label="Facebook">f</a>
+              <a className="footer-social-icon youtube" href="#" aria-label="Youtube">▶</a>
+              <a className="footer-social-icon instagram" href="#" aria-label="Instagram">◎</a>
+              <a className="footer-social-icon tiktok" href="#" aria-label="Tiktok">♪</a>
+            </div>
+          </div>
+          <div>
+            <h4 className="footer-section-title">Khám phá</h4>
+            <ul className="footer-nav-links">
+              <li><Link to="/tours">Tất cả tour</Link></li>
+              <li><Link to="/destinations">Điểm đến</Link></li>
+              <li><Link to="/articles">Bài viết du lịch</Link></li>
+              <li><Link to="/favorites">Tour yêu thích</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="footer-section-title">Dịch vụ</h4>
+            <ul className="footer-nav-links">
+              <li><Link to="/my-bookings">Đặt tour của tôi</Link></li>
+              <li><Link to="/profile">Hồ sơ cá nhân</Link></li>
+              <li><Link to="/notifications">Thông báo</Link></li>
+              <li><Link to="/register">Đăng ký thành viên</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="footer-section-title">Liên hệ</h4>
+            <div className="footer-contact-list">
+              <div className="footer-contact-item">
+                <span className="icon-box">☎</span>
+                <span className="text-box"><span>Hotline hỗ trợ 24/7</span><b>1900 6868</b></span>
+              </div>
+              <div className="footer-contact-item">
+                <span className="icon-box">✉</span>
+                <span className="text-box"><span>Email hỗ trợ</span><b>hotro@travelviet.vn</b></span>
+              </div>
+              <div className="footer-contact-item">
+                <span className="icon-box">📍</span>
+                <span className="text-box"><span>Văn phòng</span><b>12 Nguyễn Huệ, Q.1, TP.HCM</b></span>
               </div>
             </div>
-            <div className="footer-col">
-              <h4>Khám phá</h4>
-              <Link to="/tours">Tất cả tour</Link>
-              <Link to="/destinations">Điểm đến</Link>
-              <Link to="/articles">Bài viết du lịch</Link>
-              <Link to="/favorites">Tour yêu thích</Link>
-            </div>
-            <div className="footer-col">
-              <h4>Dịch vụ</h4>
-              <Link to="/my-bookings">Đặt tour của tôi</Link>
-              <Link to="/profile">Hồ sơ cá nhân</Link>
-              <Link to="/notifications">Thông báo</Link>
-              <Link to="/register">Đăng ký thành viên</Link>
-            </div>
-            <div className="footer-col">
-              <h4>Liên hệ</h4>
-              <div>Hotline hỗ trợ 24/7</div>
-              <div className="hotline">1900 6868</div>
-              <div>✉ hotro@travelviet.vn</div>
-              <div>📍 12 Nguyễn Huệ, Q.1, TP.HCM</div>
-            </div>
           </div>
-          <div className="footer-bottom">
-            <span>© 2026 TravelViet — Khám phá tour, điểm đến &amp; đặt tour trực tuyến.</span>
-            <span className="footer-demo">Demo: customer@gmail.com / Customer123!</span>
-            <button className="back-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} title="Về đầu trang">↑</button>
-          </div>
+        </div>
+        <hr className="footer-light-divider" />
+        <div className="footer-bottom-bar">
+          <span className="copy-text">© 2026 <span className="brand-accent">TravelViet</span> — Khám phá tour, điểm đến &amp; đặt tour trực tuyến.</span>
+          <span className="footer-legal-links">
+            <Link to="/tours">Tour</Link>
+            <Link to="/destinations">Điểm đến</Link>
+            <Link to="/articles">Bài viết</Link>
+          </span>
+          <button className="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} title="Về đầu trang">↑</button>
         </div>
       </div>
     </footer>

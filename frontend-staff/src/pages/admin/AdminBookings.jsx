@@ -53,35 +53,37 @@ export default function AdminBookings() {
   }
 
   return (
-    <div className="staff-page">
-      <div className="page-head">
+    <div className="admin-page">
+      <div className="admin-page-header">
         <div>
           <h2>📋 Đơn đặt tour</h2>
           <p>Tra cứu theo mã đơn / tên / email / số điện thoại, lọc trạng thái và xác nhận đơn.</p>
         </div>
-        <div className="page-head-actions">
+        <div className="admin-page-header-actions">
           <span className="page-head-count">🧾 {rows.length} đơn</span>
-          <button className="btn secondary" onClick={load}>Tải lại</button>
+          <button className="admin-filter-button" onClick={load}>Tải lại</button>
         </div>
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
-      <div className="filters">
-        <div className="form-row triple">
+      <div className="admin-filter-toolbar is-compact">
+        <div className="admin-filter-field">
           <input placeholder="🔍 Tìm mã đơn / tên / email / số điện thoại..." value={q} onChange={(e) => setQ(e.target.value)} />
+        </div>
+        <div className="admin-filter-field">
           <select value={status} onChange={(e) => setStatus(e.target.value)}>
             {BSTATES.map((s) => <option key={s} value={s}>{s === '' ? 'Tất cả trạng thái' : viStatus(s)}</option>)}
           </select>
-          <button className="btn" onClick={load}>Tìm kiếm</button>
         </div>
+        <button className="admin-primary-button" onClick={load}>Tìm kiếm</button>
       </div>
-      <div className="table-wrap"><table>
+      <div className="admin-page-card"><table className="admin-table">
         <thead><tr><th>Mã đơn</th><th>Tên tour</th><th>Khách hàng</th><th>Tổng tiền</th><th>Trạng thái đơn</th><th>Thanh toán</th><th>Thao tác</th></tr></thead>
         <tbody>
           {rows.length === 0 && (
             <tr><td colSpan={7}>
-              <div className="empty-state">
-                <div className="empty-state-ic">📋</div>
+              <div className="admin-empty-block">
+                <div className="admin-empty-icon">📋</div>
                 <b>Chưa có đơn đặt tour nào</b>
                 <p>Thử đổi từ khóa hoặc trạng thái lọc rồi bấm “Tìm kiếm”.</p>
               </div>
@@ -90,14 +92,14 @@ export default function AdminBookings() {
           {rows.map((b) => (
             <tr key={b.id}>
               <td><span className="table-code">{b.booking_code}</span></td>
-              <td>{b.tour_name}<div className="muted">{b.departure_date ? String(b.departure_date).slice(0, 10) : ''}</div></td>
-              <td>{b.contact_name || b.customer_name || '—'}<div className="muted">{b.contact_phone || ''}</div></td>
-              <td><span className="money">{formatVND(b.total_amount)}</span></td>
+              <td><div className="admin-table-stack"><span>{b.tour_name}</span><span className="admin-muted">{b.departure_date ? String(b.departure_date).slice(0, 10) : ''}</span></div></td>
+              <td><div className="admin-table-stack"><span>{b.contact_name || b.customer_name || '—'}</span><span className="admin-muted">{b.contact_phone || ''}</span></div></td>
+              <td><span className="admin-price">{formatVND(b.total_amount)}</span></td>
               <td><span className={statusBadge(b.booking_status)}>{viStatus(b.booking_status)}</span></td>
               <td><span className={statusBadge(b.payment_status)}>{viStatus(b.payment_status)}</span></td>
               <td>
-                <div className="row-actions">
-                  <button className="btn small secondary" onClick={() => openDetail(b.id)}>Xem</button>
+                <div className="admin-inline-actions">
+                  <button className="admin-filter-button" onClick={() => openDetail(b.id)}>Xem</button>
                   <select value={b.booking_status} onChange={(e) => patchStatus(b.id, e.target.value)}>
                     {BSTATES.filter(Boolean).map((s) => <option key={s} value={s}>{viStatus(s)}</option>)}
                   </select>
@@ -108,25 +110,25 @@ export default function AdminBookings() {
         </tbody>
       </table></div>
       {selectedId && (
-        <div className="details-card">
+        <div className="admin-details-card">
           <h4>📄 Chi tiết đơn #{selectedId} — khách hàng &amp; hành khách</h4>
-          <div className="row-actions" style={{ marginBottom: 10 }}>
-            <button className="btn small secondary" onClick={closeDetail}>Đóng chi tiết</button>
+          <div className="admin-inline-actions" style={{ marginBottom: 10 }}>
+            <button className="admin-filter-button" onClick={closeDetail}>Đóng chi tiết</button>
           </div>
-          {detailLoading && <div className="muted">Đang tải chi tiết...</div>}
+          {detailLoading && <div className="admin-muted">Đang tải chi tiết...</div>}
           {!detailLoading && detail?._error && <div className="alert error">{detail._error}</div>}
           {!detailLoading && detail && !detail._error && (
             <>
-              <div className="details-grid">
-                <div className="kv"><small>Mã đơn</small><span>{detail.booking_code}</span></div>
-                <div className="kv"><small>Tour</small><span>{detail.tour_name}</span></div>
-                <div className="kv"><small>Người liên hệ</small><span>{detail.contact_name || detail.customer_name || '—'} ({detail.contact_phone || '—'})</span></div>
-                <div className="kv"><small>Email</small><span>{detail.contact_email || detail.customer_email || '—'}</span></div>
-                <div className="kv"><small>Tổng tiền</small><span>{formatVND(detail.total_amount)}</span></div>
-                <div className="kv"><small>Đã thanh toán</small><span>{formatVND(detail.paid_amount)}</span></div>
+              <div className="admin-details-grid">
+                <div className="admin-details-item"><small>Mã đơn</small><span>{detail.booking_code}</span></div>
+                <div className="admin-details-item"><small>Tour</small><span>{detail.tour_name}</span></div>
+                <div className="admin-details-item"><small>Người liên hệ</small><span>{detail.contact_name || detail.customer_name || '—'} ({detail.contact_phone || '—'})</span></div>
+                <div className="admin-details-item"><small>Email</small><span>{detail.contact_email || detail.customer_email || '—'}</span></div>
+                <div className="admin-details-item"><small>Tổng tiền</small><span>{formatVND(detail.total_amount)}</span></div>
+                <div className="admin-details-item"><small>Đã thanh toán</small><span>{formatVND(detail.paid_amount)}</span></div>
               </div>
               <h4 style={{ marginTop: 14 }}>🧍 Hành khách ({(detail.passengers || []).length})</h4>
-              {(detail.passengers || []).length === 0 && <div className="muted">Chưa có thông tin hành khách.</div>}
+              {(detail.passengers || []).length === 0 && <div className="admin-muted">Chưa có thông tin hành khách.</div>}
               {(detail.passengers || []).length > 0 && (
                 <div className="mini-table-wrap"><table>
                   <thead><tr><th>Họ tên</th><th>Loại vé</th><th>Ngày sinh</th><th>Giấy tờ</th></tr></thead>
@@ -143,9 +145,9 @@ export default function AdminBookings() {
                 </table></div>
               )}
               <h4 style={{ marginTop: 14 }}>💳 Thanh toán &amp; hoàn tiền</h4>
-              <div className="details-grid">
-                <div className="kv"><small>Giao dịch</small><span>{(detail.payments || []).length} giao dịch</span></div>
-                <div className="kv"><small>Hoàn tiền</small><span>{(detail.refunds || []).length} yêu cầu</span></div>
+              <div className="admin-details-grid">
+                <div className="admin-details-item"><small>Giao dịch</small><span>{(detail.payments || []).length} giao dịch</span></div>
+                <div className="admin-details-item"><small>Hoàn tiền</small><span>{(detail.refunds || []).length} yêu cầu</span></div>
               </div>
               {(detail.payments || []).length > 0 && (
                 <div className="mini-table-wrap"><table>

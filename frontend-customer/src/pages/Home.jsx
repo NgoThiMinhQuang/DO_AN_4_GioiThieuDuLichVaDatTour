@@ -10,7 +10,16 @@ import {
 } from '../components/ui.jsx';
 
 const CAT_ICONS = ['🏖️', '⛰️', '🏛️', '🚢', '🍜', '🌿', '🏕️', '🛶'];
-const CAT_BG = ['#eff6ff', '#f0fdf4', '#fffbeb', '#fdf2f8', '#f5f3ff', '#ecfdf5', '#fff7ed', '#f0f9ff'];
+const CAT_THEMES = [
+  { color: '#2563eb', shadow: 'rgba(37, 99, 235, 0.25)', bg: '#eff6ff', border: '#bfdbfe' },
+  { color: '#059669', shadow: 'rgba(5, 150, 105, 0.25)', bg: '#ecfdf5', border: '#a7f3d0' },
+  { color: '#d97706', shadow: 'rgba(217, 119, 6, 0.25)', bg: '#fffbeb', border: '#fde68a' },
+  { color: '#db2777', shadow: 'rgba(219, 39, 119, 0.25)', bg: '#fdf2f8', border: '#f9a8d4' },
+  { color: '#7c3aed', shadow: 'rgba(124, 58, 237, 0.25)', bg: '#f5f3ff', border: '#ddd6fe' },
+  { color: '#0d9488', shadow: 'rgba(13, 148, 136, 0.25)', bg: '#f0fdfa', border: '#99f6e4' },
+  { color: '#ea580c', shadow: 'rgba(234, 88, 12, 0.25)', bg: '#fff7ed', border: '#fed7aa' },
+  { color: '#0284c7', shadow: 'rgba(2, 132, 199, 0.25)', bg: '#f0f9ff', border: '#bae6fd' },
+];
 
 const ABOUT_FEATURES = [
   { icon: '🎯', title: 'Kinh nghiệm', desc: '10+ năm tổ chức tour khắp Việt Nam' },
@@ -135,50 +144,100 @@ export default function Home() {
 
   return (
     <div className="home-tv">
-      {/* 1. HERO full-width */}
-      <section className="tv-hero">
-        <div className="tv-hero-overlay" />
-        <div className="tv-hero-inner">
-          <span className="tv-hero-badge">Khám phá Việt Nam</span>
-          <h1>
-            Khởi đầu hành trình<br />
-            <span className="tv-hero-accent">đáng nhớ của bạn</span>
-          </h1>
-          <p className="tv-hero-desc">
-            Hàng trăm tour khởi hành mỗi tuần với lịch trình rõ ràng, giá minh bạch
-            và đội ngũ đồng hành 24/7.
-          </p>
+      {/* 1. HERO + THANH TÌM KIẾM */}
+      <section className="home-banner-wrapper">
+        <div className="home-hero-container">
+          <div className="home-hero-overlay" />
+          <div className="home-hero-content-wrapper">
+            <div className="home-hero-intro">
+              <span className="home-hero-badge">
+                <span className="home-hero-badge-dot" />
+                Khám phá Việt Nam
+              </span>
+              <div className="home-hero-text-group">
+                <h1 className="home-hero-title">
+                  Khởi đầu hành trình{' '}
+                  <span className="home-hero-title-highlight">đáng nhớ của bạn</span>
+                </h1>
+                <p className="home-hero-description">
+                  Hàng trăm tour khởi hành mỗi tuần với lịch trình rõ ràng, giá minh bạch
+                  và đội ngũ đồng hành 24/7.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Thanh tìm kiếm 4 ô đè dưới hero */}
+        <div className="home-hero-search-wrapper">
+          <form className="home-search-bar" onSubmit={search}>
+            <div className="home-search-item">
+              <span className="home-search-item-icon">⌕</span>
+              <div className="home-search-item-content">
+                <label htmlFor="home-search-name">Tên tour</label>
+                <input
+                  id="home-search-name"
+                  className="home-search-native-input"
+                  placeholder="Đà Nẵng, Phú Quốc..."
+                  value={fName}
+                  onChange={(e) => setFName(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="home-search-divider" />
+            <div className="home-search-item">
+              <span className="home-search-item-icon">📍</span>
+              <div className="home-search-item-content">
+                <label htmlFor="home-search-dest">Điểm đến</label>
+                <select
+                  id="home-search-dest"
+                  className="home-search-native-input"
+                  value={fDest}
+                  onChange={(e) => setFDest(e.target.value)}
+                >
+                  <option value="">Tất cả điểm đến</option>
+                  {destinations.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="home-search-divider" />
+            <div className="home-search-item">
+              <span className="home-search-item-icon">🧭</span>
+              <div className="home-search-item-content">
+                <label htmlFor="home-search-cat">Loại tour</label>
+                <select
+                  id="home-search-cat"
+                  className="home-search-native-input"
+                  value={fCat}
+                  onChange={(e) => setFCat(e.target.value)}
+                >
+                  <option value="">Tất cả loại tour</option>
+                  {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="home-search-divider" />
+            <div className="home-search-item">
+              <span className="home-search-item-icon">📅</span>
+              <div className="home-search-item-content">
+                <label htmlFor="home-search-date">Ngày khởi hành</label>
+                <input
+                  id="home-search-date"
+                  type="date"
+                  className="home-search-native-input"
+                  value={fDate}
+                  onChange={(e) => setFDate(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="home-search-action">
+              <button className="home-search-btn" type="submit">
+                <span className="home-search-btn-icon">⌕</span> Tìm kiếm
+              </button>
+            </div>
+          </form>
         </div>
       </section>
-
-      {/* Thanh tìm kiếm nổi đè dưới hero */}
-      <div className="container tv-search-wrap">
-        <form className="tv-search" onSubmit={search}>
-          <label className="tv-search-field">
-            <span>Tên tour</span>
-            <input placeholder="Đà Nẵng, Phú Quốc..." value={fName} onChange={(e) => setFName(e.target.value)} />
-          </label>
-          <label className="tv-search-field">
-            <span>Điểm đến</span>
-            <select value={fDest} onChange={(e) => setFDest(e.target.value)}>
-              <option value="">Tất cả điểm đến</option>
-              {destinations.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-            </select>
-          </label>
-          <label className="tv-search-field">
-            <span>Loại tour</span>
-            <select value={fCat} onChange={(e) => setFCat(e.target.value)}>
-              <option value="">Tất cả loại tour</option>
-              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </label>
-          <label className="tv-search-field">
-            <span>Ngày khởi hành</span>
-            <input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} />
-          </label>
-          <button className="btn tv-search-btn" type="submit">Tìm kiếm</button>
-        </form>
-      </div>
 
       <div className="container">
         {/* 2. VỀ CHÚNG TÔI */}
@@ -250,61 +309,91 @@ export default function Home() {
 
         {/* 4. PHONG CÁCH DU LỊCH */}
         {categories.length > 0 && (
-          <section className="section">
+          <section className="section category-section">
             <div className="section-head">
               <span className="eyebrow">Đa dạng lựa chọn</span>
               <h2>Khám phá theo phong cách du lịch bạn yêu thích</h2>
               <p>Chọn loại tour phù hợp với sở thích của bạn</p>
             </div>
-            <div className="tv-style-grid">
-              {categories.map((c, i) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  className="tv-style-card"
-                  onClick={() => navigate(`/tours?category=${c.id}`)}
-                >
-                  <span className="tv-style-icon" style={{ background: CAT_BG[i % CAT_BG.length] }}>
-                    {CAT_ICONS[i % CAT_ICONS.length]}
-                  </span>
-                  <b>{c.name}</b>
-                  {c.description && <span className="tv-style-desc">{c.description}</span>}
-                  <span className="tv-style-link">Khám phá →</span>
-                </button>
-              ))}
+            <div className="category-grid">
+              {categories.map((c, i) => {
+                const theme = CAT_THEMES[i % CAT_THEMES.length];
+                const icon = CAT_ICONS[i % CAT_ICONS.length];
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className="category-modern-card"
+                    style={{
+                      '--theme-color': theme.color,
+                      '--theme-shadow': theme.shadow,
+                      background: theme.bg,
+                      borderColor: theme.border,
+                    }}
+                    onClick={() => navigate(`/tours?category=${c.id}`)}
+                  >
+                    <span className="category-bg-icon" aria-hidden="true">{icon}</span>
+                    <span className="category-card-header">
+                      <span className="category-status-tag active">Đang mở</span>
+                      <span className="category-card-icon">{icon}</span>
+                    </span>
+                    <span className="category-card-body">
+                      <span className="category-modern-title">{c.name}</span>
+                      {c.description && <span className="category-modern-description">{c.description}</span>}
+                    </span>
+                    <span className="category-card-footer">
+                      <span className="category-action-text">Khám phá ngay</span>
+                      <span className="category-action-icon-wrapper">
+                        <span className="category-action-icon">→</span>
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </section>
         )}
 
         {/* 5. ĐIỂM ĐẾN PHỔ BIẾN */}
         {destinations.length > 0 && (
-          <section className="section">
+          <section className="section popular-destinations-section">
             <div className="section-head">
               <span className="eyebrow">Đi đâu tiếp theo?</span>
               <h2>Điểm đến phổ biến</h2>
               <p>Từ biển đảo đến núi rừng — chọn điểm đến cho chuyến đi của bạn</p>
             </div>
-            <div className="bento-grid tv-bento">
-              {destinations.map((d, i) => (
-                <div className="card bento-item" key={d.id}>
-                  <Link to={`/destinations/${d.id}`} className="bento-link">
-                    <img
-                      src={d.thumbnail || fallbackDestImg(d.id, i)}
-                      alt={d.name}
-                      loading="lazy"
-                      data-fallback={fallbackDestImg(d.id, i)}
-                      onError={handleImgError}
-                    />
-                    <div className="dest-overlay">
-                      <b>{d.name}</b><br />
-                      <span>{d.province || d.region || 'Việt Nam'}</span>
-                    </div>
+            <div className="popular-destinations-bento">
+              {destinations.map((d, i) => {
+                const sizeClass = i % 5 === 0 ? 'large-wide' : i % 5 === 3 ? 'large-tall' : 'small';
+                const imgSrc = d.thumbnail || fallbackDestImg(d.id, i);
+                return (
+                  <Link key={d.id} to={`/destinations/${d.id}`} className={`destination-card ${sizeClass}`}>
+                    <span className="destination-image-wrapper">
+                      <img
+                        className="destination-image"
+                        src={imgSrc}
+                        alt={d.name}
+                        loading="lazy"
+                        data-fallback={fallbackDestImg(d.id, i)}
+                        onError={handleImgError}
+                      />
+                      <span className="destination-overlay" />
+                    </span>
+                    <span className="destination-info">
+                      <span className="destination-badge">{d.province || d.region || 'Việt Nam'}</span>
+                      <span className="destination-details">
+                        <span className="destination-name">{d.name}</span>
+                        <span className="destination-action">
+                          Khám phá <span className="destination-icon">→</span>
+                        </span>
+                      </span>
+                    </span>
                     {destTourCounts[d.id] != null && (
-                      <span className="tv-dest-count">{destTourCounts[d.id]} tour</span>
+                      <span className="destination-count">{destTourCounts[d.id]} tour</span>
                     )}
                   </Link>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div style={{ textAlign: 'center', marginTop: 22 }}>
               <Link className="btn secondary" to="/destinations">Khám phá điểm đến</Link>
