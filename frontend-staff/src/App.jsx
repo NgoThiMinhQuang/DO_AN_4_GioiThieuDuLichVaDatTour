@@ -17,20 +17,24 @@ function RequireStaff({ children }) {
 function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const linkClass = ({ isActive }) => (isActive ? 'active' : '');
   return (
     <header className="site-header">
       <div className="header-inner">
-        <Link to="/" className="logo">VietTour Staff</Link>
+        <Link to="/" className="logo">
+          <span className="logo-travel">Travel</span><span className="logo-viet">Viet</span>
+          <span className="logo-staff">Staff</span>
+        </Link>
         <nav className="nav">
-          <NavLink to="/departures">Theo dõi khởi hành</NavLink>
-          <NavLink to="/bookings">Bookings</NavLink>
-          <NavLink to="/payments">Payments</NavLink>
-          <NavLink to="/refunds">Refunds</NavLink>
+          <NavLink to="/departures" className={linkClass}>Theo dõi khởi hành</NavLink>
+          <NavLink to="/bookings" className={linkClass}>Bookings</NavLink>
+          <NavLink to="/payments" className={linkClass}>Payments</NavLink>
+          <NavLink to="/refunds" className={linkClass}>Refunds</NavLink>
         </nav>
         <div className="header-spacer" />
         <nav className="nav">
-          {!user && <NavLink to="/login">Đăng nhập</NavLink>}
-          {user && <span className="muted">{user.full_name || user.email}</span>}
+          {!user && <NavLink to="/login" className={linkClass}>Đăng nhập</NavLink>}
+          {user && <span className="user-chip">{user.full_name || user.email}</span>}
           {user && (
             <button
               className="btn secondary"
@@ -50,28 +54,34 @@ function Header() {
 
 function Home() {
   const items = [
-    { to: '/departures', title: 'Theo dõi khởi hành', desc: 'Xem lịch khởi hành và số chỗ còn lại (chỉ đọc).' },
-    { to: '/bookings', title: 'Bookings', desc: 'Xem / tìm kiếm và xác nhận booking, ghi chú.' },
-    { to: '/payments', title: 'Payments', desc: 'Xác nhận và ghi nhận thanh toán.' },
-    { to: '/refunds', title: 'Refunds', desc: 'Xử lý hủy booking và hoàn tiền.' },
+    { to: '/departures', icon: '🗓️', title: 'Theo dõi khởi hành', desc: 'Xem lịch khởi hành và số chỗ còn lại (chỉ đọc).' },
+    { to: '/bookings', icon: '📋', title: 'Bookings', desc: 'Xem / tìm kiếm và xác nhận booking, ghi chú.' },
+    { to: '/payments', icon: '💳', title: 'Payments', desc: 'Xác nhận và ghi nhận thanh toán.' },
+    { to: '/refunds', icon: '↩️', title: 'Refunds', desc: 'Xử lý hủy booking và hoàn tiền.' },
   ];
   return (
     <div className="container">
       <div className="hero">
-        <h1>Xin chào nhân viên VietTour</h1>
+        <h1>Xin chào nhân viên TravelViet 👋</h1>
         <p>Xem / tìm booking, xác nhận booking, xác nhận thanh toán, theo dõi lịch khởi hành, xử lý hủy + hoàn tiền.</p>
+        <div className="hero-badges">
+          <span>📋 Booking</span>
+          <span>💳 Payment</span>
+          <span>↩️ Refund</span>
+          <span>🗓️ Khởi hành</span>
+        </div>
       </div>
       <div className="section">
-        <h2>Công việc</h2>
-        <div className="grid cols-2">
+        <h2>Công việc hôm nay</h2>
+        <div className="section-sub">Chọn một nghiệp vụ để bắt đầu xử lý.</div>
+        <div className="work-grid">
           {items.map((it) => (
-            <div className="card" key={it.to}>
-              <div className="card-body">
-                <div className="card-title"><Link to={it.to}>{it.title}</Link></div>
-                <div className="muted">{it.desc}</div>
-                <div><Link className="btn" to={it.to}>Mở</Link></div>
-              </div>
-            </div>
+            <Link className="work-card" key={it.to} to={it.to}>
+              <div className="work-icon">{it.icon}</div>
+              <div className="work-title">{it.title}</div>
+              <div className="work-desc">{it.desc}</div>
+              <div className="work-link">Mở ngay →</div>
+            </Link>
           ))}
         </div>
       </div>
@@ -96,8 +106,8 @@ export default function App() {
       </main>
       <footer className="site-footer">
         <div className="container">
-          <b>VietTour Staff</b> — Kênh nghiệp vụ nhân viên (Booking → Payment → Refund, theo dõi khởi hành).
-          <div className="muted" style={{ color: '#a7f3d0' }}>Demo: staff@gmail.com / Staff123! — API: http://localhost:5000</div>
+          <b>TravelViet Staff</b> — Kênh nghiệp vụ nhân viên (Booking → Payment → Refund, theo dõi khởi hành).
+          <div className="muted" style={{ color: '#94a3b8' }}>Demo: staff@gmail.com / Staff123! — API: http://localhost:5000</div>
         </div>
       </footer>
     </>

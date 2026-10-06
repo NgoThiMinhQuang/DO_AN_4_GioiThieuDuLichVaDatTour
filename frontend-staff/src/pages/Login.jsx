@@ -36,15 +36,19 @@ export default function Login() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 440 }}>
-      <h2>Đăng nhập — Nhân viên</h2>
-      {error && <div className="alert error">{error}</div>}
-      <form className="form" onSubmit={submit}>
-        <label>Email hoặc SĐT<input value={identifier} onChange={(e) => setIdentifier(e.target.value)} /></label>
-        <label>Mật khẩu<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></label>
-        <button className="btn" type="submit">Đăng nhập</button>
-      </form>
-      <div className="alert info">Demo: staff@gmail.com / Staff123!</div>
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-brand"><span className="logo-travel">Travel</span><span className="logo-viet">Viet</span> Staff</div>
+        <h2>Đăng nhập nhân viên</h2>
+        <div className="login-sub">Kênh nghiệp vụ: Booking → Payment → Refund, theo dõi khởi hành.</div>
+        {error && <div className="alert error">{error}</div>}
+        <form className="form" onSubmit={submit}>
+          <label>Email hoặc SĐT<input value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="staff@gmail.com" /></label>
+          <label>Mật khẩu<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" /></label>
+          <button className="btn" type="submit">Đăng nhập</button>
+        </form>
+        <div className="demo-box">Demo: staff@gmail.com / Staff123!</div>
+      </div>
     </div>
   );
 }

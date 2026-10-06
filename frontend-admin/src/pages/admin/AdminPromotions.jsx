@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
-import { ErrorBox } from '../../components/ui.jsx';
+import { ErrorBox, StatusBadge } from '../../components/ui.jsx';
 
 export default function AdminPromotions() {
   const [rows, setRows] = useState([]);
@@ -36,10 +36,13 @@ export default function AdminPromotions() {
 
   return (
     <div>
-      <h2>Quản lý Promotions</h2>
+      <div className="tv-pagehead">
+        <div><h2>Quản lý Promotions</h2><p>Mã giảm giá & bật/tắt chương trình khuyến mãi.</p></div>
+      </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
       <form className="filters" onSubmit={create}>
+        <b>✚ Tạo mã khuyến mãi</b>
         <div className="form-row">
           <input placeholder="Mã (VD: SALE10)" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required />
           <input placeholder="Tên CT" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -49,19 +52,20 @@ export default function AdminPromotions() {
           </select>
           <input type="number" value={form.discount_value} onChange={(e) => setForm({ ...form, discount_value: Number(e.target.value) })} />
         </div>
-        <div><button className="btn" type="submit">Tạo mã</button></div>
+        <div><button className="btn sm" type="submit">＋ Tạo mã</button></div>
       </form>
       <div className="table-wrap"><table>
         <thead><tr><th>Mã</th><th>Tên</th><th>Loại</th><th>Giá trị</th><th>Đã dùng</th><th>Trạng thái</th><th>Đổi TT</th></tr></thead>
         <tbody>
+          {rows.length === 0 && <tr><td colSpan={7}><div className="tv-empty">Chưa có khuyến mãi nào.</div></td></tr>}
           {rows.map((p) => (
             <tr key={p.id}>
-              <td>{p.code}</td><td>{p.name}</td><td>{p.discount_type}</td><td>{p.discount_value}</td>
+              <td><b style={{ color: '#1d4ed8' }}>{p.code}</b></td><td>{p.name}</td><td>{p.discount_type}</td><td style={{ fontWeight: 700 }}>{p.discount_value}</td>
               <td>{p.used_count}/{p.usage_limit ?? '∞'}</td>
-              <td><span className="badge">{p.status}</span></td>
+              <td><StatusBadge value={p.status} /></td>
               <td>
-                <button className="btn secondary" onClick={() => toggle(p.id, p.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE')}>
-                  {p.status === 'ACTIVE' ? 'Tắt' : 'Bật'}
+                <button className="btn secondary sm" onClick={() => toggle(p.id, p.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE')}>
+                  {p.status === 'ACTIVE' ? '⏸ Tắt' : '▶ Bật'}
                 </button>
               </td>
             </tr>

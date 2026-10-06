@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, formatVND } from '../components/ui.jsx';
+import { ErrorBox, TourCard } from '../components/ui.jsx';
 
 export default function Favorites() {
   const [rows, setRows] = useState([]);
@@ -17,23 +16,25 @@ export default function Favorites() {
   async function remove(id) {
     try {
       await api.delete(`/favorites/${id}`);
-      setMsg('Đã xóa');
+      setMsg('Đã xóa khỏi yêu thích');
       load();
     } catch (e) { setMsg(e.response?.data?.message || e.message); }
   }
   return (
     <div className="container">
-      <h2>Tour yêu thích</h2>
+      <div className="page-head">
+        <span className="eyebrow">Đã lưu</span>
+        <h2>Tour yêu thích ({rows.length})</h2>
+        <p>Những hành trình bạn đã tim — đặt ngay khi sẵn sàng.</p>
+      </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
+      {rows.length === 0 && !error && <div className="empty-box">Chưa có tour yêu thích nào. Khám phá ngay!</div>}
       <div className="grid tours">
         {rows.map((t) => (
-          <div className="card" key={t.id}>
-            <div className="card-body">
-              <Link to={`/tours/${t.id}`}>{t.name}</Link>
-              <div className="price">{formatVND(t.adult_price)}</div>
-              <button className="btn secondary" onClick={() => remove(t.id)}>Xóa</button>
-            </div>
+          <div key={t.id} style={{ display: 'flex', flexDirection: 'column' }}>
+            <TourCard t={t} />
+            <button className="btn secondary btn-sm" style={{ marginTop: 8 }} onClick={() => remove(t.id)}>✕ Xóa khỏi yêu thích</button>
           </div>
         ))}
       </div>

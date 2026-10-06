@@ -15,7 +15,6 @@ export default function Login() {
     setError('');
     try {
       await login(identifier, password);
-      // Verify role via /me
       const res = await api.get('/auth/me');
       if (res.data?.role !== 'CUSTOMER') {
         logout();
@@ -29,16 +28,24 @@ export default function Login() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 440 }}>
-      <h2>Đăng nhập Khách hàng</h2>
-      {error && <div className="alert error">{error}</div>}
-      <form className="form" onSubmit={submit}>
-        <label>Email hoặc SĐT<input value={identifier} onChange={(e) => setIdentifier(e.target.value)} /></label>
-        <label>Mật khẩu<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></label>
-        <button className="btn" type="submit">Đăng nhập</button>
-      </form>
-      <p>Chưa có tài khoản? <Link to="/register">Đăng ký</Link></p>
-      <div className="alert info">Demo: customer@gmail.com / Customer123!</div>
+    <div className="container">
+      <div className="auth-wrap">
+        <div className="auth-card">
+          <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            <span style={{ fontSize: 24, fontWeight: 800 }}>Travel<span style={{ color: '#2563eb' }}>Viet</span></span>
+          </div>
+          <h2>Chào mừng trở lại</h2>
+          <p className="sub">Đăng nhập để đặt tour và theo dõi booking</p>
+          {error && <div className="alert error">{error}</div>}
+          <form className="form" onSubmit={submit}>
+            <label>Email hoặc SĐT<input value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="customer@gmail.com" /></label>
+            <label>Mật khẩu<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" /></label>
+            <button className="btn" type="submit">Đăng nhập</button>
+          </form>
+          <p className="auth-switch">Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p>
+          <div className="alert info">Demo: customer@gmail.com / Customer123!</div>
+        </div>
+      </div>
     </div>
   );
 }

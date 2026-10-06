@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
-import { ErrorBox, formatVND } from '../../components/ui.jsx';
+import { ErrorBox, formatVND, statusBadge } from '../../components/ui.jsx';
 
 const BSTATES = ['', 'PENDING', 'DEPOSIT_PENDING', 'CONFIRMED', 'ONGOING', 'COMPLETED', 'CANCELLED', 'EXPIRED'];
 
@@ -30,8 +30,11 @@ export default function AdminBookings() {
   }
 
   return (
-    <div>
-      <h2>Quản lý Bookings</h2>
+    <div className="staff-page">
+      <div className="page-head">
+        <h2>📋 Quản lý Bookings</h2>
+        <p>Tìm kiếm theo mã / tên / email / SĐT, lọc trạng thái và xác nhận booking.</p>
+      </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
       <div className="filters">
@@ -46,11 +49,12 @@ export default function AdminBookings() {
       <div className="table-wrap"><table>
         <thead><tr><th>Mã</th><th>Tour</th><th>Tổng</th><th>Booking</th><th>Thanh toán</th><th>Đổi TT</th></tr></thead>
         <tbody>
+          {rows.length === 0 && <tr><td colSpan={6} className="empty-row">Chưa có booking nào.</td></tr>}
           {rows.map((b) => (
             <tr key={b.id}>
-              <td>{b.booking_code}</td><td>{b.tour_name}</td><td>{formatVND(b.total_amount)}</td>
-              <td><span className="badge">{b.booking_status}</span></td>
-              <td><span className="badge">{b.payment_status}</span></td>
+              <td><b>{b.booking_code}</b></td><td>{b.tour_name}</td><td>{formatVND(b.total_amount)}</td>
+              <td><span className={statusBadge(b.booking_status)}>{b.booking_status}</span></td>
+              <td><span className={statusBadge(b.payment_status)}>{b.payment_status}</span></td>
               <td>
                 <select value={b.booking_status} onChange={(e) => patchStatus(b.id, e.target.value)}>
                   {BSTATES.filter(Boolean).map((s) => <option key={s} value={s}>{s}</option>)}

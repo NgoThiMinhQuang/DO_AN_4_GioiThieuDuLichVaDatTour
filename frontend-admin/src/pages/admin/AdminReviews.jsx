@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
-import { ErrorBox } from '../../components/ui.jsx';
+import { ErrorBox, StatusBadge } from '../../components/ui.jsx';
 
 export default function AdminReviews() {
   const [rows, setRows] = useState([]);
@@ -26,20 +26,23 @@ export default function AdminReviews() {
 
   return (
     <div>
-      <h2>Quản lý Reviews</h2>
+      <div className="tv-pagehead">
+        <div><h2>Quản lý Reviews</h2><p>{rows.length} đánh giá của khách — ẩn / hiện nội dung.</p></div>
+      </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
       <div className="table-wrap"><table>
         <thead><tr><th>ID</th><th>Tour</th><th>Khách</th><th>Sao</th><th>Nội dung</th><th>TT</th><th>Ẩn/Hiện</th></tr></thead>
         <tbody>
+          {rows.length === 0 && <tr><td colSpan={7}><div className="tv-empty">Chưa có đánh giá nào.</div></td></tr>}
           {rows.map((r) => (
             <tr key={r.id}>
-              <td>{r.id}</td><td>{r.tour_name}</td><td>{r.full_name}</td><td>{r.rating}★</td>
+              <td className="muted">#{r.id}</td><td><b>{r.tour_name}</b></td><td>{r.full_name}</td><td style={{ color: '#d97706', fontWeight: 800 }}>★ {r.rating}</td>
               <td>{(r.content || '').slice(0, 80)}</td>
-              <td><span className="badge">{r.status}</span></td>
+              <td><StatusBadge value={r.status} /></td>
               <td>
-                <button className="btn secondary" onClick={() => setStatus(r.id, r.status === 'VISIBLE' ? 'HIDDEN' : 'VISIBLE')}>
-                  {r.status === 'VISIBLE' ? 'Ẩn' : 'Hiện'}
+                <button className="btn secondary sm" onClick={() => setStatus(r.id, r.status === 'VISIBLE' ? 'HIDDEN' : 'VISIBLE')}>
+                  {r.status === 'VISIBLE' ? '🙈 Ẩn' : '👁 Hiện'}
                 </button>
               </td>
             </tr>

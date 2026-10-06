@@ -7,6 +7,8 @@ function emptyPassenger(type) {
   return { full_name: '', date_of_birth: '', gender: '', passenger_type: type, identity_number: '', nationality: '', note: '' };
 }
 
+const STEP_LABELS = ['1. Lịch & số khách', '2. Liên hệ & hành khách', '3. Voucher', '4. Xác nhận'];
+
 export default function Booking() {
   const { departureId } = useParams();
   const [search] = useSearchParams();
@@ -108,112 +110,125 @@ export default function Booking() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 860 }}>
-      <h2>Đặt tour</h2>
+    <div className="container" style={{ maxWidth: 980 }}>
+      <div className="page-head">
+        <span className="eyebrow">Đặt tour</span>
+        <h2>Hoàn tất booking trong 4 bước</h2>
+        <p>Giá server tự tính lại và kiểm tra số chỗ (BR35-BR37).</p>
+      </div>
       <div className="steps">
         {[1, 2, 3, 4].map((s) => (
-          <span key={s} className={`step${step === s ? ' active' : ''}`}>
-            {s === 1 ? '1. Chọn lịch & số khách' : s === 2 ? '2. Liên hệ & hành khách' : s === 3 ? '3. Voucher' : '4. Xác nhận'}
+          <span key={s} className={`step${step === s ? ' active' : ''}${step > s ? ' done' : ''}`}>
+            {STEP_LABELS[s - 1]}
           </span>
         ))}
       </div>
       <ErrorBox error={error} />
-      <div className="alert info">Giá hiển thị chỉ tham khảo — server tự tính lại giá và kiểm tra số chỗ (BR35-BR37).</div>
 
-      {step === 1 && (
-        <div className="form">
-          <label>Tour
-            <select value={tourId} onChange={(e) => setTourId(e.target.value)}>
-              <option value="">-- Chọn tour --</option>
-              {tours.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
-          </label>
-          <label>Lịch khởi hành
-            <select value={selDep} onChange={(e) => setSelDep(e.target.value)}>
-              <option value="">-- Chọn departure --</option>
-              {departures.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {new Date(d.departure_date).toLocaleDateString('vi-VN')} — còn {d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)} chỗ — {formatVND(d.adult_price)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="form-row">
-            <label>Người lớn<input type="number" min="1" value={counts.adultCount} onChange={(e) => setCounts({ ...counts, adultCount: Number(e.target.value) })} /></label>
-            <label>Trẻ em<input type="number" min="0" value={counts.childCount} onChange={(e) => setCounts({ ...counts, childCount: Number(e.target.value) })} /></label>
-            <label>Em bé<input type="number" min="0" value={counts.infantCount} onChange={(e) => setCounts({ ...counts, infantCount: Number(e.target.value) })} /></label>
-          </div>
-          <div><button className="btn" disabled={!selDep} onClick={() => setStep(2)}>Tiếp tục</button></div>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className="form">
-          <div className="form-row">
-            <label>Họ tên liên hệ*<input value={contact.name} onChange={(e) => setContact({ ...contact, name: e.target.value })} /></label>
-            <label>SĐT*<input value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} /></label>
-          </div>
-          <div className="form-row">
-            <label>Email<input value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} /></label>
-            <label>Địa chỉ<input value={contact.address} onChange={(e) => setContact({ ...contact, address: e.target.value })} /></label>
-          </div>
-          <h3>Danh sách hành khách ({passengers.length})</h3>
-          {passengers.map((p, i) => (
-            <div className="form-row" key={i}>
-              <label>Họ tên<input value={p.full_name} onChange={(e) => { const n = [...passengers]; n[i].full_name = e.target.value; setPassengers(n); }} /></label>
-              <label>Ngày sinh<input type="date" value={p.date_of_birth || ''} onChange={(e) => { const n = [...passengers]; n[i].date_of_birth = e.target.value; setPassengers(n); }} /></label>
-              <label>Loại
-                <select value={p.passenger_type} onChange={(e) => { const n = [...passengers]; n[i].passenger_type = e.target.value; setPassengers(n); }}>
-                  <option value="ADULT">Người lớn</option>
-                  <option value="CHILD">Trẻ em</option>
-                  <option value="INFANT">Em bé</option>
+      <div className="grid cols-2 booking-layout" style={{ alignItems: 'start' }}>
+        <div className="panel">
+          {step === 1 && (
+            <div className="form">
+              <label>Tour
+                <select value={tourId} onChange={(e) => setTourId(e.target.value)}>
+                  <option value="">-- Chọn tour --</option>
+                  {tours.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
               </label>
+              <label>Lịch khởi hành
+                <select value={selDep} onChange={(e) => setSelDep(e.target.value)}>
+                  <option value="">-- Chọn departure --</option>
+                  {departures.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {new Date(d.departure_date).toLocaleDateString('vi-VN')} — còn {d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)} chỗ — {formatVND(d.adult_price)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="form-row">
+                <label>Người lớn<input type="number" min="1" value={counts.adultCount} onChange={(e) => setCounts({ ...counts, adultCount: Number(e.target.value) })} /></label>
+                <label>Trẻ em<input type="number" min="0" value={counts.childCount} onChange={(e) => setCounts({ ...counts, childCount: Number(e.target.value) })} /></label>
+                <label>Em bé<input type="number" min="0" value={counts.infantCount} onChange={(e) => setCounts({ ...counts, infantCount: Number(e.target.value) })} /></label>
+              </div>
+              <div><button className="btn" disabled={!selDep} onClick={() => setStep(2)}>Tiếp tục →</button></div>
             </div>
-          ))}
-          <div className="form-row">
-            <button className="btn secondary" onClick={() => setStep(1)}>Quay lại</button>
-            <button className="btn" disabled={!contact.name || !contact.phone} onClick={() => setStep(3)}>Tiếp tục</button>
-          </div>
-        </div>
-      )}
+          )}
 
-      {step === 3 && (
-        <div className="form">
-          <label>Mã voucher (POST /api/promotions/validate)
-            <div className="form-row">
-              <input value={promoCode} onChange={(e) => setPromoCode(e.target.value)} placeholder="VD: SALE10" />
-              <button type="button" className="btn secondary" onClick={validatePromo}>Áp mã</button>
+          {step === 2 && (
+            <div className="form">
+              <div className="form-row">
+                <label>Họ tên liên hệ*<input value={contact.name} onChange={(e) => setContact({ ...contact, name: e.target.value })} placeholder="Nguyễn Văn A" /></label>
+                <label>SĐT*<input value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} placeholder="09xx xxx xxx" /></label>
+              </div>
+              <div className="form-row">
+                <label>Email<input value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} placeholder="ban@email.com" /></label>
+                <label>Địa chỉ<input value={contact.address} onChange={(e) => setContact({ ...contact, address: e.target.value })} /></label>
+              </div>
+              <h3>Danh sách hành khách ({passengers.length})</h3>
+              {passengers.map((p, i) => (
+                <div className="form-row" key={i}>
+                  <label>Họ tên<input value={p.full_name} onChange={(e) => { const n = [...passengers]; n[i].full_name = e.target.value; setPassengers(n); }} /></label>
+                  <label>Ngày sinh<input type="date" value={p.date_of_birth || ''} onChange={(e) => { const n = [...passengers]; n[i].date_of_birth = e.target.value; setPassengers(n); }} /></label>
+                  <label>Loại
+                    <select value={p.passenger_type} onChange={(e) => { const n = [...passengers]; n[i].passenger_type = e.target.value; setPassengers(n); }}>
+                      <option value="ADULT">Người lớn</option>
+                      <option value="CHILD">Trẻ em</option>
+                      <option value="INFANT">Em bé</option>
+                    </select>
+                  </label>
+                </div>
+              ))}
+              <div className="form-row">
+                <button className="btn secondary" onClick={() => setStep(1)}>← Quay lại</button>
+                <button className="btn" disabled={!contact.name || !contact.phone} onClick={() => setStep(3)}>Tiếp tục →</button>
+              </div>
             </div>
-          </label>
-          {promoMsg && <div className="alert info">{promoMsg}</div>}
-          <div className="card"><div className="card-body">
-            <div>Tạm tính: <b>{formatVND(subtotal)}</b></div>
-            <div>Giảm giá: <b>{formatVND(discount)}</b></div>
-            <div>Tổng dự kiến: <b className="price">{formatVND(total)}</b></div>
-          </div></div>
-          <div className="form-row">
-            <button className="btn secondary" onClick={() => setStep(2)}>Quay lại</button>
-            <button className="btn" onClick={() => setStep(4)}>Tiếp tục</button>
-          </div>
-        </div>
-      )}
+          )}
 
-      {step === 4 && (
-        <div className="form">
-          <div className="card"><div className="card-body">
-            <div><b>Tour:</b> {tour?.name}</div>
-            <div><b>Khởi hành:</b> {dep ? new Date(dep.departure_date).toLocaleDateString('vi-VN') : '—'}</div>
-            <div><b>Khách:</b> {counts.adultCount} NL + {counts.childCount} TE + {counts.infantCount} EB</div>
-            <div><b>Liên hệ:</b> {contact.name} — {contact.phone}</div>
-            <div><b>Tổng dự kiến:</b> <span className="price">{formatVND(total)}</span></div>
-          </div></div>
-          <div className="form-row">
-            <button className="btn secondary" onClick={() => setStep(3)}>Quay lại</button>
-            <button className="btn" disabled={submitting} onClick={submitBooking}>{submitting ? 'Đang tạo booking...' : 'Xác nhận đặt tour (POST /bookings)'}</button>
-          </div>
+          {step === 3 && (
+            <div className="form">
+              <label>Mã voucher
+                <div className="form-row">
+                  <input value={promoCode} onChange={(e) => setPromoCode(e.target.value)} placeholder="VD: SALE10" />
+                  <button type="button" className="btn secondary" onClick={validatePromo} style={{ flex: '0 0 auto' }}>Áp mã</button>
+                </div>
+              </label>
+              {promoMsg && <div className="alert info">{promoMsg}</div>}
+              <div className="form-row">
+                <button className="btn secondary" onClick={() => setStep(2)}>← Quay lại</button>
+                <button className="btn" onClick={() => setStep(4)}>Tiếp tục →</button>
+              </div>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="form">
+              <div className="card"><div className="card-body">
+                <div><b>Tour:</b> {tour?.name}</div>
+                <div><b>Khởi hành:</b> {dep ? new Date(dep.departure_date).toLocaleDateString('vi-VN') : '—'}</div>
+                <div><b>Khách:</b> {counts.adultCount} NL + {counts.childCount} TE + {counts.infantCount} EB</div>
+                <div><b>Liên hệ:</b> {contact.name} — {contact.phone}</div>
+                <div><b>Tổng dự kiến:</b> <span className="price">{formatVND(total)}</span></div>
+              </div></div>
+              <div className="form-row">
+                <button className="btn secondary" onClick={() => setStep(3)}>← Quay lại</button>
+                <button className="btn" disabled={submitting} onClick={submitBooking}>{submitting ? 'Đang tạo booking...' : 'Xác nhận đặt tour'}</button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        <div className="panel" style={{ position: 'sticky', top: 84 }}>
+          <h3 style={{ marginTop: 0 }}>Tóm tắt</h3>
+          <div className="muted">{tour?.name || 'Chưa chọn tour'}</div>
+          <div style={{ margin: '10px 0', borderTop: '1px dashed #e2e8f0', paddingTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Tạm tính</span><b>{formatVND(subtotal)}</b></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Giảm giá</span><b>−{formatVND(discount)}</b></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}><span>Tổng dự kiến</span><span className="price">{formatVND(total)}</span></div>
+          </div>
+          <div className="alert info" style={{ marginBottom: 0 }}>Giá hiển thị chỉ tham khảo — server tự tính lại giá và kiểm tra số chỗ.</div>
+        </div>
+      </div>
     </div>
   );
 }

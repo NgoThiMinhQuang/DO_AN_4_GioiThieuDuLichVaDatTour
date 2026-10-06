@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
-import { ErrorBox, formatVND } from '../../components/ui.jsx';
+import { ErrorBox, StatusBadge, formatVND } from '../../components/ui.jsx';
 
 export default function AdminPayments() {
   const [rows, setRows] = useState([]);
@@ -31,30 +31,42 @@ export default function AdminPayments() {
 
   return (
     <div>
-      <h2>Quản lý Payments & Refunds</h2>
+      <div className="tv-pagehead">
+        <div><h2>Quản lý Payments & Refunds</h2><p>Xác minh giao dịch thanh toán & theo dõi hoàn tiền.</p></div>
+      </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
-      <h3>Payments</h3>
-      <div className="table-wrap"><table>
-        <thead><tr><th>Mã GD</th><th>Booking</th><th>Số tiền</th><th>TT</th><th>Verify</th></tr></thead>
-        <tbody>
-          {rows.map((p) => (
-            <tr key={p.id}>
-              <td>{p.transaction_code}</td><td>{p.booking_code}</td><td>{formatVND(p.amount)}</td>
-              <td><span className="badge">{p.status}</span></td>
-              <td>
-                <button className="btn secondary" onClick={() => verify(p.id, 'SUCCESS')}>SUCCESS</button>{' '}
-                <button className="btn danger" onClick={() => verify(p.id, 'FAILED')}>FAILED</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table></div>
-      <h3>Refunds</h3>
-      <div className="table-wrap"><table>
-        <thead><tr><th>Mã hoàn</th><th>Booking</th><th>Số tiền</th><th>Trạng thái</th></tr></thead>
-        <tbody>{refunds.map((r) => <tr key={r.id}><td>{r.refund_code}</td><td>{r.booking_code}</td><td>{formatVND(r.amount)}</td><td>{r.status}</td></tr>)}</tbody>
-      </table></div>
+      <div className="tv-panel">
+        <h3>💳 Payments</h3>
+        <div className="table-wrap" style={{ marginBottom: 0 }}><table>
+          <thead><tr><th>Mã GD</th><th>Booking</th><th>Số tiền</th><th>TT</th><th>Verify</th></tr></thead>
+          <tbody>
+            {rows.length === 0 && <tr><td colSpan={5}><div className="tv-empty">Chưa có giao dịch nào.</div></td></tr>}
+            {rows.map((p) => (
+              <tr key={p.id}>
+                <td><b>{p.transaction_code}</b></td><td>{p.booking_code}</td><td style={{ fontWeight: 700 }}>{formatVND(p.amount)}</td>
+                <td><StatusBadge value={p.status} /></td>
+                <td>
+                  <div className="tv-actions">
+                    <button className="btn sm secondary" onClick={() => verify(p.id, 'SUCCESS')}>✓ SUCCESS</button>
+                    <button className="btn sm danger" onClick={() => verify(p.id, 'FAILED')}>✕ FAILED</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table></div>
+      </div>
+      <div className="tv-panel">
+        <h3>↩ Refunds</h3>
+        <div className="table-wrap" style={{ marginBottom: 0 }}><table>
+          <thead><tr><th>Mã hoàn</th><th>Booking</th><th>Số tiền</th><th>Trạng thái</th></tr></thead>
+          <tbody>
+            {refunds.length === 0 && <tr><td colSpan={4}><div className="tv-empty">Chưa có yêu cầu hoàn nào.</div></td></tr>}
+            {refunds.map((r) => <tr key={r.id}><td><b>{r.refund_code}</b></td><td>{r.booking_code}</td><td style={{ fontWeight: 700 }}>{formatVND(r.amount)}</td><td><StatusBadge value={r.status} /></td></tr>)}
+          </tbody>
+        </table></div>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, formatVND } from '../components/ui.jsx';
+import { ErrorBox, TourCard, handleImgError } from '../components/ui.jsx';
 
 export default function DestinationDetail() {
   const { id } = useParams();
@@ -19,25 +19,36 @@ export default function DestinationDetail() {
   if (!d) return <div className="container"><p>Đang tải...</p></div>;
   return (
     <div className="container">
-      <h2>{d.name}</h2>
-      <div className="muted">{d.province} • {d.region} • Khí hậu: {d.climate || '—'} • Thời điểm đẹp: {d.best_time_to_visit || '—'}</div>
-      {d.thumbnail && <img className="detail-img" src={d.thumbnail} alt={d.name} style={{ marginTop: 12 }} />}
-      <p>{d.description}</p>
-      <h3>Địa điểm tham quan</h3>
-      <div className="grid cols-3">
-        {(d.attractions || []).map((a) => (
-          <div className="card" key={a.id}><div className="card-body"><b>{a.name}</b><div className="muted">{a.address}</div><div className="muted">{a.description}</div></div></div>
-        ))}
+      <div className="page-head">
+        <span className="eyebrow">{d.region || 'Điểm đến'}</span>
+        <h2>{d.name}</h2>
+        <div className="muted">{d.province} • Khí hậu: {d.climate || '—'} • Thời điểm đẹp: {d.best_time_to_visit || '—'}</div>
       </div>
-      <h3>Tour liên quan</h3>
-      <div className="grid cols-3">
-        {(d.tours || []).map((t) => (
-          <div className="card" key={t.id}><div className="card-body"><Link to={`/tours/${t.id}`}>{t.name}</Link><div className="price">{formatVND(t.adult_price)}</div></div></div>
-        ))}
+      <div className="detail-hero">
+        <img
+          src={d.thumbnail || `https://picsum.photos/seed/dest-${d.id}/1200/520`}
+          alt={d.name} data-seed={`dest-${d.id}`} onError={handleImgError}
+        />
+      </div>
+      <div className="panel" style={{ marginTop: 16 }}><p style={{ margin: 0, lineHeight: 1.7 }}>{d.description}</p></div>
+      <div className="section">
+        <div className="section-head left"><span className="eyebrow">Tham quan</span><h2 style={{ fontSize: 22 }}>Địa điểm nổi bật</h2></div>
+        <div className="grid cols-3">
+          {(d.attractions || []).map((a) => (
+            <div className="card" key={a.id}><div className="card-body"><b>{a.name}</b><div className="muted">{a.address}</div><div className="muted">{a.description}</div></div></div>
+          ))}
+        </div>
+        {!(d.attractions || []).length && <div className="muted">Chưa có địa điểm tham quan.</div>}
+      </div>
+      <div className="section">
+        <div className="section-head left"><span className="eyebrow">Gợi ý thêm</span><h2 style={{ fontSize: 22 }}>Tour liên quan</h2></div>
+        <div className="grid tours">
+          {(d.tours || []).map((t) => <TourCard key={t.id} t={t} />)}
+        </div>
       </div>
       <h3>Bài viết liên quan</h3>
       {(d.articles || []).map((a) => (
-        <div key={a.id}><Link to={`/articles/${a.id}`}>{a.title}</Link></div>
+        <div key={a.id} style={{ marginBottom: 6 }}><Link to={`/articles/${a.id}`}>{a.title}</Link></div>
       ))}
     </div>
   );

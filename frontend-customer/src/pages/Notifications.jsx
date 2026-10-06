@@ -18,17 +18,22 @@ export default function Notifications() {
       load();
     } catch (_) {}
   }
+  const unread = rows.filter((n) => !n.is_read).length;
   return (
-    <div className="container" style={{ maxWidth: 720 }}>
-      <h2>Thông báo</h2>
+    <div className="container" style={{ maxWidth: 760 }}>
+      <div className="page-head">
+        <span className="eyebrow">Cập nhật</span>
+        <h2>Thông báo {unread > 0 && <span className="badge">{unread} chưa đọc</span>}</h2>
+      </div>
       <ErrorBox error={error} />
+      {rows.length === 0 && !error && <div className="empty-box">Không có thông báo nào.</div>}
       {rows.map((n) => (
-        <div className="card" key={n.id} style={{ marginBottom: 8, opacity: n.is_read ? 0.7 : 1 }}>
+        <div className="card" key={n.id} style={{ marginBottom: 12, opacity: n.is_read ? 0.72 : 1, borderLeft: n.is_read ? undefined : '4px solid #2563eb' }}>
           <div className="card-body">
-            <b>{n.title}</b> <span className="badge">{n.type}</span>
+            <div><b>{n.title}</b> <span className="badge">{n.type}</span></div>
             <div>{n.content}</div>
             <div className="muted">{n.created_at ? new Date(n.created_at).toLocaleString('vi-VN') : ''}</div>
-            {!n.is_read && <button className="btn secondary" onClick={() => markRead(n.id)}>Đánh dấu đã đọc</button>}
+            {!n.is_read && <div><button className="btn secondary btn-sm" onClick={() => markRead(n.id)}>Đánh dấu đã đọc</button></div>}
           </div>
         </div>
       ))}

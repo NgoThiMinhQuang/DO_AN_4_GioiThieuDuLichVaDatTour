@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import api from '../../api/client.js';
-import { formatVND } from '../../components/ui.jsx';
+import { formatVND, statusBadge } from '../../components/ui.jsx';
 
 // App nhan vien: LUON chi doc — khong nut tao departure, khong doi trang thai.
 // Chi xem lich khoi hanh + so cho con lai.
@@ -24,8 +24,11 @@ export default function AdminDepartures() {
   }
 
   return (
-    <div>
-      <h2>Theo dõi lịch khởi hành</h2>
+    <div className="staff-page">
+      <div className="page-head">
+        <h2>🗓️ Theo dõi lịch khởi hành</h2>
+        <p>Chế độ chỉ đọc — xem ngày đi, số chỗ còn lại và trạng thái mở/đóng.</p>
+      </div>
       {error && <div className="alert error">{error}</div>}
       <div className="alert info">Nhập Tour ID (để trống = xem tất cả) — tài khoản nhân viên chỉ xem theo dõi.</div>
       <div className="filters">
@@ -37,13 +40,14 @@ export default function AdminDepartures() {
       <div className="table-wrap"><table>
         <thead><tr><th>ID</th><th>Ngày đi</th><th>Còn lại</th><th>Giá NL</th><th>Trạng thái</th></tr></thead>
         <tbody>
+          {deps.length === 0 && <tr><td colSpan={5} className="empty-row">Chưa có dữ liệu — bấm “Tải departures”.</td></tr>}
           {deps.map((d) => (
             <tr key={d.id}>
-              <td>{d.id}</td>
+              <td>#{d.id}</td>
               <td>{String(d.departure_date).slice(0, 10)}</td>
-              <td>{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</td>
+              <td><b>{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</b></td>
               <td>{formatVND(d.adult_price)}</td>
-              <td><span className="badge">{d.status}</span></td>
+              <td><span className={statusBadge(d.status)}>{d.status}</span></td>
             </tr>
           ))}
         </tbody>

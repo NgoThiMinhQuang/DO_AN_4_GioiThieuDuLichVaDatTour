@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
-import { ErrorBox, formatVND } from '../../components/ui.jsx';
+import { ErrorBox, StatusBadge, formatVND } from '../../components/ui.jsx';
 
 const RSTATES = ['PENDING', 'PROCESSING', 'SUCCESS', 'FAILED'];
 
@@ -45,25 +45,29 @@ export default function AdminRefunds() {
 
   return (
     <div>
-      <h2>Quản lý Hoàn tiền</h2>
+      <div className="tv-pagehead">
+        <div><h2>Quản lý Hoàn tiền</h2><p>Tạo & duyệt yêu cầu hoàn tiền (số tiền hoàn ≤ đã thanh toán).</p></div>
+      </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
       <div className="filters">
+        <b>✚ Tạo yêu cầu hoàn</b>
         <div className="form-row">
           <input placeholder="Booking ID" value={form.booking_id} onChange={(e) => setForm({ ...form, booking_id: e.target.value })} />
           <input placeholder="Payment ID (không bắt buộc)" value={form.payment_id} onChange={(e) => setForm({ ...form, payment_id: e.target.value })} />
           <input placeholder="Số tiền hoàn" type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
           <input placeholder="Lý do" value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} />
-          <button className="btn" onClick={create}>Tạo yêu cầu hoàn</button>
+          <button className="btn sm" onClick={create}>Tạo yêu cầu hoàn</button>
         </div>
       </div>
       <div className="table-wrap"><table>
         <thead><tr><th>Mã hoàn</th><th>Booking</th><th>Số tiền</th><th>Lý do</th><th>Trạng thái</th><th>Duyệt</th></tr></thead>
         <tbody>
+          {rows.length === 0 && <tr><td colSpan={6}><div className="tv-empty">Chưa có yêu cầu hoàn nào.</div></td></tr>}
           {rows.map((r) => (
             <tr key={r.id}>
-              <td>{r.refund_code}</td><td>{r.booking_code}</td><td>{formatVND(r.amount)}</td>
-              <td>{r.reason}</td><td><span className="badge">{r.status}</span></td>
+              <td><b>{r.refund_code}</b></td><td>{r.booking_code}</td><td style={{ fontWeight: 700 }}>{formatVND(r.amount)}</td>
+              <td>{r.reason}</td><td><StatusBadge value={r.status} /></td>
               <td>
                 <select value={r.status} onChange={(e) => patch(r.id, e.target.value)}>
                   {RSTATES.map((s) => <option key={s} value={s}>{s}</option>)}

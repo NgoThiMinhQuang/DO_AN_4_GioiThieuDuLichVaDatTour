@@ -1,17 +1,25 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/client.js';
 import { TourCard, ErrorBox } from '../components/ui.jsx';
 
 export default function Tours() {
+  const [params] = useSearchParams();
+  const initialQ = params.get('q') || '';
   const [tours, setTours] = useState([]);
   const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState([]);
   const [destinations, setDestinations] = useState([]);
   const [error, setError] = useState('');
   const [f, setF] = useState({
-    q: '', category: '', destination: '', minPrice: '', maxPrice: '',
+    q: initialQ, category: '', destination: '', minPrice: '', maxPrice: '',
     days: '', departDate: '', sort: 'newest'
   });
+
+  useEffect(() => {
+    setF((prev) => ({ ...prev, q: params.get('q') || '' }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
 
   useEffect(() => {
     (async () => {
@@ -29,7 +37,7 @@ export default function Tours() {
   async function load() {
     setError('');
     try {
-      const params = {
+      const p = {
         q: f.q || undefined,
         category: f.category || undefined,
         destination: f.destination || undefined,
@@ -38,9 +46,8 @@ export default function Tours() {
         sort: f.sort || undefined,
         limit: 24
       };
-      const res = await api.get('/tours', { params });
+      const res = await api.get('/tours', { params: p });
       let rows = res.data.data || [];
-      // Lọc client-side cho số ngày + ngày khởi hành (backend chưa hỗ trợ param này)
       if (f.days) rows = rows.filter((t) => Number(t.duration_days) === Number(f.days));
       setTours(rows);
       setTotal(res.data.total ?? rows.length);
@@ -54,7 +61,11 @@ export default function Tours() {
 
   return (
     <div className="container">
-      <h2>Danh sách tour ({total})</h2>
+      <div className="page-head">
+        <span className="eyebrow">Danh sách tour</span>
+        <h2>Tìm tour phù hợp ({total})</h2>
+        <p>Lọc theo điểm đến, ngân sách và thời gian khởi hành mong muốn.</p>
+      </div>
       <div className="filters">
         <div className="form-row">
           <input placeholder="Tìm kiếm tên / mã / điểm khởi hành..." value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
@@ -81,6 +92,7 @@ export default function Tours() {
         <div><button className="btn" onClick={load}>Tìm kiếm / Lọc</button></div>
       </div>
       <ErrorBox error={error} />
+      {tours.length === 0 && !error && <div className="empty-box">Không tìm thấy tour phù hợp. Thử nới lỏng điều kiện lọc.</div>}
       <div className="grid tours">
         {tours.map((t) => <TourCard key={t.id} t={t} />)}
       </div>

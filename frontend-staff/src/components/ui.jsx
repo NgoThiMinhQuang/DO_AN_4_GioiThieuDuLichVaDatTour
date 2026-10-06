@@ -6,6 +6,17 @@ export function formatVND(n) {
   return v.toLocaleString('vi-VN') + 'đ';
 }
 
+// Map trạng thái -> màu badge TravelViet:
+// PENDING cam, CONFIRMED/COMPLETED xanh lá, CANCELLED đỏ, OPEN xanh dương.
+export function statusBadge(status) {
+  const s = String(status || '').toUpperCase();
+  if (['PENDING', 'DEPOSIT_PENDING', 'PROCESSING', 'UNPAID', 'AWAITING'].includes(s)) return 'badge b-pending';
+  if (['CONFIRMED', 'COMPLETED', 'SUCCESS', 'PAID', 'APPROVED'].includes(s)) return 'badge b-success';
+  if (['CANCELLED', 'CANCELED', 'FAILED', 'EXPIRED', 'REJECTED'].includes(s)) return 'badge b-danger';
+  if (['OPEN', 'ONGOING', 'AVAILABLE', 'PARTIAL', 'REFUNDED'].includes(s)) return 'badge b-info';
+  return 'badge b-neutral';
+}
+
 export function TourCard({ t }) {
   return (
     <div className="card">

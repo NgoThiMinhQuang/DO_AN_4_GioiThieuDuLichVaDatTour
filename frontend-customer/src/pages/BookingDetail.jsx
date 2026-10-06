@@ -53,20 +53,26 @@ export default function BookingDetail() {
 
   return (
     <div className="container">
-      <h2>Booking {b.booking_code}</h2>
+      <div className="page-head">
+        <span className="eyebrow">Chi tiết booking</span>
+        <h2>Booking {b.booking_code}</h2>
+        <div><span className="badge">{b.booking_status}</span> <span className="badge">{b.payment_status}</span></div>
+      </div>
       {msg && <div className="alert info">{msg}</div>}
-      <div className="grid cols-2">
-        <div className="card"><div className="card-body">
-          <div><b>Tour:</b> {b.tour_name}</div>
-          <div><b>Khởi hành:</b> {b.departure_date ? new Date(b.departure_date).toLocaleDateString('vi-VN') : ''} — về {b.return_date ? new Date(b.return_date).toLocaleDateString('vi-VN') : ''}</div>
-          <div><b>Liên hệ:</b> {b.contact_name} • {b.contact_phone} • {b.contact_email}</div>
-          <div><b>Giá snapshot NL/TE/EB:</b> {formatVND(b.adult_price)} / {formatVND(b.child_price)} / {formatVND(b.infant_price)}</div>
-          <div><b>Tạm tính:</b> {formatVND(b.subtotal)} • <b>Giảm:</b> {formatVND(b.discount_amount)} • <b>Tổng:</b> <span className="price">{formatVND(b.total_amount)}</span></div>
-          <div><b>Đã trả:</b> {formatVND(b.paid_amount)} • <b>Còn lại:</b> {formatVND(b.remaining_amount)}</div>
-          <div><b>Trạng thái:</b> {b.booking_status} / {b.payment_status}</div>
-        </div></div>
-        <div className="card"><div className="card-body">
-          <h3>Thanh toán thêm (POST /api/payments)</h3>
+      <div className="grid cols-2" style={{ alignItems: 'start' }}>
+        <div className="panel">
+          <h3 style={{ marginTop: 0 }}>Thông tin chuyến đi</h3>
+          <div className="form">
+            <div><b>Tour:</b> {b.tour_name}</div>
+            <div><b>Khởi hành:</b> {b.departure_date ? new Date(b.departure_date).toLocaleDateString('vi-VN') : ''} — về {b.return_date ? new Date(b.return_date).toLocaleDateString('vi-VN') : ''}</div>
+            <div><b>Liên hệ:</b> {b.contact_name} • {b.contact_phone} • {b.contact_email}</div>
+            <div><b>Giá snapshot NL/TE/EB:</b> {formatVND(b.adult_price)} / {formatVND(b.child_price)} / {formatVND(b.infant_price)}</div>
+            <div><b>Tạm tính:</b> {formatVND(b.subtotal)} • <b>Giảm:</b> {formatVND(b.discount_amount)} • <b>Tổng:</b> <span className="price">{formatVND(b.total_amount)}</span></div>
+            <div><b>Đã trả:</b> {formatVND(b.paid_amount)} • <b>Còn lại:</b> <span className="price">{formatVND(b.remaining_amount)}</span></div>
+          </div>
+        </div>
+        <div className="panel">
+          <h3 style={{ marginTop: 0 }}>Thanh toán thêm</h3>
           <div className="form-row">
             <input type="number" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} placeholder="Số tiền" />
             <select value={pay.method} onChange={(e) => setPay({ ...pay, method: e.target.value })}>
@@ -76,8 +82,10 @@ export default function BookingDetail() {
               <option value="MOMO">MoMo</option>
             </select>
           </div>
-          <div style={{ marginTop: 8 }}><button className="btn" onClick={doPay}>Thanh toán</button>{' '}
-          <button className="btn danger" onClick={doCancel}>Hủy booking (POST /:id/cancel)</button></div>
+          <div className="form-row" style={{ marginTop: 8 }}>
+            <button className="btn" onClick={doPay}>Thanh toán</button>
+            <button className="btn danger" onClick={doCancel}>Hủy booking</button>
+          </div>
           <h3>Đánh giá (khi hoàn thành)</h3>
           <div className="form-row">
             <select value={review.rating} onChange={(e) => setReview({ ...review, rating: e.target.value })}>
@@ -85,18 +93,18 @@ export default function BookingDetail() {
             </select>
             <input value={review.content} onChange={(e) => setReview({ ...review, content: e.target.value })} placeholder="Nội dung" />
           </div>
-          <div style={{ marginTop: 8 }}><button className="btn secondary" onClick={doReview}>Gửi đánh giá (POST /:id/reviews)</button></div>
-        </div></div>
+          <div style={{ marginTop: 8 }}><button className="btn secondary" onClick={doReview}>Gửi đánh giá</button></div>
+        </div>
       </div>
       <h3>Hành khách</h3>
       <div className="table-wrap"><table>
         <thead><tr><th>Họ tên</th><th>Loại</th><th>Ngày sinh</th></tr></thead>
-        <tbody>{(b.passengers || []).map((p) => <tr key={p.id}><td>{p.full_name}</td><td>{p.passenger_type}</td><td>{p.date_of_birth ? String(p.date_of_birth).slice(0, 10) : ''}</td></tr>)}</tbody>
+        <tbody>{(b.passengers || []).map((p) => <tr key={p.id}><td>{p.full_name}</td><td><span className="badge">{p.passenger_type}</span></td><td>{p.date_of_birth ? String(p.date_of_birth).slice(0, 10) : ''}</td></tr>)}</tbody>
       </table></div>
       <h3>Lịch sử thanh toán</h3>
       <div className="table-wrap"><table>
         <thead><tr><th>Mã GD</th><th>Số tiền</th><th>Phương thức</th><th>Trạng thái</th></tr></thead>
-        <tbody>{(b.payments || []).map((p) => <tr key={p.id}><td>{p.transaction_code}</td><td>{formatVND(p.amount)}</td><td>{p.payment_method}</td><td>{p.status}</td></tr>)}</tbody>
+        <tbody>{(b.payments || []).map((p) => <tr key={p.id}><td>{p.transaction_code}</td><td>{formatVND(p.amount)}</td><td>{p.payment_method}</td><td><span className="badge">{p.status}</span></td></tr>)}</tbody>
       </table></div>
     </div>
   );

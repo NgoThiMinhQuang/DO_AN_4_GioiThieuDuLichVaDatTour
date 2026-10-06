@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
-import { ErrorBox, formatVND } from '../../components/ui.jsx';
+import { ErrorBox, formatVND, statusBadge } from '../../components/ui.jsx';
 
 export default function AdminPayments() {
   const [rows, setRows] = useState([]);
@@ -30,30 +30,39 @@ export default function AdminPayments() {
   }
 
   return (
-    <div>
-      <h2>Quản lý Payments & Refunds</h2>
+    <div className="staff-page">
+      <div className="page-head">
+        <h2>💳 Quản lý Payments & Refunds</h2>
+        <p>Xác nhận giao dịch thành công / thất bại, theo dõi các yêu cầu hoàn tiền.</p>
+      </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
-      <h3>Payments</h3>
+      <div className="page-head"><h2 style={{ fontSize: 17 }}>Payments</h2></div>
       <div className="table-wrap"><table>
         <thead><tr><th>Mã GD</th><th>Booking</th><th>Số tiền</th><th>TT</th><th>Verify</th></tr></thead>
         <tbody>
+          {rows.length === 0 && <tr><td colSpan={5} className="empty-row">Chưa có payment nào.</td></tr>}
           {rows.map((p) => (
             <tr key={p.id}>
-              <td>{p.transaction_code}</td><td>{p.booking_code}</td><td>{formatVND(p.amount)}</td>
-              <td><span className="badge">{p.status}</span></td>
+              <td><b>{p.transaction_code}</b></td><td>{p.booking_code}</td><td>{formatVND(p.amount)}</td>
+              <td><span className={statusBadge(p.status)}>{p.status}</span></td>
               <td>
-                <button className="btn secondary" onClick={() => verify(p.id, 'SUCCESS')}>SUCCESS</button>{' '}
-                <button className="btn danger" onClick={() => verify(p.id, 'FAILED')}>FAILED</button>
+                <div className="row-actions">
+                  <button className="btn small secondary" onClick={() => verify(p.id, 'SUCCESS')}>SUCCESS</button>
+                  <button className="btn small danger" onClick={() => verify(p.id, 'FAILED')}>FAILED</button>
+                </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table></div>
-      <h3>Refunds</h3>
+      <div className="page-head"><h2 style={{ fontSize: 17 }}>Refunds</h2></div>
       <div className="table-wrap"><table>
         <thead><tr><th>Mã hoàn</th><th>Booking</th><th>Số tiền</th><th>Trạng thái</th></tr></thead>
-        <tbody>{refunds.map((r) => <tr key={r.id}><td>{r.refund_code}</td><td>{r.booking_code}</td><td>{formatVND(r.amount)}</td><td>{r.status}</td></tr>)}</tbody>
+        <tbody>
+          {refunds.length === 0 && <tr><td colSpan={4} className="empty-row">Chưa có refund nào.</td></tr>}
+          {refunds.map((r) => <tr key={r.id}><td><b>{r.refund_code}</b></td><td>{r.booking_code}</td><td>{formatVND(r.amount)}</td><td><span className={statusBadge(r.status)}>{r.status}</span></td></tr>)}
+        </tbody>
       </table></div>
     </div>
   );

@@ -3,6 +3,14 @@ import { Link } from 'react-router-dom';
 import api from '../api/client.js';
 import { ErrorBox, formatVND } from '../components/ui.jsx';
 
+function statusClass(s) {
+  const v = String(s || '').toUpperCase();
+  if (['CONFIRMED', 'COMPLETED', 'PAID', 'SUCCESS'].includes(v)) return 'badge green';
+  if (['PENDING', 'PARTIALLY_PAID', 'PENDING_PAYMENT'].includes(v)) return 'badge amber';
+  if (['CANCELLED', 'FAILED', 'EXPIRED'].includes(v)) return 'badge red';
+  return 'badge';
+}
+
 export default function MyBookings() {
   const [rows, setRows] = useState([]);
   const [error, setError] = useState('');
@@ -16,25 +24,32 @@ export default function MyBookings() {
   }, []);
   return (
     <div className="container">
-      <h2>Booking của tôi</h2>
+      <div className="page-head">
+        <span className="eyebrow">Lịch sử đặt tour</span>
+        <h2>Booking của tôi ({rows.length})</h2>
+        <p>Theo dõi trạng thái booking và thanh toán của bạn.</p>
+      </div>
       <ErrorBox error={error} />
-      <div className="table-wrap"><table>
-        <thead><tr><th>Mã</th><th>Tour</th><th>Khởi hành</th><th>Khách</th><th>Tổng</th><th>Booking</th><th>Thanh toán</th><th></th></tr></thead>
-        <tbody>
-          {rows.map((b) => (
-            <tr key={b.id}>
-              <td>{b.booking_code}</td>
-              <td>{b.tour_name}</td>
-              <td>{b.departure_date ? new Date(b.departure_date).toLocaleDateString('vi-VN') : ''}</td>
-              <td>{b.adult_count}+{b.child_count}+{b.infant_count}</td>
-              <td>{formatVND(b.total_amount)}</td>
-              <td><span className="badge">{b.booking_status}</span></td>
-              <td><span className="badge">{b.payment_status}</span></td>
-              <td><Link to={`/my-bookings/${b.id}`}>Chi tiết</Link></td>
-            </tr>
-          ))}
-        </tbody>
-      </table></div>
+      {rows.length === 0 && !error && <div className="empty-box">Chưa có booking nào. <Link to="/tours">Đặt tour ngay →</Link></div>}
+      {rows.length > 0 && (
+        <div className="table-wrap"><table>
+          <thead><tr><th>Mã</th><th>Tour</th><th>Khởi hành</th><th>Khách</th><th>Tổng</th><th>Booking</th><th>Thanh toán</th><th></th></tr></thead>
+          <tbody>
+            {rows.map((b) => (
+              <tr key={b.id}>
+                <td><b>{b.booking_code}</b></td>
+                <td>{b.tour_name}</td>
+                <td>{b.departure_date ? new Date(b.departure_date).toLocaleDateString('vi-VN') : ''}</td>
+                <td>{b.adult_count}+{b.child_count}+{b.infant_count}</td>
+                <td><span className="price">{formatVND(b.total_amount)}</span></td>
+                <td><span className={statusClass(b.booking_status)}>{b.booking_status}</span></td>
+                <td><span className={statusClass(b.payment_status)}>{b.payment_status}</span></td>
+                <td><Link to={`/my-bookings/${b.id}`}>Chi tiết</Link></td>
+              </tr>
+            ))}
+          </tbody>
+        </table></div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
-import { Link, NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/admin/Dashboard.jsx';
@@ -18,19 +19,68 @@ function RequireAdmin({ children }) {
   return children;
 }
 
+const MENU = [
+  { to: '/', end: true, icon: '▦', label: 'Dashboard' },
+  { to: '/tours', icon: '✈', label: 'Tours' },
+  { to: '/departures', icon: '🛫', label: 'Departures' },
+  { to: '/bookings', icon: '🧾', label: 'Bookings' },
+  { to: '/payments', icon: '💳', label: 'Payments' },
+  { to: '/refunds', icon: '↩', label: 'Refunds' },
+  { to: '/promotions', icon: '🏷', label: 'Promotions' },
+  { to: '/reviews', icon: '★', label: 'Reviews' },
+  { to: '/users', icon: '👥', label: 'Users' },
+];
+
+const TITLES = {
+  '/': ['Tổng quan', 'Dashboard · báo cáo doanh thu, top tour'],
+  '/tours': ['Quản lý Tours', 'Tạo nhanh & đổi trạng thái tour'],
+  '/departures': ['Quản lý Departures', 'Lịch khởi hành theo tour'],
+  '/bookings': ['Quản lý Bookings', 'Tra cứu & cập nhật trạng thái đặt tour'],
+  '/payments': ['Payments & Refunds', 'Xác minh giao dịch thanh toán'],
+  '/refunds': ['Quản lý Hoàn tiền', 'Tạo & duyệt yêu cầu hoàn tiền'],
+  '/promotions': ['Quản lý Promotions', 'Mã giảm giá & bật/tắt chương trình'],
+  '/reviews': ['Quản lý Reviews', 'Ẩn / hiện đánh giá của khách'],
+  '/users': ['Quản lý Users', 'Khóa / mở tài khoản người dùng'],
+};
+
 function AdminLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [open, setOpen] = useState(false);
+  const [title, sub] = TITLES[pathname] || ['TravelViet Admin', 'Trang quản trị'];
+  const initial = (user?.full_name || user?.email || 'A').trim().charAt(0).toUpperCase();
+
   return (
-    <>
-      <header className="site-header">
-        <div className="header-inner">
-          <Link to="/" className="logo">VietTour - Admin</Link>
-          <div className="header-spacer" />
-          <nav className="nav">
-            <span className="muted">{user?.full_name || user?.email || ''}</span>
+    <div className={`tv-shell${open ? ' side-open' : ''}`}>
+      {open && <div className="tv-scrim" onClick={() => setOpen(false)} />}
+      <aside className="tv-side">
+        <div className="tv-brand">
+          <span className="tv-brand-mark">T</span>
+          <div><b>TravelViet Admin</b><small>Quản trị tour</small></div>
+        </div>
+        <div className="tv-menu-label">Menu chính</div>
+        <nav className="tv-menu" onClick={() => setOpen(false)}>
+          {MENU.map((m) => (
+            <NavLink key={m.to} to={m.to} end={m.end}>
+              <span className="tv-mi-ic">{m.icon}</span>{m.label}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="tv-side-foot">
+          <div className="muted">API: http://localhost:5000</div>
+          <div className="muted">Demo: admin@gmail.com / Admin123!</div>
+        </div>
+      </aside>
+      <div className="tv-body">
+        <header className="tv-top">
+          <div className="tv-top-inner">
+            <button className="btn ghost sm tv-burger" onClick={() => setOpen(!open)} aria-label="Menu">☰</button>
+            <div className="tv-page-crumb"><b>{title}</b>{sub}</div>
+            <div className="header-spacer" />
+            <span className="tv-user-chip"><span className="tv-avatar">{initial}</span>{user?.full_name || user?.email || ''}</span>
             <button
-              className="btn secondary"
+              className="btn secondary sm"
               onClick={() => {
                 logout();
                 navigate('/login');
@@ -38,30 +88,17 @@ function AdminLayout({ children }) {
             >
               Đăng xuất
             </button>
-          </nav>
-        </div>
-      </header>
-      <div className="container admin-layout">
-        <aside className="admin-side">
-          <NavLink to="/" end>Dashboard</NavLink>
-          <NavLink to="/tours">Tours</NavLink>
-          <NavLink to="/departures">Departures</NavLink>
-          <NavLink to="/bookings">Bookings</NavLink>
-          <NavLink to="/payments">Payments</NavLink>
-          <NavLink to="/refunds">Refunds</NavLink>
-          <NavLink to="/promotions">Promotions</NavLink>
-          <NavLink to="/reviews">Reviews</NavLink>
-          <NavLink to="/users">Users</NavLink>
-        </aside>
-        <div className="admin-main">{children}</div>
+          </div>
+        </header>
+        <main className="tv-main">{children}</main>
+        <footer className="tv-footer">
+          <div className="tv-footer-inner">
+            <span><b>TravelViet Admin</b> — Dashboard / báo cáo, tours, departures, bookings, payments, refunds, promotions, reviews, users.</span>
+            <span>Demo: admin@gmail.com / Admin123!</span>
+          </div>
+        </footer>
       </div>
-      <footer className="site-footer">
-        <div className="container">
-          <b>VietTour - Admin</b> — Dashboard / báo cáo, tours, departures, bookings, payments, refunds, promotions, reviews, users.
-          <div className="muted" style={{ color: '#a7f3d0' }}>Demo: admin@gmail.com / Admin123! — API: http://localhost:5000</div>
-        </div>
-      </footer>
-    </>
+    </div>
   );
 }
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { ErrorBox, formatVND } from '../components/ui.jsx';
+import { ErrorBox, formatVND, TourCard, tourImg, handleImgError, durationLabel } from '../components/ui.jsx';
 
 export default function TourDetail() {
   const { id } = useParams();
@@ -45,13 +45,26 @@ export default function TourDetail() {
   if (error) return <div className="container"><ErrorBox error={error} /></div>;
   if (!tour) return <div className="container"><p>Đang tải...</p></div>;
 
+  const seed = tour.code || tour.id;
+  const old = tour.adult_price ? Math.round(Number(tour.adult_price) * 1.15) : null;
+
   return (
     <div className="container">
-      <h2>{tour.name}</h2>
-      <div className="muted">Mã: {tour.code} • Danh mục: {tour.category_name || '—'} • ⭐ {tour.avg_rating ? Number(tour.avg_rating).toFixed(1) : '—'}</div>
-      {tour.thumbnail && <img className="detail-img" src={tour.thumbnail} alt={tour.name} style={{ marginTop: 12 }} />}
-      <div className="grid cols-2" style={{ marginTop: 12 }}>
+      <div className="page-head">
+        <span className="eyebrow">{tour.category_name || 'Tour du lịch'}</span>
+        <h2>{tour.name}</h2>
+        <div className="muted">Mã: {tour.code} • ⭐ {tour.avg_rating ? Number(tour.avg_rating).toFixed(1) : '—'} ({(tour.reviews || []).length} đánh giá)</div>
+      </div>
+      <div className="detail-hero">
+        <img src={tourImg(tour, 1200, 520)} alt={tour.name} data-seed={seed} onError={handleImgError} />
+        {durationLabel(tour) && <span className="tour-badge">{durationLabel(tour)}</span>}
+      </div>
+      <div className="grid cols-2" style={{ marginTop: 20 }}>
         <div className="card"><div className="card-body">
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+            <span className="price" style={{ fontSize: 24 }}>{formatVND(tour.adult_price)}</span>
+            {old && <span className="old-price">{formatVND(old)}</span>}
+          </div>
           <div><b>Điểm khởi hành:</b> {tour.departure_location}</div>
           <div><b>Thời lượng:</b> {tour.duration_days} ngày {tour.duration_nights} đêm</div>
           <div><b>Phương tiện:</b> {tour.transport}</div>
@@ -66,7 +79,11 @@ export default function TourDetail() {
           <h3 style={{ margin: '0 0 8px' }}>Lịch khởi hành còn chỗ</h3>
           {(tour.departures || []).length === 0 && <div className="muted">Hiện chưa có lịch mở bán.</div>}
           {(tour.departures || []).map((d) => (
-            <label key={d.id} style={{ display: 'flex', gap: 8, alignItems: 'center', border: '1px solid #e2e8e6', borderRadius: 8, padding: 8 }}>
+            <label
+              key={d.id}
+              className={`dep-option${String(selectedDep) === String(d.id) ? ' selected' : ''}`}
+              style={{ flexDirection: 'row' }}
+            >
               <input type="radio" name="dep" checked={String(selectedDep) === String(d.id)} onChange={() => setSelectedDep(String(d.id))} style={{ width: 'auto' }} />
               <span>{new Date(d.departure_date).toLocaleDateString('vi-VN')} — còn <b>{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</b> chỗ — {formatVND(d.adult_price)} ({d.status})</span>
             </label>
@@ -78,7 +95,7 @@ export default function TourDetail() {
               disabled={!selectedDep}
               onClick={() => navigate(`/booking/${selectedDep}?tourId=${tour.id}`)}
             >
-              Đặt tour
+              Đặt tour ngay
             </button>
           </div>
           {favMsg && <div className="alert info">{favMsg}</div>}
@@ -88,7 +105,7 @@ export default function TourDetail() {
       <div className="itinerary">
         <h3>Lịch trình</h3>
         {(tour.itinerary || []).map((it) => (
-          <div key={it.id} style={{ marginBottom: 8 }}>
+          <div key={it.id} style={{ marginBottom: 12 }}>
             <b>Ngày {it.day_number}: {it.title}</b>
             <div className="muted">{it.description}</div>
             {it.meals && <div className="muted">Ăn uống: {it.meals}</div>}
@@ -99,28 +116,34 @@ export default function TourDetail() {
       </div>
 
       <div className="section">
-        <h3>Đánh giá ({(tour.reviews || []).length})</h3>
+        <div className="section-head left">
+          <span className="eyebrow">Review thật</span>
+          <h2 style={{ fontSize: 22 }}>Đánh giá ({(tour.reviews || []).length})</h2>
+        </div>
         {(tour.reviews || []).map((r) => (
-          <div key={r.id} className="card" style={{ marginBottom: 8 }}><div className="card-body">
-            <b>{r.full_name} — {r.rating}★</b>
-            <div>{r.content}</div>
-          </div></div>
+          <div key={r.id} className="review-card" style={{ marginBottom: 12 }}>
+            <div className="review-who" style={{ marginTop: 0 }}>
+              <span className="user-avatar">{(r.full_name || 'K').charAt(0)}</span>
+              <div><b>{r.full_name} — {r.rating}★</b></div>
+            </div>
+            <p style={{ marginBottom: 0 }}>{r.content}</p>
+          </div>
         ))}
+        {!(tour.reviews || []).length && <div className="muted">Chưa có đánh giá nào.</div>}
       </div>
 
       {related.length > 0 && (
         <div className="section">
-          <h3>Tour liên quan</h3>
+          <div className="section-head left">
+            <span className="eyebrow">Gợi ý thêm</span>
+            <h2 style={{ fontSize: 22 }}>Tour liên quan</h2>
+          </div>
           <div className="grid tours">
-            {related.map((t) => (
-              <div className="card" key={t.id}><div className="card-body">
-                <Link to={`/tours/${t.id}`}>{t.name}</Link>
-                <div className="price">{formatVND(t.adult_price)}</div>
-              </div></div>
-            ))}
+            {related.map((t) => <TourCard key={t.id} t={t} />)}
           </div>
         </div>
       )}
+      <div style={{ display: 'none' }}><Link to="/">home</Link></div>
     </div>
   );
 }
