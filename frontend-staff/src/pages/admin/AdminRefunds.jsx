@@ -66,7 +66,7 @@ export default function AdminRefunds() {
           {rows.length === 0 && <tr><td colSpan={6} className="empty-row">Chưa có yêu cầu hoàn tiền nào.</td></tr>}
           {rows.map((r) => (
             <tr key={r.id}>
-              <td><b>{r.refund_code}</b></td><td>{r.booking_code}</td><td>{formatVND(r.amount)}</td>
+              <td><span className="table-code">{r.refund_code}</span></td><td>{r.booking_code}</td><td><span className="money">{formatVND(r.amount)}</span></td>
               <td>{r.reason}</td><td><span className={statusBadge(r.status)}>{viStatus(r.status)}</span></td>
               <td>
                 <select value={r.status} onChange={(e) => patch(r.id, e.target.value)}>

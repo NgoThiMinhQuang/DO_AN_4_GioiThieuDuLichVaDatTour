@@ -74,7 +74,7 @@ export default function AdminTours() {
                   onError={handleImgError}
                 />
               </td>
-              <td><b>{r.code}</b></td><td>{r.name}</td><td style={{ fontWeight: 700, color: '#1d4ed8' }}>{formatVND(r.adult_price)}</td>
+              <td><b>{r.code}</b></td><td>{r.name}</td><td style={{ fontWeight: 500, color: '#1d4ed8' }}>{formatVND(r.adult_price)}</td>
               <td><StatusBadge value={r.status} /></td>
               <td>
                 <select value={r.status} onChange={(e) => changeStatus(r.id, e.target.value)}>

@@ -33,7 +33,7 @@ export default function DestinationDetail() {
       </div>
       <div className="panel" style={{ marginTop: 16 }}><p style={{ margin: 0, lineHeight: 1.7 }}>{d.description}</p></div>
       <div className="section">
-        <div className="section-head left"><span className="eyebrow">Tham quan</span><h2 style={{ fontSize: 22 }}>Địa điểm nổi bật</h2></div>
+        <div className="section-head left"><span className="eyebrow">Tham quan</span><h2 style={{ fontSize: 20 }}>Địa điểm nổi bật</h2></div>
         <div className="grid cols-3">
           {(d.attractions || []).map((a) => (
             <div className="card" key={a.id}><div className="card-body"><b>{a.name}</b><div className="muted">{a.address}</div><div className="muted">{a.description}</div></div></div>
@@ -42,7 +42,7 @@ export default function DestinationDetail() {
         {!(d.attractions || []).length && <div className="muted">Chưa có địa điểm tham quan.</div>}
       </div>
       <div className="section">
-        <div className="section-head left"><span className="eyebrow">Gợi ý thêm</span><h2 style={{ fontSize: 22 }}>Tour liên quan</h2></div>
+        <div className="section-head left"><span className="eyebrow">Gợi ý thêm</span><h2 style={{ fontSize: 20 }}>Tour liên quan</h2></div>
         <div className="grid tours">
           {(d.tours || []).map((t) => <TourCard key={t.id} t={t} />)}
         </div>

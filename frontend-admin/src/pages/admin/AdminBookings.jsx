@@ -51,7 +51,7 @@ export default function AdminBookings() {
           {rows.length === 0 && <tr><td colSpan={6}><div className="tv-empty">Không có đơn đặt tour nào.</div></td></tr>}
           {rows.map((b) => (
             <tr key={b.id}>
-              <td><b>{b.booking_code}</b></td><td>{b.tour_name}</td><td style={{ fontWeight: 700 }}>{formatVND(b.total_amount)}</td>
+              <td><b>{b.booking_code}</b></td><td>{b.tour_name}</td><td style={{ fontWeight: 500 }}>{formatVND(b.total_amount)}</td>
               <td><StatusBadge value={b.booking_status} /></td>
               <td><StatusBadge value={b.payment_status} /></td>
               <td>

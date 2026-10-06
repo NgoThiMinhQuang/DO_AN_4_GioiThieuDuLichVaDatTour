@@ -45,8 +45,8 @@ export default function AdminDepartures() {
             <tr key={d.id}>
               <td>#{d.id}</td>
               <td>{String(d.departure_date).slice(0, 10)}</td>
-              <td><b>{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</b></td>
-              <td>{formatVND(d.adult_price)}</td>
+              <td><span className="table-code">{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</span></td>
+              <td><span className="money">{formatVND(d.adult_price)}</span></td>
               <td><span className={statusBadge(d.status)}>{viStatus(d.status)}</span></td>
             </tr>
           ))}

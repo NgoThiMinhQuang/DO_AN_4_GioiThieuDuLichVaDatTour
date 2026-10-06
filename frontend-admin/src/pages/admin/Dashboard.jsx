@@ -50,7 +50,7 @@ export default function Dashboard() {
             <thead><tr><th>Tháng</th><th>Doanh thu</th><th>Số giao dịch</th></tr></thead>
             <tbody>
               {revenue.length === 0 && <tr><td colSpan={3}><div className="tv-empty">Chưa có dữ liệu doanh thu.</div></td></tr>}
-              {revenue.map((r, i) => <tr key={i}><td><b>{r.period}</b></td><td style={{ color: '#1d4ed8', fontWeight: 800 }}>{formatVND(r.revenue)}</td><td>{r.transactions}</td></tr>)}
+              {revenue.map((r, i) => <tr key={i}><td><b>{r.period}</b></td><td style={{ color: '#1d4ed8', fontWeight: 600 }}>{formatVND(r.revenue)}</td><td>{r.transactions}</td></tr>)}
             </tbody>
           </table></div>
         </div>
@@ -77,7 +77,7 @@ export default function Dashboard() {
           <thead><tr><th>Tên tour</th><th>Số đơn đặt</th><th>Số khách</th><th>Doanh thu</th><th>Tỉ lệ lấp đầy</th></tr></thead>
           <tbody>
             {topTours.length === 0 && <tr><td colSpan={5}><div className="tv-empty">Chưa có dữ liệu.</div></td></tr>}
-            {topTours.map((t) => <tr key={t.id}><td><b>{t.name}</b></td><td>{t.bookings}</td><td>{t.guests}</td><td style={{ fontWeight: 700 }}>{formatVND(t.revenue)}</td><td>{t.fill_rate}%</td></tr>)}
+            {topTours.map((t) => <tr key={t.id}><td><b>{t.name}</b></td><td>{t.bookings}</td><td>{t.guests}</td><td style={{ fontWeight: 500 }}>{formatVND(t.revenue)}</td><td>{t.fill_rate}%</td></tr>)}
           </tbody>
         </table></div>
       </div>

@@ -142,7 +142,7 @@ export default function TourDetail() {
       <div className="section">
         <div className="section-head left">
           <span className="eyebrow">Đánh giá thật</span>
-          <h2 style={{ fontSize: 22 }}>Đánh giá ({reviewCount})</h2>
+          <h2 style={{ fontSize: 20 }}>Đánh giá ({reviewCount})</h2>
         </div>
         {(tour.reviews || []).map((r) => (
           <div key={r.id} className="review-card" style={{ marginBottom: 12 }}>
@@ -160,7 +160,7 @@ export default function TourDetail() {
         <div className="section">
           <div className="section-head left">
             <span className="eyebrow">Gợi ý thêm</span>
-            <h2 style={{ fontSize: 22 }}>Tour liên quan</h2>
+            <h2 style={{ fontSize: 20 }}>Tour liên quan</h2>
           </div>
           <div className="grid tours">
             {related.map((t) => <TourCard key={t.id} t={t} />)}

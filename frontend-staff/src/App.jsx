@@ -106,7 +106,7 @@ export default function App() {
       </main>
       <footer className="site-footer">
         <div className="container">
-          <b>TravelViet</b> — Kênh nghiệp vụ nhân viên (Đơn đặt tour → Thanh toán → Hoàn tiền, theo dõi lịch khởi hành).
+          <span className="footer-brand">TravelViet</span> — Kênh nghiệp vụ nhân viên (Đơn đặt tour → Thanh toán → Hoàn tiền, theo dõi lịch khởi hành).
           <div className="muted" style={{ color: '#94a3b8' }}>Tài khoản dùng thử: staff@gmail.com / Staff123!</div>
         </div>
       </footer>

@@ -44,7 +44,7 @@ export default function AdminPayments() {
             {rows.length === 0 && <tr><td colSpan={5}><div className="tv-empty">Chưa có giao dịch nào.</div></td></tr>}
             {rows.map((p) => (
               <tr key={p.id}>
-                <td><b>{p.transaction_code}</b></td><td>{p.booking_code}</td><td style={{ fontWeight: 700 }}>{formatVND(p.amount)}</td>
+                <td><b>{p.transaction_code}</b></td><td>{p.booking_code}</td><td style={{ fontWeight: 500 }}>{formatVND(p.amount)}</td>
                 <td><StatusBadge value={p.status} /></td>
                 <td>
                   <div className="tv-actions">
@@ -63,7 +63,7 @@ export default function AdminPayments() {
           <thead><tr><th>Mã hoàn tiền</th><th>Mã đơn</th><th>Số tiền</th><th>Trạng thái</th></tr></thead>
           <tbody>
             {refunds.length === 0 && <tr><td colSpan={4}><div className="tv-empty">Chưa có yêu cầu hoàn tiền nào.</div></td></tr>}
-            {refunds.map((r) => <tr key={r.id}><td><b>{r.refund_code}</b></td><td>{r.booking_code}</td><td style={{ fontWeight: 700 }}>{formatVND(r.amount)}</td><td><StatusBadge value={r.status} /></td></tr>)}
+            {refunds.map((r) => <tr key={r.id}><td><b>{r.refund_code}</b></td><td>{r.booking_code}</td><td style={{ fontWeight: 500 }}>{formatVND(r.amount)}</td><td><StatusBadge value={r.status} /></td></tr>)}
           </tbody>
         </table></div>
       </div>

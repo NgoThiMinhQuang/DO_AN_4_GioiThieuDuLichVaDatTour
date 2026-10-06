@@ -32,7 +32,7 @@ export default function Login() {
       <div className="auth-wrap">
         <div className="auth-card">
           <div style={{ textAlign: 'center', marginBottom: 12 }}>
-            <span style={{ fontSize: 24, fontWeight: 800 }}>Travel<span style={{ color: '#2563eb' }}>Viet</span></span>
+            <span style={{ fontSize: 22, fontWeight: 600 }}>Travel<span style={{ color: '#2563eb' }}>Viet</span></span>
           </div>
           <h2>Chào mừng trở lại</h2>
           <p className="sub">Đăng nhập để đặt tour và theo dõi chuyến đi</p>

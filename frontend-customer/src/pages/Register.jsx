@@ -24,7 +24,7 @@ export default function Register() {
       <div className="auth-wrap">
         <div className="auth-card">
           <div style={{ textAlign: 'center', marginBottom: 12 }}>
-            <span style={{ fontSize: 24, fontWeight: 800 }}>Travel<span style={{ color: '#2563eb' }}>Viet</span></span>
+            <span style={{ fontSize: 22, fontWeight: 600 }}>Travel<span style={{ color: '#2563eb' }}>Viet</span></span>
           </div>
           <h2>Tạo tài khoản</h2>
           <p className="sub">Tham gia cùng 120.000+ khách du lịch mỗi năm</p>

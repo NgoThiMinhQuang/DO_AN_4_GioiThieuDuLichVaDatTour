@@ -37,7 +37,7 @@ export default function AdminReviews() {
           {rows.length === 0 && <tr><td colSpan={7}><div className="tv-empty">Chưa có đánh giá nào.</div></td></tr>}
           {rows.map((r) => (
             <tr key={r.id}>
-              <td className="muted">#{r.id}</td><td><b>{r.tour_name}</b></td><td>{r.full_name}</td><td style={{ color: '#d97706', fontWeight: 800 }}>★ {r.rating}</td>
+              <td className="muted">#{r.id}</td><td><b>{r.tour_name}</b></td><td>{r.full_name}</td><td style={{ color: '#d97706', fontWeight: 600 }}>★ {r.rating}</td>
               <td>{(r.content || '').slice(0, 80)}</td>
               <td><StatusBadge value={r.status} /></td>
               <td>

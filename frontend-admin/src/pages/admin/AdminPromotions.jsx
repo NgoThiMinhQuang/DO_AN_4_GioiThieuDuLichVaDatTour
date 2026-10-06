@@ -65,7 +65,7 @@ export default function AdminPromotions() {
           {rows.length === 0 && <tr><td colSpan={7}><div className="tv-empty">Chưa có khuyến mãi nào.</div></td></tr>}
           {rows.map((p) => (
             <tr key={p.id}>
-              <td><b style={{ color: '#1d4ed8' }}>{p.code}</b></td><td>{p.name}</td><td>{viStatus(p.discount_type)}</td><td style={{ fontWeight: 700 }}>{discountText(p)}</td>
+              <td><b style={{ color: '#1d4ed8' }}>{p.code}</b></td><td>{p.name}</td><td>{viStatus(p.discount_type)}</td><td style={{ fontWeight: 500 }}>{discountText(p)}</td>
               <td>{p.used_count}/{p.usage_limit ?? '∞'}</td>
               <td><StatusBadge value={p.status} /></td>
               <td>

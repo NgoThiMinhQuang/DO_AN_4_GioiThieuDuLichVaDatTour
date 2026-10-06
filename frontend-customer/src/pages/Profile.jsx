@@ -56,7 +56,7 @@ export default function Profile() {
         <span className="user-avatar" style={{ width: 72, height: 72, fontSize: 28, margin: '0 auto' }}>
           {form.avatar ? <img src={form.avatar} alt="avatar" /> : initial}
         </span>
-        <div style={{ marginTop: 10, fontWeight: 800, fontSize: 18, color: '#0f172a' }}>{form.full_name || user?.email || ''}</div>
+        <div style={{ marginTop: 10, fontWeight: 600, fontSize: 17, color: '#0f172a' }}>{form.full_name || user?.email || ''}</div>
         <div className="muted">{user?.email || ''}</div>
       </div>
       <ErrorBox error={error} />

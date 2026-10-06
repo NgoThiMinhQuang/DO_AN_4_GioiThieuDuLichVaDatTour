@@ -52,7 +52,7 @@ export default function AdminBookings() {
           {rows.length === 0 && <tr><td colSpan={6} className="empty-row">Chưa có đơn đặt tour nào.</td></tr>}
           {rows.map((b) => (
             <tr key={b.id}>
-              <td><b>{b.booking_code}</b></td><td>{b.tour_name}</td><td>{formatVND(b.total_amount)}</td>
+              <td><span className="table-code">{b.booking_code}</span></td><td>{b.tour_name}</td><td><span className="money">{formatVND(b.total_amount)}</span></td>
               <td><span className={statusBadge(b.booking_status)}>{viStatus(b.booking_status)}</span></td>
               <td><span className={statusBadge(b.payment_status)}>{viStatus(b.payment_status)}</span></td>
               <td>

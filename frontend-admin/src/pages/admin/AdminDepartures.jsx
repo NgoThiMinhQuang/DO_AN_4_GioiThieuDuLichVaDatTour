@@ -75,7 +75,7 @@ export default function AdminDepartures() {
               <td className="muted">#{d.id}</td>
               <td><b>{String(d.departure_date).slice(0, 10)}</b></td>
               <td>{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</td>
-              <td style={{ fontWeight: 700 }}>{formatVND(d.adult_price)}</td>
+              <td style={{ fontWeight: 500 }}>{formatVND(d.adult_price)}</td>
               <td><StatusBadge value={d.status} /></td>
               {!readOnly && (
               <td>
