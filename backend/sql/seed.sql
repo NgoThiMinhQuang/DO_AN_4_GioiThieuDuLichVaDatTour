@@ -7,8 +7,11 @@ INSERT IGNORE INTO roles (id, name, description) VALUES
   (3, 'ADMIN', 'Quan tri vien');
 
 -- admin@gmail.com / Admin123! (bcrypt cua "Admin123!")
+-- staff@gmail.com / Staff123! (STAFF van hanh) | customer@gmail.com / Customer123! (khach demo)
 INSERT IGNORE INTO users (id, full_name, email, phone, password_hash, role_id, status) VALUES
-  (1, 'Administrator', 'admin@gmail.com', '0900000001', '$2a$10$O7Vknnrb0UHCpXcJCMVt1.X.LoCx7GYPMttIlcvAHlGAlp.HDgfVK', 3, 'ACTIVE');
+  (1, 'Administrator', 'admin@gmail.com', '0900000001', '$2a$10$O7Vknnrb0UHCpXcJCMVt1.X.LoCx7GYPMttIlcvAHlGAlp.HDgfVK', 3, 'ACTIVE'),
+  (2, 'Nhan Vien Van Hanh', 'staff@gmail.com', '0900000002', '$2a$10$iYg/r.NktBka5pvwpiM5u.80qzUxWgJGGfipCRvLOdgCdAsjDpHHy', 2, 'ACTIVE'),
+  (3, 'Khach Hang Demo', 'customer@gmail.com', '0900000003', '$2a$10$.NtuE1Lrt9sBKJwM7z7VcOMcyHcnJiIYUySHYHSvCmZrGuaj72JXO', 1, 'ACTIVE');
 
 INSERT IGNORE INTO destinations (id, name, province, region, description, climate, best_time_to_visit, status) VALUES
   (1, 'Da Nang', 'Da Nang', 'Mien Trung', 'Thanh pho bien nang dong voi Ba Na Hills, bien My Khe, cau Rong.', 'Nhiet doi gio mua', 'Thang 3 - thang 9', 'VISIBLE'),

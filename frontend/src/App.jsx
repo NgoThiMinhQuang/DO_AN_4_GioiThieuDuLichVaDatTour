@@ -20,6 +20,7 @@ import AdminTours from './pages/admin/AdminTours.jsx';
 import AdminDepartures from './pages/admin/AdminDepartures.jsx';
 import AdminBookings from './pages/admin/AdminBookings.jsx';
 import AdminPayments from './pages/admin/AdminPayments.jsx';
+import AdminRefunds from './pages/admin/AdminRefunds.jsx';
 import AdminPromotions from './pages/admin/AdminPromotions.jsx';
 import AdminReviews from './pages/admin/AdminReviews.jsx';
 import AdminUsers from './pages/admin/AdminUsers.jsx';
@@ -77,17 +78,20 @@ function Header() {
 }
 
 function AdminLayout({ children }) {
+  const { role } = useAuth();
+  const isAdmin = role === 'ADMIN';
   return (
     <div className="container admin-layout">
       <aside className="admin-side">
-        <NavLink to="/admin" end>Dashboard</NavLink>
-        <NavLink to="/admin/tours">Tours</NavLink>
+        {isAdmin && <NavLink to="/admin" end>Dashboard</NavLink>}
+        {isAdmin && <NavLink to="/admin/tours">Tours</NavLink>}
         <NavLink to="/admin/departures">Departures</NavLink>
         <NavLink to="/admin/bookings">Bookings</NavLink>
         <NavLink to="/admin/payments">Payments</NavLink>
-        <NavLink to="/admin/promotions">Promotions</NavLink>
-        <NavLink to="/admin/reviews">Reviews</NavLink>
-        <NavLink to="/admin/users">Users</NavLink>
+        <NavLink to="/admin/refunds">Refunds</NavLink>
+        {isAdmin && <NavLink to="/admin/promotions">Promotions</NavLink>}
+        {isAdmin && <NavLink to="/admin/reviews">Reviews</NavLink>}
+        {isAdmin && <NavLink to="/admin/users">Users</NavLink>}
       </aside>
       <div className="admin-main">{children}</div>
     </div>
@@ -117,14 +121,15 @@ export default function App() {
           <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
           <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
 
-          <Route path="/admin" element={<RequireRole roles={['ADMIN', 'STAFF']}><AdminLayout><Dashboard /></AdminLayout></RequireRole>} />
-          <Route path="/admin/tours" element={<RequireRole roles={['ADMIN', 'STAFF']}><AdminLayout><AdminTours /></AdminLayout></RequireRole>} />
+          <Route path="/admin" element={<RequireRole roles={['ADMIN']}><AdminLayout><Dashboard /></AdminLayout></RequireRole>} />
+          <Route path="/admin/tours" element={<RequireRole roles={['ADMIN']}><AdminLayout><AdminTours /></AdminLayout></RequireRole>} />
           <Route path="/admin/departures" element={<RequireRole roles={['ADMIN', 'STAFF']}><AdminLayout><AdminDepartures /></AdminLayout></RequireRole>} />
           <Route path="/admin/bookings" element={<RequireRole roles={['ADMIN', 'STAFF']}><AdminLayout><AdminBookings /></AdminLayout></RequireRole>} />
           <Route path="/admin/payments" element={<RequireRole roles={['ADMIN', 'STAFF']}><AdminLayout><AdminPayments /></AdminLayout></RequireRole>} />
-          <Route path="/admin/promotions" element={<RequireRole roles={['ADMIN', 'STAFF']}><AdminLayout><AdminPromotions /></AdminLayout></RequireRole>} />
-          <Route path="/admin/reviews" element={<RequireRole roles={['ADMIN', 'STAFF']}><AdminLayout><AdminReviews /></AdminLayout></RequireRole>} />
-          <Route path="/admin/users" element={<RequireRole roles={['ADMIN', 'STAFF']}><AdminLayout><AdminUsers /></AdminLayout></RequireRole>} />
+          <Route path="/admin/refunds" element={<RequireRole roles={['ADMIN', 'STAFF']}><AdminLayout><AdminRefunds /></AdminLayout></RequireRole>} />
+          <Route path="/admin/promotions" element={<RequireRole roles={['ADMIN']}><AdminLayout><AdminPromotions /></AdminLayout></RequireRole>} />
+          <Route path="/admin/reviews" element={<RequireRole roles={['ADMIN']}><AdminLayout><AdminReviews /></AdminLayout></RequireRole>} />
+          <Route path="/admin/users" element={<RequireRole roles={['ADMIN']}><AdminLayout><AdminUsers /></AdminLayout></RequireRole>} />
 
           <Route path="*" element={<div className="container"><h2>404 - Không tìm thấy trang</h2><Link to="/">Về trang chủ</Link></div>} />
         </Routes>

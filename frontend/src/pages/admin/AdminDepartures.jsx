@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import api from '../../api/client.js';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { formatVND } from '../../components/ui.jsx';
 
 const STATUSES = ['OPEN', 'ALMOST_FULL', 'FULL', 'CLOSED', 'ONGOING', 'DONE', 'CANCELLED'];
 
 export default function AdminDepartures() {
+  const { role } = useAuth();
+  const readOnly = role === 'STAFF'; // STAFF chi theo doi lich khoi hanh (muc 2.3), khong tao/sua
   const [tourId, setTourId] = useState('');
   const [deps, setDeps] = useState([]);
   const [error, setError] = useState('');
@@ -47,20 +50,22 @@ export default function AdminDepartures() {
       <h2>Quản lý Departures</h2>
       {error && <div className="alert error">{error}</div>}
       {msg && <div className="alert info">{msg}</div>}
-      <div className="alert info">Nhập Tour ID (để trống = xem tất cả), đổi trạng thái qua PUT /admin/departures/:id.</div>
+      <div className="alert info">Nhập Tour ID (để trống = xem tất cả){readOnly ? ' — tài khoản STAFF chỉ xem theo dõi.' : ', đổi trạng thái qua PUT /admin/departures/:id.'}</div>
       <div className="filters">
         <div className="form-row">
           <input placeholder="Tour ID (VD: 1)" value={tourId} onChange={(e) => setTourId(e.target.value)} />
           <button className="btn" onClick={loadByTour}>Tải departures</button>
         </div>
+        {!readOnly && (
         <div className="form-row">
           <input type="date" value={createForm.departure_date} onChange={(e) => setCreateForm({ ...createForm, departure_date: e.target.value })} />
           <input type="number" value={createForm.capacity} onChange={(e) => setCreateForm({ ...createForm, capacity: Number(e.target.value) })} />
           <button className="btn secondary" onClick={create}>Tạo departure (POST /admin/tours/:id/departures)</button>
         </div>
+        )}
       </div>
       <div className="table-wrap"><table>
-        <thead><tr><th>ID</th><th>Ngày đi</th><th>Còn lại</th><th>Giá NL</th><th>Trạng thái</th><th>Đổi TT</th></tr></thead>
+        <thead><tr><th>ID</th><th>Ngày đi</th><th>Còn lại</th><th>Giá NL</th><th>Trạng thái</th>{!readOnly && <th>Đổi TT</th>}</tr></thead>
         <tbody>
           {deps.map((d) => (
             <tr key={d.id}>
@@ -69,11 +74,13 @@ export default function AdminDepartures() {
               <td>{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</td>
               <td>{formatVND(d.adult_price)}</td>
               <td><span className="badge">{d.status}</span></td>
+              {!readOnly && (
               <td>
                 <select value={d.status} onChange={(e) => updateStatus(d.id, e.target.value)}>
                   {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </td>
+              )}
             </tr>
           ))}
         </tbody>

@@ -5,15 +5,27 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
-// STAFF duoc doc booking; moi thu khac can ADMIN
+// RBAC theo README muc 48 + BR43-BR45 (kiem tra tai backend, khong chi an nut o frontend).
+// ADMIN: toan quyen. STAFF: van hanh booking/thanh toan/huy-hoan + theo doi lich khoi hanh.
+// CUSTOMER: khong duoc vao /api/admin.
+const STAFF_RULES = [
+  { method: 'GET', prefix: '/bookings' }, // xem + tim kiem booking (muc 49-50)
+  { method: 'PATCH', prefix: '/bookings/' }, // xac nhan / cap nhat trang thai + ghi chu (muc 51)
+  { method: 'GET', prefix: '/payments' }, // xem giao dich
+  { method: 'PATCH', prefix: '/payments/' }, // xac nhan / ghi nhan thanh toan
+  { method: 'GET', prefix: '/refunds' }, // xem hoan tien
+  { method: 'POST', prefix: '/refunds' }, // tao yeu cau hoan (muc 37)
+  { method: 'PATCH', prefix: '/refunds/' }, // duyet hoan tien
+  { method: 'GET', prefix: '/departures' }, // theo doi lich khoi hanh (chi doc)
+];
 router.use(requireAuth);
 router.use((req, res, next) => {
-  if (req.method === 'GET' && req.path.startsWith('/bookings')) {
-    if (!['STAFF', 'ADMIN'].includes(req.user.role)) return res.status(403).json({ message: 'Khong co quyen' });
-    return next();
+  if (req.user.role === 'ADMIN') return next();
+  if (req.user.role === 'STAFF') {
+    const ok = STAFF_RULES.some((r) => req.method === r.method && req.path.startsWith(r.prefix));
+    if (ok) return next();
   }
-  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Can quyen ADMIN' });
-  return next();
+  return res.status(403).json({ message: 'Khong co quyen (RBAC: CUSTOMER khong vao admin; STAFF chi van hanh booking/thanh toan/hoan tien)' });
 });
 
 async function audit(userId, action, entityType, entityId, oldV, newV) {
