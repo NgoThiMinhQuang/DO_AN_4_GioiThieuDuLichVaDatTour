@@ -61,12 +61,12 @@ function Header() {
   return (
     <header className="site-header">
       <div className="header-inner">
-        <Link to="/" className="logo brand">
-          <span className="brand-travel">Travel</span><span className="brand-viet">Viet</span>
+        <Link to="/" className="logo brand logo-img" aria-label="TravelViet - Trang chủ">
+          <img src="/images/logo.png" alt="TravelViet" style={{ height: 48 }} />
         </Link>
         <nav className="nav">
           <NavLink to="/" end>Trang chủ</NavLink>
-          <NavLink to="/tours">Tours</NavLink>
+          <NavLink to="/tours">Tour</NavLink>
           <NavLink to="/destinations">Điểm đến</NavLink>
           <NavLink to="/articles">Bài viết</NavLink>
         </nav>
@@ -93,7 +93,7 @@ function Header() {
                 <div className="user-dropdown">
                   <div className="dd-head"><b>{displayName}</b><span>{user.email || user.phone || ''}</span></div>
                   <Link to="/profile" onClick={() => setOpen(false)}>👤 Hồ sơ cá nhân</Link>
-                  <Link to="/my-bookings" onClick={() => setOpen(false)}>🧾 Booking của tôi</Link>
+                  <Link to="/my-bookings" onClick={() => setOpen(false)}>🧾 Đặt tour của tôi</Link>
                   <Link to="/favorites" onClick={() => setOpen(false)}>♡ Tour yêu thích</Link>
                   <Link to="/notifications" onClick={() => setOpen(false)}>🔔 Thông báo</Link>
                   <button
@@ -136,14 +136,14 @@ function Footer() {
             </div>
             <div className="footer-col">
               <h4>Khám phá</h4>
-              <Link to="/tours">Tất cả tours</Link>
+              <Link to="/tours">Tất cả tour</Link>
               <Link to="/destinations">Điểm đến</Link>
               <Link to="/articles">Bài viết du lịch</Link>
               <Link to="/favorites">Tour yêu thích</Link>
             </div>
             <div className="footer-col">
               <h4>Dịch vụ</h4>
-              <Link to="/my-bookings">Booking của tôi</Link>
+              <Link to="/my-bookings">Đặt tour của tôi</Link>
               <Link to="/profile">Hồ sơ cá nhân</Link>
               <Link to="/notifications">Thông báo</Link>
               <Link to="/register">Đăng ký thành viên</Link>

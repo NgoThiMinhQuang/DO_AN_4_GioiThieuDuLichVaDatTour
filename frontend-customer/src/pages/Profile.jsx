@@ -80,7 +80,7 @@ export default function Profile() {
             </label>
             <label>Địa chỉ<input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></label>
           </div>
-          <label>Avatar URL<input value={form.avatar} onChange={(e) => setForm({ ...form, avatar: e.target.value })} placeholder="https://..." /></label>
+          <label>Ảnh đại diện (đường dẫn ảnh)<input value={form.avatar} onChange={(e) => setForm({ ...form, avatar: e.target.value })} placeholder="https://..." /></label>
           <button className="btn" type="submit">Lưu thay đổi</button>
         </form>
       </div>

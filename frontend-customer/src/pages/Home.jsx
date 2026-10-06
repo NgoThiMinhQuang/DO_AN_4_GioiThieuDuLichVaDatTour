@@ -1,40 +1,46 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
-import { TourCard, ErrorBox, handleImgError, tourImg } from '../components/ui.jsx';
+import { TourCard, ErrorBox, handleImgError, resolveArticleImg, fallbackDestImg } from '../components/ui.jsx';
 
 const WHY_US = [
   { icon: '🛡️', title: 'Thanh toán an toàn', desc: 'Đa dạng VNPay, MoMo, chuyển khoản với xác nhận minh bạch.' },
-  { icon: '🏷️', title: 'Giá tốt mỗi ngày', desc: 'Voucher, khuyến mãi theo tour giúp bạn tiết kiệm tối đa.' },
-  { icon: '🗺️', title: 'Lịch trình chuẩn', desc: 'Tour thiết kế bởi chuyên gia địa phương, review thật.' },
+  { icon: '🏷️', title: 'Giá tốt mỗi ngày', desc: 'Mã giảm giá, khuyến mãi theo tour giúp bạn tiết kiệm tối đa.' },
+  { icon: '🗺️', title: 'Lịch trình chuẩn', desc: 'Tour thiết kế bởi chuyên gia địa phương, đánh giá thật.' },
   { icon: '🎧', title: 'Hỗ trợ 24/7', desc: 'Hotline 1900 6868 đồng hành trước, trong và sau chuyến đi.' },
 ];
 
 const REVIEWS = [
   { name: 'Minh Anh', tour: 'Đà Nẵng – Hội An 4N3Đ', text: 'Đặt tour 5 phút là xong, lịch trình rõ ràng, hướng dẫn viên nhiệt tình. Rất đáng tiền!', stars: 5 },
   { name: 'Quốc Bảo', tour: 'Phú Quốc 3N2Đ', text: 'Thanh toán VNPay mượt, nhận vé ngay. Khách sạn và bữa ăn đúng như mô tả.', stars: 5 },
-  { name: 'Thu Hằng', tour: 'Sapa – Fansipan 3N2Đ', text: 'Lần đầu đi tour mà không lo gì, bên hỗ trợ đổi lịch rất nhanh qua hotline.', stars: 4 },
+  { name: 'Thu Hằng', tour: 'Sa Pa – Fansipan 3N2Đ', text: 'Lần đầu đi tour mà không lo gì, bên hỗ trợ đổi lịch rất nhanh qua hotline.', stars: 4 },
 ];
 
 export default function Home() {
   const [tours, setTours] = useState([]);
   const [destinations, setDestinations] = useState([]);
   const [articles, setArticles] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [error, setError] = useState('');
-  const [q, setQ] = useState('');
+  const [fName, setFName] = useState('');
+  const [fDest, setFDest] = useState('');
+  const [fCat, setFCat] = useState('');
+  const [fDate, setFDate] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
       try {
-        const [t, d, a] = await Promise.all([
+        const [t, d, a, c] = await Promise.all([
           api.get('/tours', { params: { sort: 'newest', limit: 8 } }),
           api.get('/meta/destinations'),
-          api.get('/meta/articles')
+          api.get('/meta/articles'),
+          api.get('/meta/tour-categories').catch(() => ({ data: { data: [] } }))
         ]);
         setTours(t.data.data || []);
         setDestinations((d.data.data || []).slice(0, 6));
         setArticles((a.data.data || []).slice(0, 3));
+        setCategories(c.data.data || []);
       } catch (e) {
         setError(e.response?.data?.message || e.message);
       }
@@ -43,27 +49,54 @@ export default function Home() {
 
   function search(e) {
     e.preventDefault();
-    navigate(q ? `/tours?q=${encodeURIComponent(q)}` : '/tours');
+    const p = new URLSearchParams();
+    if (fName.trim()) p.set('q', fName.trim());
+    if (fDest) p.set('destination', fDest);
+    if (fCat) p.set('category', fCat);
+    if (fDate) p.set('departDate', fDate);
+    const qs = p.toString();
+    navigate(qs ? `/tours?${qs}` : '/tours');
   }
 
   return (
     <div className="container">
-      <div className="hero">
-        <h1>Khám phá Việt Nam — Đặt tour dễ dàng</h1>
-        <p>Hàng trăm tour khởi hành mỗi tuần, giá minh bạch, áp voucher tự động và thanh toán an toàn.</p>
-        <form className="hero-search" onSubmit={search}>
-          <input placeholder="Tìm tour: Đà Nẵng, Phú Quốc, Sapa..." value={q} onChange={(e) => setQ(e.target.value)} />
-          <button className="btn" type="submit">Tìm kiếm</button>
-        </form>
-        <div className="tv-hero-strip">
-          <span className="tv-hero-chip">✓ Giữ chỗ tức thì</span>
-          <span className="tv-hero-chip">✓ Voucher mỗi ngày</span>
-          <span className="tv-hero-chip">✓ Hỗ trợ 24/7</span>
-        </div>
-        <div className="hero-stats">
-          <div><b>500+</b><span>Tour đang mở bán</span></div>
-          <div><b>120K+</b><span>Lượt khách mỗi năm</span></div>
-          <div><b>4.8/5</b><span>Đánh giá trung bình</span></div>
+      <div className="hero hero-image">
+        <div className="hero-overlay" />
+        <div className="hero-content">
+          <span className="hero-badge">Khám phá Việt Nam</span>
+          <h1>Khởi đầu hành trình đáng nhớ của bạn</h1>
+          <p>Hàng trăm tour khởi hành mỗi tuần, giá minh bạch, áp mã giảm giá tự động và thanh toán an toàn.</p>
+          <form className="hero-search-grid" onSubmit={search}>
+            <label>Tên tour
+              <input placeholder="Tên tour: Đà Nẵng, Phú Quốc..." value={fName} onChange={(e) => setFName(e.target.value)} />
+            </label>
+            <label>Điểm đến
+              <select value={fDest} onChange={(e) => setFDest(e.target.value)}>
+                <option value="">Tất cả điểm đến</option>
+                {destinations.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            </label>
+            <label>Loại tour
+              <select value={fCat} onChange={(e) => setFCat(e.target.value)}>
+                <option value="">Tất cả loại tour</option>
+                {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </label>
+            <label>Ngày khởi hành
+              <input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} />
+            </label>
+            <button className="btn" type="submit">Tìm kiếm</button>
+          </form>
+          <div className="tv-hero-strip">
+            <span className="tv-hero-chip">✓ Giữ chỗ tức thì</span>
+            <span className="tv-hero-chip">✓ Mã giảm giá mỗi ngày</span>
+            <span className="tv-hero-chip">✓ Hỗ trợ 24/7</span>
+          </div>
+          <div className="hero-stats">
+            <div><b>500+</b><span>Tour đang mở bán</span></div>
+            <div><b>120K+</b><span>Lượt khách mỗi năm</span></div>
+            <div><b>4.8/5</b><span>Đánh giá trung bình</span></div>
+          </div>
         </div>
       </div>
 
@@ -76,10 +109,10 @@ export default function Home() {
           <p>Những hành trình được yêu thích nhất tuần này</p>
         </div>
         <div className="grid tours">
-          {tours.map((t) => <TourCard key={t.id} t={t} />)}
+          {tours.map((t, i) => <TourCard key={t.id} t={t} hot={i < 2} />)}
         </div>
         <div style={{ textAlign: 'center', marginTop: 22 }}>
-          <Link className="btn secondary" to="/tours">Xem tất cả tours</Link>
+          <Link className="btn secondary" to="/tours">Xem tất cả tour</Link>
         </div>
       </section>
 
@@ -89,25 +122,19 @@ export default function Home() {
           <h2>Điểm đến được yêu thích</h2>
           <p>Từ biển đảo đến núi rừng — chọn điểm đến cho chuyến đi của bạn</p>
         </div>
-        <div className="grid cols-3">
+        <div className="bento-grid">
           {destinations.map((d, i) => (
-            <div className="card" key={d.id}>
-              <div className="dest-media">
-                <Link to={`/destinations/${d.id}`}>
-                  <img
-                    src={d.thumbnail || `https://picsum.photos/seed/dest-${d.id || i}/640/400`}
-                    alt={d.name} loading="lazy" data-seed={`dest-${d.id || i}`} onError={handleImgError}
-                  />
-                </Link>
+            <div className="card bento-item" key={d.id}>
+              <Link to={`/destinations/${d.id}`} className="bento-link">
+                <img
+                  src={d.thumbnail || fallbackDestImg(d.id, i)}
+                  alt={d.name} loading="lazy" data-fallback={fallbackDestImg(d.id, i)} onError={handleImgError}
+                />
                 <div className="dest-overlay">
                   <b>{d.name}</b><br />
                   <span>{d.province || d.region || 'Việt Nam'}</span>
                 </div>
-              </div>
-              <div className="card-body">
-                <div className="card-title"><Link to={`/destinations/${d.id}`}>{d.name}</Link></div>
-                <div className="muted">{(d.description || '').slice(0, 90)}{(d.description || '').length > 90 ? '...' : ''}</div>
-              </div>
+              </Link>
             </div>
           ))}
         </div>
@@ -135,7 +162,7 @@ export default function Home() {
 
       <section className="section">
         <div className="section-head">
-          <span className="eyebrow">Review thật</span>
+          <span className="eyebrow">Đánh giá thật</span>
           <h2>Khách hàng nói gì?</h2>
           <p>Hơn 120.000 lượt khách đã đồng hành cùng TravelViet</p>
         </div>
@@ -158,15 +185,15 @@ export default function Home() {
           <div className="section-head">
             <span className="eyebrow">Cẩm nang du lịch</span>
             <h2>Bài viết mới</h2>
-            <p>Kinh nghiệm, gợi ý lịch trình và mẹo săn voucher</p>
+            <p>Kinh nghiệm, gợi ý lịch trình và mẹo săn mã giảm giá</p>
           </div>
           <div className="grid cols-3">
-            {articles.map((a, i) => (
+            {articles.map((a) => (
               <div className="card" key={a.id}>
                 <Link to={`/articles/${a.id}`}>
                   <img
-                    src={a.thumbnail || `https://picsum.photos/seed/art-${a.id || i}/640/400`}
-                    alt={a.title} loading="lazy" data-seed={`art-${a.id || i}`} onError={handleImgError}
+                    src={resolveArticleImg(a)}
+                    alt={a.title} loading="lazy" data-fallback="/images/banner.jpg" onError={handleImgError}
                   />
                 </Link>
                 <div className="card-body">
@@ -189,7 +216,6 @@ export default function Home() {
         </div>
         <Link className="btn btn-lg" to="/tours">Tìm tour ngay →</Link>
       </div>
-      <div style={{ display: 'none' }}>{tourImg({})}</div>
     </div>
   );
 }

@@ -27,7 +27,7 @@ export default function Register() {
             <span style={{ fontSize: 24, fontWeight: 800 }}>Travel<span style={{ color: '#2563eb' }}>Viet</span></span>
           </div>
           <h2>Tạo tài khoản</h2>
-          <p className="sub">Tham gia cùng 120K+ traveler mỗi năm</p>
+          <p className="sub">Tham gia cùng 120.000+ khách du lịch mỗi năm</p>
           {error && <div className="alert error">{error}</div>}
           <form className="form" onSubmit={submit}>
             <label>Họ tên<input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required placeholder="Nguyễn Văn A" /></label>

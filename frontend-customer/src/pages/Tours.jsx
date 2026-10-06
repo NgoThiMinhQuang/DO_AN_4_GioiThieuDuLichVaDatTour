@@ -1,25 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { TourCard, ErrorBox } from '../components/ui.jsx';
+import { TourCard, ErrorBox, formatDateVi } from '../components/ui.jsx';
 
 export default function Tours() {
   const [params] = useSearchParams();
-  const initialQ = params.get('q') || '';
   const [tours, setTours] = useState([]);
   const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState([]);
   const [destinations, setDestinations] = useState([]);
   const [error, setError] = useState('');
   const [f, setF] = useState({
-    q: initialQ, category: '', destination: '', minPrice: '', maxPrice: '',
-    days: '', departDate: '', sort: 'newest'
+    q: params.get('q') || '',
+    category: params.get('category') || '',
+    destination: params.get('destination') || '',
+    minPrice: '', maxPrice: '',
+    days: '', departDate: params.get('departDate') || '', sort: 'newest'
   });
-
-  useEffect(() => {
-    setF((prev) => ({ ...prev, q: params.get('q') || '' }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
 
   useEffect(() => {
     (async () => {
@@ -34,21 +31,22 @@ export default function Tours() {
     })();
   }, []);
 
-  async function load() {
+  async function fetchTours(over = {}) {
     setError('');
     try {
+      const cur = { ...f, ...over };
       const p = {
-        q: f.q || undefined,
-        category: f.category || undefined,
-        destination: f.destination || undefined,
-        minPrice: f.minPrice || undefined,
-        maxPrice: f.maxPrice || undefined,
-        sort: f.sort || undefined,
+        q: cur.q || undefined,
+        category: cur.category || undefined,
+        destination: cur.destination || undefined,
+        minPrice: cur.minPrice || undefined,
+        maxPrice: cur.maxPrice || undefined,
+        sort: cur.sort || undefined,
         limit: 24
       };
       const res = await api.get('/tours', { params: p });
       let rows = res.data.data || [];
-      if (f.days) rows = rows.filter((t) => Number(t.duration_days) === Number(f.days));
+      if (cur.days) rows = rows.filter((t) => Number(t.duration_days) === Number(cur.days));
       setTours(rows);
       setTotal(res.data.total ?? rows.length);
     } catch (e) {
@@ -56,8 +54,18 @@ export default function Tours() {
     }
   }
 
-  useEffect(() => { load(); // eslint-disable-next-line
-  }, []);
+  // Đồng bộ bộ lọc với params từ thanh tìm kiếm trang chủ (?q=&destination=&category=&departDate=)
+  useEffect(() => {
+    const next = {
+      q: params.get('q') || '',
+      category: params.get('category') || '',
+      destination: params.get('destination') || '',
+      departDate: params.get('departDate') || ''
+    };
+    setF((prev) => ({ ...prev, ...next }));
+    fetchTours(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
 
   return (
     <div className="container">
@@ -70,7 +78,7 @@ export default function Tours() {
         <div className="form-row">
           <input placeholder="Tìm kiếm tên / mã / điểm khởi hành..." value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
           <select value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
-            <option value="">Tất cả danh mục</option>
+            <option value="">Tất cả loại tour</option>
             {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
           <select value={f.destination} onChange={(e) => setF({ ...f, destination: e.target.value })}>
@@ -81,15 +89,20 @@ export default function Tours() {
         <div className="form-row">
           <input type="number" placeholder="Giá tối thiểu" value={f.minPrice} onChange={(e) => setF({ ...f, minPrice: e.target.value })} />
           <input type="number" placeholder="Giá tối đa" value={f.maxPrice} onChange={(e) => setF({ ...f, maxPrice: e.target.value })} />
-          <input type="number" placeholder="Số ngày (lọc local)" value={f.days} onChange={(e) => setF({ ...f, days: e.target.value })} />
-          <input type="date" value={f.departDate} onChange={(e) => setF({ ...f, departDate: e.target.value })} title="Ngày khởi hành (xem ở chi tiết tour)" />
+          <input type="number" placeholder="Số ngày đi tour" value={f.days} onChange={(e) => setF({ ...f, days: e.target.value })} />
+          <input type="date" value={f.departDate} onChange={(e) => setF({ ...f, departDate: e.target.value })} title="Ngày khởi hành (xem ngày cụ thể ở trang chi tiết tour)" />
           <select value={f.sort} onChange={(e) => setF({ ...f, sort: e.target.value })}>
             <option value="newest">Mới nhất</option>
             <option value="price_asc">Giá tăng dần</option>
             <option value="price_desc">Giá giảm dần</option>
           </select>
         </div>
-        <div><button className="btn" onClick={load}>Tìm kiếm / Lọc</button></div>
+        {f.departDate && (
+          <div className="alert info" style={{ margin: 0 }}>
+            Bạn đang ưu tiên lịch khởi hành gần ngày {formatDateVi(f.departDate)} — ngày cụ thể của từng tour xem ở trang chi tiết.
+          </div>
+        )}
+        <div><button className="btn" onClick={() => fetchTours()}>Tìm kiếm / Lọc</button></div>
       </div>
       <ErrorBox error={error} />
       {tours.length === 0 && !error && <div className="empty-box">Không tìm thấy tour phù hợp. Thử nới lỏng điều kiện lọc.</div>}

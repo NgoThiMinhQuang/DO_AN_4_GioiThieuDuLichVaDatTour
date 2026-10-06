@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
-import { ErrorBox, StatusBadge, formatVND } from '../../components/ui.jsx';
+import { ErrorBox, StatusBadge, formatVND, handleImgError, viStatus } from '../../components/ui.jsx';
 
 const STATUSES = ['DRAFT', 'OPEN', 'PAUSED', 'CLOSED'];
 
@@ -24,7 +24,7 @@ export default function AdminTours() {
     e.preventDefault();
     try {
       await api.post('/admin/tours', { ...form, adult_price: Number(form.adult_price) || 0, duration_days: 3, duration_nights: 2 });
-      setMsg('Tạo tour thành công');
+      setMsg('Thêm tour mới thành công.');
       setForm({ code: '', name: '', departure_location: '', adult_price: '', status: 'OPEN' });
       load();
     } catch (err) { setMsg(err.response?.data?.message || err.message); }
@@ -33,7 +33,7 @@ export default function AdminTours() {
   async function changeStatus(id, status) {
     try {
       await api.put(`/admin/tours/${id}`, { status });
-      setMsg(`Đã đổi trạng thái #${id} → ${status}`);
+      setMsg(`Đã đổi trạng thái tour #${id} thành “${viStatus(status)}”.`);
       load();
     } catch (err) { setMsg(err.response?.data?.message || err.message); }
   }
@@ -43,32 +43,42 @@ export default function AdminTours() {
   return (
     <div>
       <div className="tv-pagehead">
-        <div><h2>Quản lý Tours</h2><p>{rows.length} tour trong hệ thống — tạo nhanh & đổi trạng thái.</p></div>
+        <div><h2>Quản lý tour</h2><p>{rows.length} tour trong hệ thống — thêm mới và đổi trạng thái.</p></div>
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
       <form className="filters" onSubmit={create}>
-        <b>✚ Tạo nhanh tour</b>
+        <b>✚ Thêm tour mới</b>
         <div className="form-row">
-          <input placeholder="Mã tour" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
+          <input placeholder="Mã tour (ví dụ: TOUR-DN-01)" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
           <input placeholder="Tên tour" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <input placeholder="Điểm khởi hành" value={form.departure_location} onChange={(e) => setForm({ ...form, departure_location: e.target.value })} />
-          <input type="number" placeholder="Giá NL" value={form.adult_price} onChange={(e) => setForm({ ...form, adult_price: e.target.value })} />
+          <input type="number" placeholder="Giá người lớn" value={form.adult_price} onChange={(e) => setForm({ ...form, adult_price: e.target.value })} />
         </div>
-        <div><button className="btn sm" type="submit">＋ Tạo tour</button></div>
+        <div><button className="btn sm" type="submit">＋ Thêm tour</button></div>
       </form>
-      <div className="filters"><input placeholder="🔍 Tìm kiếm mã / tên..." value={q} onChange={(e) => setQ(e.target.value)} /></div>
+      <div className="filters"><input placeholder="🔍 Tìm kiếm theo mã / tên tour..." value={q} onChange={(e) => setQ(e.target.value)} /></div>
       <div className="table-wrap"><table>
-        <thead><tr><th>ID</th><th>Mã</th><th>Tên</th><th>Giá</th><th>Trạng thái</th><th>Đổi TT</th></tr></thead>
+        <thead><tr><th>Mã số</th><th>Ảnh</th><th>Mã tour</th><th>Tên tour</th><th>Giá người lớn</th><th>Trạng thái</th><th>Đổi trạng thái</th></tr></thead>
         <tbody>
-          {filtered.length === 0 && <tr><td colSpan={6}><div className="tv-empty">Không có tour nào khớp.</div></td></tr>}
+          {filtered.length === 0 && <tr><td colSpan={7}><div className="tv-empty">Không có tour nào khớp.</div></td></tr>}
           {filtered.map((r) => (
             <tr key={r.id}>
-              <td className="muted">#{r.id}</td><td><b>{r.code}</b></td><td>{r.name}</td><td style={{ fontWeight: 700, color: '#1d4ed8' }}>{formatVND(r.adult_price)}</td>
+              <td className="muted">#{r.id}</td>
+              <td>
+                <img
+                  className="tv-thumb"
+                  src={r.thumbnail || '/images/banner.jpg'}
+                  alt={r.name}
+                  loading="lazy"
+                  onError={handleImgError}
+                />
+              </td>
+              <td><b>{r.code}</b></td><td>{r.name}</td><td style={{ fontWeight: 700, color: '#1d4ed8' }}>{formatVND(r.adult_price)}</td>
               <td><StatusBadge value={r.status} /></td>
               <td>
                 <select value={r.status} onChange={(e) => changeStatus(r.id, e.target.value)}>
-                  {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                  {STATUSES.map((s) => <option key={s} value={s}>{viStatus(s)}</option>)}
                 </select>
               </td>
             </tr>

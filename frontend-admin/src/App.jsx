@@ -20,27 +20,27 @@ function RequireAdmin({ children }) {
 }
 
 const MENU = [
-  { to: '/', end: true, icon: '▦', label: 'Dashboard' },
-  { to: '/tours', icon: '✈', label: 'Tours' },
-  { to: '/departures', icon: '🛫', label: 'Departures' },
-  { to: '/bookings', icon: '🧾', label: 'Bookings' },
-  { to: '/payments', icon: '💳', label: 'Payments' },
-  { to: '/refunds', icon: '↩', label: 'Refunds' },
-  { to: '/promotions', icon: '🏷', label: 'Promotions' },
-  { to: '/reviews', icon: '★', label: 'Reviews' },
-  { to: '/users', icon: '👥', label: 'Users' },
+  { to: '/', end: true, icon: '▦', label: 'Tổng quan' },
+  { to: '/tours', icon: '✈', label: 'Quản lý tour' },
+  { to: '/departures', icon: '🛫', label: 'Lịch khởi hành' },
+  { to: '/bookings', icon: '🧾', label: 'Đơn đặt tour' },
+  { to: '/payments', icon: '💳', label: 'Thanh toán' },
+  { to: '/refunds', icon: '↩', label: 'Hoàn tiền' },
+  { to: '/promotions', icon: '🏷', label: 'Khuyến mãi' },
+  { to: '/reviews', icon: '★', label: 'Đánh giá' },
+  { to: '/users', icon: '👥', label: 'Người dùng' },
 ];
 
 const TITLES = {
-  '/': ['Tổng quan', 'Dashboard · báo cáo doanh thu, top tour'],
-  '/tours': ['Quản lý Tours', 'Tạo nhanh & đổi trạng thái tour'],
-  '/departures': ['Quản lý Departures', 'Lịch khởi hành theo tour'],
-  '/bookings': ['Quản lý Bookings', 'Tra cứu & cập nhật trạng thái đặt tour'],
-  '/payments': ['Payments & Refunds', 'Xác minh giao dịch thanh toán'],
-  '/refunds': ['Quản lý Hoàn tiền', 'Tạo & duyệt yêu cầu hoàn tiền'],
-  '/promotions': ['Quản lý Promotions', 'Mã giảm giá & bật/tắt chương trình'],
-  '/reviews': ['Quản lý Reviews', 'Ẩn / hiện đánh giá của khách'],
-  '/users': ['Quản lý Users', 'Khóa / mở tài khoản người dùng'],
+  '/': ['Tổng quan', 'Báo cáo doanh thu và tour nổi bật'],
+  '/tours': ['Quản lý tour', 'Thêm mới và đổi trạng thái tour'],
+  '/departures': ['Lịch khởi hành', 'Lịch khởi hành theo từng tour'],
+  '/bookings': ['Đơn đặt tour', 'Tra cứu và cập nhật trạng thái đơn đặt tour'],
+  '/payments': ['Thanh toán', 'Xác minh giao dịch thanh toán'],
+  '/refunds': ['Hoàn tiền', 'Tạo và duyệt yêu cầu hoàn tiền'],
+  '/promotions': ['Khuyến mãi', 'Mã giảm giá và bật/tắt chương trình'],
+  '/reviews': ['Đánh giá', 'Ẩn / hiện đánh giá của khách hàng'],
+  '/users': ['Người dùng', 'Khóa / mở khóa tài khoản người dùng'],
 };
 
 function AdminLayout({ children }) {
@@ -48,7 +48,7 @@ function AdminLayout({ children }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
-  const [title, sub] = TITLES[pathname] || ['TravelViet Admin', 'Trang quản trị'];
+  const [title, sub] = TITLES[pathname] || ['TravelViet', 'Trang quản trị'];
   const initial = (user?.full_name || user?.email || 'A').trim().charAt(0).toUpperCase();
 
   return (
@@ -56,8 +56,8 @@ function AdminLayout({ children }) {
       {open && <div className="tv-scrim" onClick={() => setOpen(false)} />}
       <aside className="tv-side">
         <div className="tv-brand">
-          <span className="tv-brand-mark">T</span>
-          <div><b>TravelViet Admin</b><small>Quản trị tour</small></div>
+          <img className="tv-brand-logo" src="/images/logo.png" alt="Logo TravelViet" />
+          <div><b>TravelViet</b><small>Quản trị tour</small></div>
         </div>
         <div className="tv-menu-label">Menu chính</div>
         <nav className="tv-menu" onClick={() => setOpen(false)}>
@@ -68,14 +68,14 @@ function AdminLayout({ children }) {
           ))}
         </nav>
         <div className="tv-side-foot">
-          <div className="muted">API: http://localhost:5000</div>
-          <div className="muted">Demo: admin@gmail.com / Admin123!</div>
+          <div className="muted">Tài khoản demo:</div>
+          <div className="muted">admin@gmail.com / Admin123!</div>
         </div>
       </aside>
       <div className="tv-body">
         <header className="tv-top">
           <div className="tv-top-inner">
-            <button className="btn ghost sm tv-burger" onClick={() => setOpen(!open)} aria-label="Menu">☰</button>
+            <button className="btn ghost sm tv-burger" onClick={() => setOpen(!open)} aria-label="Mở menu">☰</button>
             <div className="tv-page-crumb"><b>{title}</b>{sub}</div>
             <div className="header-spacer" />
             <span className="tv-user-chip"><span className="tv-avatar">{initial}</span>{user?.full_name || user?.email || ''}</span>
@@ -93,8 +93,8 @@ function AdminLayout({ children }) {
         <main className="tv-main">{children}</main>
         <footer className="tv-footer">
           <div className="tv-footer-inner">
-            <span><b>TravelViet Admin</b> — Dashboard / báo cáo, tours, departures, bookings, payments, refunds, promotions, reviews, users.</span>
-            <span>Demo: admin@gmail.com / Admin123!</span>
+            <span><b>TravelViet</b> — Tổng quan, quản lý tour, lịch khởi hành, đơn đặt tour, thanh toán, hoàn tiền, khuyến mãi, đánh giá, người dùng.</span>
+            <span>Tài khoản demo: admin@gmail.com / Admin123!</span>
           </div>
         </footer>
       </div>
@@ -115,7 +115,7 @@ export default function App() {
       <Route path="/promotions" element={<RequireAdmin><AdminLayout><AdminPromotions /></AdminLayout></RequireAdmin>} />
       <Route path="/reviews" element={<RequireAdmin><AdminLayout><AdminReviews /></AdminLayout></RequireAdmin>} />
       <Route path="/users" element={<RequireAdmin><AdminLayout><AdminUsers /></AdminLayout></RequireAdmin>} />
-      <Route path="*" element={<div className="container"><h2>404 - Không tìm thấy trang</h2><Link to="/">Về Dashboard</Link></div>} />
+      <Route path="*" element={<div className="container"><h2>404 - Không tìm thấy trang</h2><Link to="/">Về trang tổng quan</Link></div>} />
     </Routes>
   );
 }

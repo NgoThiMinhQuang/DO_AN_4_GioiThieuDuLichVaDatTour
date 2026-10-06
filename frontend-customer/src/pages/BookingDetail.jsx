@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, formatVND } from '../components/ui.jsx';
+import { ErrorBox, formatVND, bookingStatusVi, paymentStatusVi, paymentMethodVi, passengerTypeVi } from '../components/ui.jsx';
 
 export default function BookingDetail() {
   const { id } = useParams();
@@ -32,7 +32,7 @@ export default function BookingDetail() {
   }
 
   async function doCancel() {
-    if (!confirm('Xác nhận hủy booking?')) return;
+    if (!confirm('Xác nhận hủy đặt tour?')) return;
     try {
       const res = await api.post(`/bookings/${id}/cancel`);
       setMsg(res.data.message);
@@ -54,9 +54,9 @@ export default function BookingDetail() {
   return (
     <div className="container">
       <div className="page-head">
-        <span className="eyebrow">Chi tiết booking</span>
-        <h2>Booking {b.booking_code}</h2>
-        <div><span className="badge">{b.booking_status}</span> <span className="badge">{b.payment_status}</span></div>
+        <span className="eyebrow">Chi tiết đặt tour</span>
+        <h2>Đặt tour {b.booking_code}</h2>
+        <div><span className="badge">{bookingStatusVi(b.booking_status)}</span> <span className="badge">{paymentStatusVi(b.payment_status)}</span></div>
       </div>
       {msg && <div className="alert info">{msg}</div>}
       <div className="grid cols-2" style={{ alignItems: 'start' }}>
@@ -66,7 +66,7 @@ export default function BookingDetail() {
             <div><b>Tour:</b> {b.tour_name}</div>
             <div><b>Khởi hành:</b> {b.departure_date ? new Date(b.departure_date).toLocaleDateString('vi-VN') : ''} — về {b.return_date ? new Date(b.return_date).toLocaleDateString('vi-VN') : ''}</div>
             <div><b>Liên hệ:</b> {b.contact_name} • {b.contact_phone} • {b.contact_email}</div>
-            <div><b>Giá snapshot NL/TE/EB:</b> {formatVND(b.adult_price)} / {formatVND(b.child_price)} / {formatVND(b.infant_price)}</div>
+            <div><b>Giá tại thời điểm đặt (người lớn / trẻ em / em bé):</b> {formatVND(b.adult_price)} / {formatVND(b.child_price)} / {formatVND(b.infant_price)}</div>
             <div><b>Tạm tính:</b> {formatVND(b.subtotal)} • <b>Giảm:</b> {formatVND(b.discount_amount)} • <b>Tổng:</b> <span className="price">{formatVND(b.total_amount)}</span></div>
             <div><b>Đã trả:</b> {formatVND(b.paid_amount)} • <b>Còn lại:</b> <span className="price">{formatVND(b.remaining_amount)}</span></div>
           </div>
@@ -84,7 +84,7 @@ export default function BookingDetail() {
           </div>
           <div className="form-row" style={{ marginTop: 8 }}>
             <button className="btn" onClick={doPay}>Thanh toán</button>
-            <button className="btn danger" onClick={doCancel}>Hủy booking</button>
+            <button className="btn danger" onClick={doCancel}>Hủy đặt tour</button>
           </div>
           <h3>Đánh giá (khi hoàn thành)</h3>
           <div className="form-row">
@@ -99,12 +99,12 @@ export default function BookingDetail() {
       <h3>Hành khách</h3>
       <div className="table-wrap"><table>
         <thead><tr><th>Họ tên</th><th>Loại</th><th>Ngày sinh</th></tr></thead>
-        <tbody>{(b.passengers || []).map((p) => <tr key={p.id}><td>{p.full_name}</td><td><span className="badge">{p.passenger_type}</span></td><td>{p.date_of_birth ? String(p.date_of_birth).slice(0, 10) : ''}</td></tr>)}</tbody>
+        <tbody>{(b.passengers || []).map((p) => <tr key={p.id}><td>{p.full_name}</td><td><span className="badge">{passengerTypeVi(p.passenger_type)}</span></td><td>{p.date_of_birth ? String(p.date_of_birth).slice(0, 10) : ''}</td></tr>)}</tbody>
       </table></div>
       <h3>Lịch sử thanh toán</h3>
       <div className="table-wrap"><table>
-        <thead><tr><th>Mã GD</th><th>Số tiền</th><th>Phương thức</th><th>Trạng thái</th></tr></thead>
-        <tbody>{(b.payments || []).map((p) => <tr key={p.id}><td>{p.transaction_code}</td><td>{formatVND(p.amount)}</td><td>{p.payment_method}</td><td><span className="badge">{p.status}</span></td></tr>)}</tbody>
+        <thead><tr><th>Mã giao dịch</th><th>Số tiền</th><th>Phương thức</th><th>Trạng thái</th></tr></thead>
+        <tbody>{(b.payments || []).map((p) => <tr key={p.id}><td>{p.transaction_code}</td><td>{formatVND(p.amount)}</td><td>{paymentMethodVi(p.payment_method)}</td><td><span className="badge">{paymentStatusVi(p.status)}</span></td></tr>)}</tbody>
       </table></div>
     </div>
   );

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { ErrorBox, formatVND, TourCard, tourImg, handleImgError, durationLabel } from '../components/ui.jsx';
+import { ErrorBox, formatVND, TourCard, resolveTourImg, handleImgError, durationLabel, tourStatusVi, formatDateVi } from '../components/ui.jsx';
 
 export default function TourDetail() {
   const { id } = useParams();
@@ -11,6 +11,7 @@ export default function TourDetail() {
   const [error, setError] = useState('');
   const [favMsg, setFavMsg] = useState('');
   const [selectedDep, setSelectedDep] = useState('');
+  const [activeImg, setActiveImg] = useState('/images/banner.jpg');
   const { token } = useAuth();
   const navigate = useNavigate();
 
@@ -19,6 +20,8 @@ export default function TourDetail() {
       try {
         const res = await api.get(`/tours/${id}`);
         setTour(res.data);
+        const cover = resolveTourImg(res.data);
+        setActiveImg(cover);
         const dep = (res.data.departures || [])[0];
         if (dep) setSelectedDep(String(dep.id));
         try {
@@ -45,20 +48,41 @@ export default function TourDetail() {
   if (error) return <div className="container"><ErrorBox error={error} /></div>;
   if (!tour) return <div className="container"><p>Đang tải...</p></div>;
 
-  const seed = tour.code || tour.id;
   const old = tour.adult_price ? Math.round(Number(tour.adult_price) * 1.15) : null;
+  const rawGallery = tour.tour_images || tour.images || [];
+  const albumUrls = rawGallery
+    .map((g) => (typeof g === 'string' ? g : g?.image_url))
+    .filter(Boolean);
+  const thumbs = [tour.thumbnail, ...albumUrls].filter(Boolean);
+  const uniqueThumbs = [...new Set(thumbs)];
+  const reviewCount = (tour.reviews || []).length;
 
   return (
     <div className="container">
       <div className="page-head">
         <span className="eyebrow">{tour.category_name || 'Tour du lịch'}</span>
         <h2>{tour.name}</h2>
-        <div className="muted">Mã: {tour.code} • ⭐ {tour.avg_rating ? Number(tour.avg_rating).toFixed(1) : '—'} ({(tour.reviews || []).length} đánh giá)</div>
+        <div className="muted">Mã: {tour.code} • ⭐ {tour.avg_rating ? Number(tour.avg_rating).toFixed(1) : '—'} ({reviewCount} đánh giá) • <span className="badge">{tourStatusVi(tour.status)}</span></div>
       </div>
       <div className="detail-hero">
-        <img src={tourImg(tour, 1200, 520)} alt={tour.name} data-seed={seed} onError={handleImgError} />
+        <img src={activeImg || resolveTourImg(tour)} alt={tour.name} data-fallback="/images/banner.jpg" onError={handleImgError} />
         {durationLabel(tour) && <span className="tour-badge">{durationLabel(tour)}</span>}
       </div>
+      {uniqueThumbs.length > 1 && (
+        <div className="album-row">
+          {uniqueThumbs.map((u) => (
+            <button
+              key={u}
+              type="button"
+              className={`album-thumb${activeImg === u ? ' active' : ''}`}
+              onClick={() => setActiveImg(u)}
+              title="Xem ảnh"
+            >
+              <img src={u} alt={tour.name} loading="lazy" data-fallback="/images/banner.jpg" onError={handleImgError} />
+            </button>
+          ))}
+        </div>
+      )}
       <div className="grid cols-2" style={{ marginTop: 20 }}>
         <div className="card"><div className="card-body">
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
@@ -68,7 +92,7 @@ export default function TourDetail() {
           <div><b>Điểm khởi hành:</b> {tour.departure_location}</div>
           <div><b>Thời lượng:</b> {tour.duration_days} ngày {tour.duration_nights} đêm</div>
           <div><b>Phương tiện:</b> {tour.transport}</div>
-          <div><b>Giá NL/TE/EB:</b> <span className="price">{formatVND(tour.adult_price)} / {formatVND(tour.child_price)} / {formatVND(tour.infant_price)}</span></div>
+          <div><b>Giá người lớn / trẻ em / em bé:</b> <span className="price">{formatVND(tour.adult_price)} / {formatVND(tour.child_price)} / {formatVND(tour.infant_price)}</span></div>
           <div><b>Điểm đến:</b> {(tour.destinations || []).map((d) => d.name).join(', ') || '—'}</div>
           <div><b>Bao gồm:</b> {tour.included_services || '—'}</div>
           <div><b>Không bao gồm:</b> {tour.excluded_services || '—'}</div>
@@ -85,7 +109,7 @@ export default function TourDetail() {
               style={{ flexDirection: 'row' }}
             >
               <input type="radio" name="dep" checked={String(selectedDep) === String(d.id)} onChange={() => setSelectedDep(String(d.id))} style={{ width: 'auto' }} />
-              <span>{new Date(d.departure_date).toLocaleDateString('vi-VN')} — còn <b>{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</b> chỗ — {formatVND(d.adult_price)} ({d.status})</span>
+              <span>{formatDateVi(d.departure_date)} — còn <b>{d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)}</b> chỗ — {formatVND(d.adult_price)} ({tourStatusVi(d.status)})</span>
             </label>
           ))}
           <div className="form-row" style={{ marginTop: 10 }}>
@@ -117,8 +141,8 @@ export default function TourDetail() {
 
       <div className="section">
         <div className="section-head left">
-          <span className="eyebrow">Review thật</span>
-          <h2 style={{ fontSize: 22 }}>Đánh giá ({(tour.reviews || []).length})</h2>
+          <span className="eyebrow">Đánh giá thật</span>
+          <h2 style={{ fontSize: 22 }}>Đánh giá ({reviewCount})</h2>
         </div>
         {(tour.reviews || []).map((r) => (
           <div key={r.id} className="review-card" style={{ marginBottom: 12 }}>

@@ -7,7 +7,7 @@ function emptyPassenger(type) {
   return { full_name: '', date_of_birth: '', gender: '', passenger_type: type, identity_number: '', nationality: '', note: '' };
 }
 
-const STEP_LABELS = ['1. Lịch & số khách', '2. Liên hệ & hành khách', '3. Voucher', '4. Xác nhận'];
+const STEP_LABELS = ['1. Lịch & số khách', '2. Liên hệ & hành khách', '3. Mã giảm giá', '4. Xác nhận'];
 
 export default function Booking() {
   const { departureId } = useParams();
@@ -113,8 +113,8 @@ export default function Booking() {
     <div className="container" style={{ maxWidth: 980 }}>
       <div className="page-head">
         <span className="eyebrow">Đặt tour</span>
-        <h2>Hoàn tất booking trong 4 bước</h2>
-        <p>Giá server tự tính lại và kiểm tra số chỗ (BR35-BR37).</p>
+        <h2>Hoàn tất đặt tour trong 4 bước</h2>
+        <p>Giá do hệ thống tự tính lại và kiểm tra số chỗ còn trống.</p>
       </div>
       <div className="steps">
         {[1, 2, 3, 4].map((s) => (
@@ -137,7 +137,7 @@ export default function Booking() {
               </label>
               <label>Lịch khởi hành
                 <select value={selDep} onChange={(e) => setSelDep(e.target.value)}>
-                  <option value="">-- Chọn departure --</option>
+                  <option value="">-- Chọn lịch khởi hành --</option>
                   {departures.map((d) => (
                     <option key={d.id} value={d.id}>
                       {new Date(d.departure_date).toLocaleDateString('vi-VN')} — còn {d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats)} chỗ — {formatVND(d.adult_price)}
@@ -187,7 +187,7 @@ export default function Booking() {
 
           {step === 3 && (
             <div className="form">
-              <label>Mã voucher
+              <label>Mã giảm giá
                 <div className="form-row">
                   <input value={promoCode} onChange={(e) => setPromoCode(e.target.value)} placeholder="VD: SALE10" />
                   <button type="button" className="btn secondary" onClick={validatePromo} style={{ flex: '0 0 auto' }}>Áp mã</button>
@@ -212,7 +212,7 @@ export default function Booking() {
               </div></div>
               <div className="form-row">
                 <button className="btn secondary" onClick={() => setStep(3)}>← Quay lại</button>
-                <button className="btn" disabled={submitting} onClick={submitBooking}>{submitting ? 'Đang tạo booking...' : 'Xác nhận đặt tour'}</button>
+                <button className="btn" disabled={submitting} onClick={submitBooking}>{submitting ? 'Đang xử lý đặt tour...' : 'Xác nhận đặt tour'}</button>
               </div>
             </div>
           )}
@@ -226,7 +226,7 @@ export default function Booking() {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Giảm giá</span><b>−{formatVND(discount)}</b></div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}><span>Tổng dự kiến</span><span className="price">{formatVND(total)}</span></div>
           </div>
-          <div className="alert info" style={{ marginBottom: 0 }}>Giá hiển thị chỉ tham khảo — server tự tính lại giá và kiểm tra số chỗ.</div>
+          <div className="alert info" style={{ marginBottom: 0 }}>Giá hiển thị chỉ để tham khảo — hệ thống sẽ tính lại giá và kiểm tra số chỗ còn trống.</div>
         </div>
       </div>
     </div>

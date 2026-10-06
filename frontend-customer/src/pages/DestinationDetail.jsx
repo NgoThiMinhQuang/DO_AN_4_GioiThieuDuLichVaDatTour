@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, TourCard, handleImgError } from '../components/ui.jsx';
+import { ErrorBox, TourCard, handleImgError, fallbackDestImg } from '../components/ui.jsx';
 
 export default function DestinationDetail() {
   const { id } = useParams();
@@ -17,6 +17,7 @@ export default function DestinationDetail() {
   }, [id]);
   if (error) return <div className="container"><ErrorBox error={error} /></div>;
   if (!d) return <div className="container"><p>Đang tải...</p></div>;
+  const fb = fallbackDestImg(d.id, 0);
   return (
     <div className="container">
       <div className="page-head">
@@ -26,8 +27,8 @@ export default function DestinationDetail() {
       </div>
       <div className="detail-hero">
         <img
-          src={d.thumbnail || `https://picsum.photos/seed/dest-${d.id}/1200/520`}
-          alt={d.name} data-seed={`dest-${d.id}`} onError={handleImgError}
+          src={d.thumbnail || fb}
+          alt={d.name} data-fallback={fb} onError={handleImgError}
         />
       </div>
       <div className="panel" style={{ marginTop: 16 }}><p style={{ margin: 0, lineHeight: 1.7 }}>{d.description}</p></div>

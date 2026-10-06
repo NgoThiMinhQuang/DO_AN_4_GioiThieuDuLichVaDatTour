@@ -35,7 +35,7 @@ export default function Login() {
             <span style={{ fontSize: 24, fontWeight: 800 }}>Travel<span style={{ color: '#2563eb' }}>Viet</span></span>
           </div>
           <h2>Chào mừng trở lại</h2>
-          <p className="sub">Đăng nhập để đặt tour và theo dõi booking</p>
+          <p className="sub">Đăng nhập để đặt tour và theo dõi chuyến đi</p>
           {error && <div className="alert error">{error}</div>}
           <form className="form" onSubmit={submit}>
             <label>Email hoặc SĐT<input value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="customer@gmail.com" /></label>

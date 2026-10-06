@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client.js';
-import { ErrorBox } from '../components/ui.jsx';
+import { ErrorBox, notifTypeVi } from '../components/ui.jsx';
 
 export default function Notifications() {
   const [rows, setRows] = useState([]);
@@ -30,7 +30,7 @@ export default function Notifications() {
       {rows.map((n) => (
         <div className="card" key={n.id} style={{ marginBottom: 12, opacity: n.is_read ? 0.72 : 1, borderLeft: n.is_read ? undefined : '4px solid #2563eb' }}>
           <div className="card-body">
-            <div><b>{n.title}</b> <span className="badge">{n.type}</span></div>
+            <div><b>{n.title}</b> <span className="badge">{notifTypeVi(n.type)}</span></div>
             <div>{n.content}</div>
             <div className="muted">{n.created_at ? new Date(n.created_at).toLocaleString('vi-VN') : ''}</div>
             {!n.is_read && <div><button className="btn secondary btn-sm" onClick={() => markRead(n.id)}>Đánh dấu đã đọc</button></div>}

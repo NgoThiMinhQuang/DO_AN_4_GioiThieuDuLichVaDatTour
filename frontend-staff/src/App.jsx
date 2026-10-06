@@ -22,14 +22,14 @@ function Header() {
     <header className="site-header">
       <div className="header-inner">
         <Link to="/" className="logo">
-          <span className="logo-travel">Travel</span><span className="logo-viet">Viet</span>
-          <span className="logo-staff">Staff</span>
+          <img src="/images/logo.png" alt="TravelViet" className="logo-img" />
+          <span className="logo-staff">Nhân viên</span>
         </Link>
         <nav className="nav">
-          <NavLink to="/departures" className={linkClass}>Theo dõi khởi hành</NavLink>
-          <NavLink to="/bookings" className={linkClass}>Bookings</NavLink>
-          <NavLink to="/payments" className={linkClass}>Payments</NavLink>
-          <NavLink to="/refunds" className={linkClass}>Refunds</NavLink>
+          <NavLink to="/departures" className={linkClass}>Lịch khởi hành</NavLink>
+          <NavLink to="/bookings" className={linkClass}>Đơn đặt tour</NavLink>
+          <NavLink to="/payments" className={linkClass}>Thanh toán</NavLink>
+          <NavLink to="/refunds" className={linkClass}>Hoàn tiền</NavLink>
         </nav>
         <div className="header-spacer" />
         <nav className="nav">
@@ -54,21 +54,21 @@ function Header() {
 
 function Home() {
   const items = [
-    { to: '/departures', icon: '🗓️', title: 'Theo dõi khởi hành', desc: 'Xem lịch khởi hành và số chỗ còn lại (chỉ đọc).' },
-    { to: '/bookings', icon: '📋', title: 'Bookings', desc: 'Xem / tìm kiếm và xác nhận booking, ghi chú.' },
-    { to: '/payments', icon: '💳', title: 'Payments', desc: 'Xác nhận và ghi nhận thanh toán.' },
-    { to: '/refunds', icon: '↩️', title: 'Refunds', desc: 'Xử lý hủy booking và hoàn tiền.' },
+    { to: '/departures', icon: '🗓️', title: 'Lịch khởi hành', desc: 'Xem lịch khởi hành và số chỗ còn lại (chỉ đọc).' },
+    { to: '/bookings', icon: '📋', title: 'Đơn đặt tour', desc: 'Tra cứu, lọc và xác nhận đơn đặt tour.' },
+    { to: '/payments', icon: '💳', title: 'Thanh toán', desc: 'Xác nhận và ghi nhận thanh toán.' },
+    { to: '/refunds', icon: '↩️', title: 'Hoàn tiền', desc: 'Xử lý hủy đơn và hoàn tiền.' },
   ];
   return (
     <div className="container">
-      <div className="hero">
-        <h1>Xin chào nhân viên TravelViet 👋</h1>
-        <p>Xem / tìm booking, xác nhận booking, xác nhận thanh toán, theo dõi lịch khởi hành, xử lý hủy + hoàn tiền.</p>
+      <div className="hero hero-staff">
+        <h1>Xin chào nhân viên TravelViet</h1>
+        <p>Tra cứu đơn đặt tour, xác nhận đơn, xác nhận thanh toán, theo dõi lịch khởi hành, xử lý hủy và hoàn tiền.</p>
         <div className="hero-badges">
-          <span>📋 Booking</span>
-          <span>💳 Payment</span>
-          <span>↩️ Refund</span>
-          <span>🗓️ Khởi hành</span>
+          <span>📋 Đơn đặt tour</span>
+          <span>💳 Thanh toán</span>
+          <span>↩️ Hoàn tiền</span>
+          <span>🗓️ Lịch khởi hành</span>
         </div>
       </div>
       <div className="section">
@@ -106,8 +106,8 @@ export default function App() {
       </main>
       <footer className="site-footer">
         <div className="container">
-          <b>TravelViet Staff</b> — Kênh nghiệp vụ nhân viên (Booking → Payment → Refund, theo dõi khởi hành).
-          <div className="muted" style={{ color: '#94a3b8' }}>Demo: staff@gmail.com / Staff123! — API: http://localhost:5000</div>
+          <b>TravelViet</b> — Kênh nghiệp vụ nhân viên (Đơn đặt tour → Thanh toán → Hoàn tiền, theo dõi lịch khởi hành).
+          <div className="muted" style={{ color: '#94a3b8' }}>Tài khoản dùng thử: staff@gmail.com / Staff123!</div>
         </div>
       </footer>
     </>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
-import { ErrorBox, StatusBadge } from '../../components/ui.jsx';
+import { ErrorBox, StatusBadge, viStatus } from '../../components/ui.jsx';
 
 export default function AdminReviews() {
   const [rows, setRows] = useState([]);
@@ -19,7 +19,7 @@ export default function AdminReviews() {
   async function setStatus(id, status) {
     try {
       await api.patch(`/admin/reviews/${id}`, { status });
-      setMsg(`Review #${id} → ${status}`);
+      setMsg(`Đánh giá #${id} đã chuyển thành “${viStatus(status)}”.`);
       load();
     } catch (e) { setMsg(e.response?.data?.message || e.message); }
   }
@@ -27,12 +27,12 @@ export default function AdminReviews() {
   return (
     <div>
       <div className="tv-pagehead">
-        <div><h2>Quản lý Reviews</h2><p>{rows.length} đánh giá của khách — ẩn / hiện nội dung.</p></div>
+        <div><h2>Đánh giá</h2><p>{rows.length} đánh giá của khách hàng — ẩn / hiện nội dung.</p></div>
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
       <div className="table-wrap"><table>
-        <thead><tr><th>ID</th><th>Tour</th><th>Khách</th><th>Sao</th><th>Nội dung</th><th>TT</th><th>Ẩn/Hiện</th></tr></thead>
+        <thead><tr><th>Mã số</th><th>Tên tour</th><th>Khách hàng</th><th>Điểm số</th><th>Nội dung</th><th>Trạng thái</th><th>Ẩn / Hiện</th></tr></thead>
         <tbody>
           {rows.length === 0 && <tr><td colSpan={7}><div className="tv-empty">Chưa có đánh giá nào.</div></td></tr>}
           {rows.map((r) => (

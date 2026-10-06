@@ -26,7 +26,7 @@ export default function Login() {
       }
       if (role !== 'STAFF') {
         logout();
-        setError('Đây là trang Nhân viên');
+        setError('Đây là trang dành cho nhân viên. Vui lòng dùng tài khoản nhân viên.');
         return;
       }
       navigate('/');
@@ -38,16 +38,16 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <div className="login-brand"><span className="logo-travel">Travel</span><span className="logo-viet">Viet</span> Staff</div>
+        <div className="login-brand"><img src="/images/logo.png" alt="TravelViet" className="login-logo" /><span className="logo-staff">Nhân viên</span></div>
         <h2>Đăng nhập nhân viên</h2>
-        <div className="login-sub">Kênh nghiệp vụ: Booking → Payment → Refund, theo dõi khởi hành.</div>
+        <div className="login-sub">Kênh nghiệp vụ: Đơn đặt tour → Thanh toán → Hoàn tiền, theo dõi lịch khởi hành.</div>
         {error && <div className="alert error">{error}</div>}
         <form className="form" onSubmit={submit}>
-          <label>Email hoặc SĐT<input value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="staff@gmail.com" /></label>
+          <label>Email hoặc số điện thoại<input value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="staff@gmail.com" /></label>
           <label>Mật khẩu<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" /></label>
           <button className="btn" type="submit">Đăng nhập</button>
         </form>
-        <div className="demo-box">Demo: staff@gmail.com / Staff123!</div>
+        <div className="demo-box">Tài khoản dùng thử: staff@gmail.com / Staff123!</div>
       </div>
     </div>
   );
