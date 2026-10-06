@@ -1,27 +1,49 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
-import { TourCard, ErrorBox, handleImgError, resolveArticleImg, fallbackDestImg } from '../components/ui.jsx';
+import {
+  TourCard,
+  handleImgError,
+  fallbackDestImg,
+  formatDateVi,
+  formatVND,
+} from '../components/ui.jsx';
+
+const CAT_ICONS = ['🏖️', '⛰️', '🏛️', '🚢', '🍜', '🌿', '🏕️', '🛶'];
+const CAT_BG = ['#eff6ff', '#f0fdf4', '#fffbeb', '#fdf2f8', '#f5f3ff', '#ecfdf5', '#fff7ed', '#f0f9ff'];
+
+const ABOUT_FEATURES = [
+  { icon: '🎯', title: 'Kinh nghiệm', desc: '10+ năm tổ chức tour khắp Việt Nam' },
+  { icon: '👥', title: 'Đội ngũ', desc: 'Hướng dẫn viên địa phương tận tâm' },
+  { icon: '💰', title: 'Giá cả', desc: 'Minh bạch, ưu đãi mỗi ngày' },
+  { icon: '🕑', title: 'Hỗ trợ 24/7', desc: 'Đồng hành trước, trong, sau tour' },
+];
 
 const WHY_US = [
-  { icon: '🛡️', title: 'Thanh toán an toàn', desc: 'Đa dạng VNPay, MoMo, chuyển khoản với xác nhận minh bạch.' },
-  { icon: '🏷️', title: 'Giá tốt mỗi ngày', desc: 'Mã giảm giá, khuyến mãi theo tour giúp bạn tiết kiệm tối đa.' },
-  { icon: '🗺️', title: 'Lịch trình chuẩn', desc: 'Tour thiết kế bởi chuyên gia địa phương, đánh giá thật.' },
-  { icon: '🎧', title: 'Hỗ trợ 24/7', desc: 'Hotline 1900 6868 đồng hành trước, trong và sau chuyến đi.' },
+  { icon: '🗺️', title: 'Lịch trình rõ ràng', desc: 'Từng ngày đi đâu, ăn gì, ở đâu đều ghi chi tiết. Không phát sinh mập mờ, không cắt xén điểm tham quan.' },
+  { icon: '🛡️', title: 'Đặt tour an toàn', desc: 'Thanh toán VNPay, MoMo, chuyển khoản với xác nhận minh bạch. Giữ chỗ tức thì, hoàn tiền theo chính sách rõ ràng.' },
+  { icon: '🎧', title: 'Hỗ trợ chuyên nghiệp', desc: 'Hotline 1900 6868 và đội ngũ tư vấn am hiểu từng tuyến. Đổi lịch, đổi thông tin linh hoạt khi cần.' },
+  { icon: '⭐', title: 'Trải nghiệm tối ưu', desc: 'Khách sạn, bữa ăn, phương tiện đúng như mô tả. Hơn 120.000 lượt khách hài lòng mỗi năm.' },
 ];
 
 const REVIEWS = [
-  { name: 'Minh Anh', tour: 'Đà Nẵng – Hội An 4N3Đ', text: 'Đặt tour 5 phút là xong, lịch trình rõ ràng, hướng dẫn viên nhiệt tình. Rất đáng tiền!', stars: 5 },
-  { name: 'Quốc Bảo', tour: 'Phú Quốc 3N2Đ', text: 'Thanh toán VNPay mượt, nhận vé ngay. Khách sạn và bữa ăn đúng như mô tả.', stars: 5 },
-  { name: 'Thu Hằng', tour: 'Sa Pa – Fansipan 3N2Đ', text: 'Lần đầu đi tour mà không lo gì, bên hỗ trợ đổi lịch rất nhanh qua hotline.', stars: 4 },
+  { name: 'Minh Anh', tour: 'Đà Nẵng – Hội An 4N3Đ', text: 'Đặt tour chỉ mất 5 phút, lịch trình rõ ràng từng ngày. Hướng dẫn viên nhiệt tình, khách sạn đúng như mô tả. Rất đáng tiền!', stars: 5 },
+  { name: 'Quốc Bảo', tour: 'Phú Quốc 3N2Đ', text: 'Thanh toán VNPay mượt mà, nhận xác nhận giữ chỗ ngay. Bữa ăn ngon, xe đưa đón đúng giờ. Cả nhà đều hài lòng.', stars: 5 },
+  { name: 'Thu Hằng', tour: 'Sa Pa – Fansipan 3N2Đ', text: 'Lần đầu đi tour mà không phải lo gì. Bên hỗ trợ đổi lịch rất nhanh qua hotline. Chắc chắn sẽ đặt tiếp!', stars: 4 },
+];
+
+const MAP_PINS = [
+  { label: 'Sa Pa', top: '18%', left: '62%' },
+  { label: 'Đà Nẵng', top: '52%', left: '72%' },
+  { label: 'Phú Quốc', top: '78%', left: '38%' },
 ];
 
 export default function Home() {
   const [tours, setTours] = useState([]);
   const [destinations, setDestinations] = useState([]);
-  const [articles, setArticles] = useState([]);
+  const [destTourCounts, setDestTourCounts] = useState({});
   const [categories, setCategories] = useState([]);
-  const [error, setError] = useState('');
+  const [departures, setDepartures] = useState([]);
   const [fName, setFName] = useState('');
   const [fDest, setFDest] = useState('');
   const [fCat, setFCat] = useState('');
@@ -29,22 +51,75 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let alive = true;
     (async () => {
       try {
-        const [t, d, a, c] = await Promise.all([
-          api.get('/tours', { params: { sort: 'newest', limit: 8 } }),
-          api.get('/meta/destinations'),
-          api.get('/meta/articles'),
-          api.get('/meta/tour-categories').catch(() => ({ data: { data: [] } }))
+        const [t, d, c] = await Promise.all([
+          api.get('/tours', { params: { sort: 'newest', limit: 8 } }).catch(() => ({ data: { data: [] } })),
+          api.get('/meta/destinations').catch(() => ({ data: { data: [] } })),
+          api.get('/meta/tour-categories').catch(() => ({ data: { data: [] } })),
         ]);
-        setTours(t.data.data || []);
-        setDestinations((d.data.data || []).slice(0, 6));
-        setArticles((a.data.data || []).slice(0, 3));
-        setCategories(c.data.data || []);
-      } catch (e) {
-        setError(e.response?.data?.message || e.message);
-      }
+        if (!alive) return;
+        const tourRows = t.data.data || [];
+        const destRows = (d.data.data || []).slice(0, 6);
+        const catRows = c.data.data || [];
+        setTours(tourRows);
+        setDestinations(destRows);
+        setCategories(catRows);
+
+        // Đếm số tour theo từng điểm đến (lặng lẽ, không hiện lỗi)
+        if (destRows.length > 0) {
+          try {
+            const counts = await Promise.all(
+              destRows.map((dest) =>
+                api
+                  .get('/tours', { params: { destination: dest.id, limit: 1 } })
+                  .then((r) => ({ id: dest.id, total: r.data.total ?? (r.data.data || []).length }))
+                  .catch(() => ({ id: dest.id, total: null }))
+              )
+            );
+            if (!alive) return;
+            const map = {};
+            counts.forEach((x) => { map[x.id] = x.total; });
+            setDestTourCounts(map);
+          } catch (_) { /* bỏ qua */ }
+        }
+
+        // Gom lịch khởi hành OPEN sắp tới từ chi tiết các tour (tối đa 6)
+        try {
+          const details = await Promise.all(
+            tourRows.slice(0, 8).map((tour) =>
+              api.get(`/tours/${tour.id}`).then((r) => r.data).catch(() => null)
+            )
+          );
+          if (!alive) return;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const all = [];
+          details.forEach((detail) => {
+            if (!detail) return;
+            (detail.departures || []).forEach((dep) => {
+              const st = String(dep.status || '').toUpperCase();
+              if (!['OPEN', 'ALMOST_FULL'].includes(st)) return;
+              const dd = new Date(dep.departure_date);
+              if (Number.isNaN(dd.getTime()) || dd < today) return;
+              const remaining = dep.remaining ?? (dep.capacity - (dep.confirmed_seats || 0) - (dep.held_seats || 0));
+              all.push({
+                id: dep.id,
+                tourId: detail.id,
+                tourName: detail.name,
+                date: dep.departure_date,
+                remaining: Number.isFinite(Number(remaining)) ? Number(remaining) : null,
+                price: dep.adult_price ?? detail.adult_price,
+              });
+            });
+          });
+          all.sort((a, b) => new Date(a.date) - new Date(b.date));
+          setDepartures(all.slice(0, 6));
+        } catch (_) { /* bỏ qua, hiển thị empty-state */ }
+      } catch (_) { /* bỏ qua, hiển thị empty-state đẹp */ }
     })();
+    return () => { alive = false; };
   }, []);
 
   function search(e) {
@@ -59,162 +134,304 @@ export default function Home() {
   }
 
   return (
-    <div className="container">
-      <div className="hero hero-image">
-        <div className="hero-overlay" />
-        <div className="hero-content">
-          <span className="hero-badge">Khám phá Việt Nam</span>
-          <h1>Khởi đầu hành trình đáng nhớ của bạn</h1>
-          <p>Hàng trăm tour khởi hành mỗi tuần, giá minh bạch, áp mã giảm giá tự động và thanh toán an toàn.</p>
-          <form className="hero-search-grid" onSubmit={search}>
-            <label>Tên tour
-              <input placeholder="Tên tour: Đà Nẵng, Phú Quốc..." value={fName} onChange={(e) => setFName(e.target.value)} />
-            </label>
-            <label>Điểm đến
-              <select value={fDest} onChange={(e) => setFDest(e.target.value)}>
-                <option value="">Tất cả điểm đến</option>
-                {destinations.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-              </select>
-            </label>
-            <label>Loại tour
-              <select value={fCat} onChange={(e) => setFCat(e.target.value)}>
-                <option value="">Tất cả loại tour</option>
-                {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </label>
-            <label>Ngày khởi hành
-              <input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} />
-            </label>
-            <button className="btn" type="submit">Tìm kiếm</button>
-          </form>
-          <div className="tv-hero-strip">
-            <span className="tv-hero-chip">✓ Giữ chỗ tức thì</span>
-            <span className="tv-hero-chip">✓ Mã giảm giá mỗi ngày</span>
-            <span className="tv-hero-chip">✓ Hỗ trợ 24/7</span>
-          </div>
-          <div className="hero-stats">
-            <div><b>500+</b><span>Tour đang mở bán</span></div>
-            <div><b>120K+</b><span>Lượt khách mỗi năm</span></div>
-            <div><b>4.8/5</b><span>Đánh giá trung bình</span></div>
-          </div>
+    <div className="home-tv">
+      {/* 1. HERO full-width */}
+      <section className="tv-hero">
+        <div className="tv-hero-overlay" />
+        <div className="tv-hero-inner">
+          <span className="tv-hero-badge">Khám phá Việt Nam</span>
+          <h1>
+            Khởi đầu hành trình<br />
+            <span className="tv-hero-accent">đáng nhớ của bạn</span>
+          </h1>
+          <p className="tv-hero-desc">
+            Hàng trăm tour khởi hành mỗi tuần với lịch trình rõ ràng, giá minh bạch
+            và đội ngũ đồng hành 24/7.
+          </p>
         </div>
+      </section>
+
+      {/* Thanh tìm kiếm nổi đè dưới hero */}
+      <div className="container tv-search-wrap">
+        <form className="tv-search" onSubmit={search}>
+          <label className="tv-search-field">
+            <span>Tên tour</span>
+            <input placeholder="Đà Nẵng, Phú Quốc..." value={fName} onChange={(e) => setFName(e.target.value)} />
+          </label>
+          <label className="tv-search-field">
+            <span>Điểm đến</span>
+            <select value={fDest} onChange={(e) => setFDest(e.target.value)}>
+              <option value="">Tất cả điểm đến</option>
+              {destinations.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          </label>
+          <label className="tv-search-field">
+            <span>Loại tour</span>
+            <select value={fCat} onChange={(e) => setFCat(e.target.value)}>
+              <option value="">Tất cả loại tour</option>
+              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </label>
+          <label className="tv-search-field">
+            <span>Ngày khởi hành</span>
+            <input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} />
+          </label>
+          <button className="btn tv-search-btn" type="submit">Tìm kiếm</button>
+        </form>
       </div>
 
-      <ErrorBox error={error} />
-
-      <section className="section">
-        <div className="section-head">
-          <span className="eyebrow">Gợi ý hôm nay</span>
-          <h2>Tour nổi bật</h2>
-          <p>Những hành trình được yêu thích nhất tuần này</p>
-        </div>
-        <div className="grid tours">
-          {tours.map((t, i) => <TourCard key={t.id} t={t} hot={i < 2} />)}
-        </div>
-        <div style={{ textAlign: 'center', marginTop: 22 }}>
-          <Link className="btn secondary" to="/tours">Xem tất cả tour</Link>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section-head">
-          <span className="eyebrow">Đi đâu tiếp theo?</span>
-          <h2>Điểm đến được yêu thích</h2>
-          <p>Từ biển đảo đến núi rừng — chọn điểm đến cho chuyến đi của bạn</p>
-        </div>
-        <div className="bento-grid">
-          {destinations.map((d, i) => (
-            <div className="card bento-item" key={d.id}>
-              <Link to={`/destinations/${d.id}`} className="bento-link">
-                <img
-                  src={d.thumbnail || fallbackDestImg(d.id, i)}
-                  alt={d.name} loading="lazy" data-fallback={fallbackDestImg(d.id, i)} onError={handleImgError}
-                />
-                <div className="dest-overlay">
-                  <b>{d.name}</b><br />
-                  <span>{d.province || d.region || 'Việt Nam'}</span>
+      <div className="container">
+        {/* 2. VỀ CHÚNG TÔI */}
+        <section className="section tv-about">
+          <div className="tv-about-text">
+            <span className="eyebrow">Về chúng tôi</span>
+            <h2>Khám Phá Thế Giới Cùng Travel Viet</h2>
+            <p>
+              Travel Viet là nền tảng giới thiệu du lịch và đặt tour trực tuyến,
+              kết nối bạn với những hành trình khắp Việt Nam — từ biển đảo
+              trong xanh đến núi rừng hùng vĩ.
+            </p>
+            <p>
+              Mỗi tour đều được thiết kế bởi chuyên gia địa phương với lịch trình
+              chi tiết từng ngày, giá trọn gói minh bạch và chính sách đổi lịch
+              linh hoạt, để bạn yên tâm tận hưởng từng khoảnh khắc.
+            </p>
+            <div className="tv-about-stats">
+              <div><b>10+</b><span>Năm kinh nghiệm</span></div>
+              <div><b>500+</b><span>Tour đang mở bán</span></div>
+              <div><b>120K+</b><span>Lượt khách mỗi năm</span></div>
+            </div>
+            <div className="tv-about-features">
+              {ABOUT_FEATURES.map((f) => (
+                <div className="tv-about-feature" key={f.title}>
+                  <span className="tv-about-feature-icon">{f.icon}</span>
+                  <div><b>{f.title}</b><span>{f.desc}</span></div>
                 </div>
-              </Link>
+              ))}
             </div>
-          ))}
-        </div>
-        <div style={{ textAlign: 'center', marginTop: 22 }}>
-          <Link className="btn secondary" to="/destinations">Khám phá điểm đến</Link>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section-head">
-          <span className="eyebrow">Cam kết của chúng tôi</span>
-          <h2>Vì sao chọn TravelViet?</h2>
-          <p>Đặt tour trực tuyến nhanh chóng, minh bạch và an tâm</p>
-        </div>
-        <div className="feature-grid">
-          {WHY_US.map((f) => (
-            <div className="feature-card" key={f.title}>
-              <div className="feature-icon">{f.icon}</div>
-              <b>{f.title}</b>
-              <p>{f.desc}</p>
+            <Link className="btn secondary" to="/tours">Khám phá thêm</Link>
+          </div>
+          <div className="tv-about-media">
+            <img src="/images/tours/bien.jpg" alt="Biển Việt Nam" loading="lazy" data-fallback="/images/banner.jpg" onError={handleImgError} />
+            <div className="tv-about-badge tv-about-badge-1">
+              <b>10+</b><span>Năm kinh nghiệm</span>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section-head">
-          <span className="eyebrow">Đánh giá thật</span>
-          <h2>Khách hàng nói gì?</h2>
-          <p>Hơn 120.000 lượt khách đã đồng hành cùng TravelViet</p>
-        </div>
-        <div className="grid cols-3">
-          {REVIEWS.map((r) => (
-            <div className="review-card" key={r.name}>
-              <div className="stars">{'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}</div>
-              <p>“{r.text}”</p>
-              <div className="review-who">
-                <span className="user-avatar">{r.name.charAt(0)}</span>
-                <div><b>{r.name}</b><span>{r.tour}</span></div>
-              </div>
+            <div className="tv-about-badge tv-about-badge-2">
+              <b>🏆</b><span>Giải Thưởng<br />Du lịch 2025</span>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {articles.length > 0 && (
+        {/* 3. TOUR NỔI BẬT */}
         <section className="section">
           <div className="section-head">
-            <span className="eyebrow">Cẩm nang du lịch</span>
-            <h2>Bài viết mới</h2>
-            <p>Kinh nghiệm, gợi ý lịch trình và mẹo săn mã giảm giá</p>
+            <span className="eyebrow">Gợi ý hôm nay</span>
+            <h2>Tour nổi bật</h2>
+            <p>Những hành trình được yêu thích nhất tuần này</p>
+          </div>
+          {tours.length > 0 ? (
+            <>
+              <div className="grid tours">
+                {tours.map((t, i) => <TourCard key={t.id} t={t} hot={i < 2} />)}
+              </div>
+              <div style={{ textAlign: 'center', marginTop: 22 }}>
+                <Link className="btn secondary" to="/tours">Xem tất cả tour</Link>
+              </div>
+            </>
+          ) : (
+            <div className="tv-empty">
+              <div className="tv-empty-icon">🧳</div>
+              <b>Chưa có tour nào đang mở bán</b>
+              <p>Hiện tại chưa có tour phù hợp. Vui lòng quay lại sau hoặc khám phá các điểm đến hấp dẫn.</p>
+              <Link className="btn secondary" to="/destinations">Khám phá điểm đến</Link>
+            </div>
+          )}
+        </section>
+
+        {/* 4. PHONG CÁCH DU LỊCH */}
+        {categories.length > 0 && (
+          <section className="section">
+            <div className="section-head">
+              <span className="eyebrow">Đa dạng lựa chọn</span>
+              <h2>Khám phá theo phong cách du lịch bạn yêu thích</h2>
+              <p>Chọn loại tour phù hợp với sở thích của bạn</p>
+            </div>
+            <div className="tv-style-grid">
+              {categories.map((c, i) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  className="tv-style-card"
+                  onClick={() => navigate(`/tours?category=${c.id}`)}
+                >
+                  <span className="tv-style-icon" style={{ background: CAT_BG[i % CAT_BG.length] }}>
+                    {CAT_ICONS[i % CAT_ICONS.length]}
+                  </span>
+                  <b>{c.name}</b>
+                  {c.description && <span className="tv-style-desc">{c.description}</span>}
+                  <span className="tv-style-link">Khám phá →</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 5. ĐIỂM ĐẾN PHỔ BIẾN */}
+        {destinations.length > 0 && (
+          <section className="section">
+            <div className="section-head">
+              <span className="eyebrow">Đi đâu tiếp theo?</span>
+              <h2>Điểm đến phổ biến</h2>
+              <p>Từ biển đảo đến núi rừng — chọn điểm đến cho chuyến đi của bạn</p>
+            </div>
+            <div className="bento-grid tv-bento">
+              {destinations.map((d, i) => (
+                <div className="card bento-item" key={d.id}>
+                  <Link to={`/destinations/${d.id}`} className="bento-link">
+                    <img
+                      src={d.thumbnail || fallbackDestImg(d.id, i)}
+                      alt={d.name}
+                      loading="lazy"
+                      data-fallback={fallbackDestImg(d.id, i)}
+                      onError={handleImgError}
+                    />
+                    <div className="dest-overlay">
+                      <b>{d.name}</b><br />
+                      <span>{d.province || d.region || 'Việt Nam'}</span>
+                    </div>
+                    {destTourCounts[d.id] != null && (
+                      <span className="tv-dest-count">{destTourCounts[d.id]} tour</span>
+                    )}
+                  </Link>
+                </div>
+              ))}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: 22 }}>
+              <Link className="btn secondary" to="/destinations">Khám phá điểm đến</Link>
+            </div>
+          </section>
+        )}
+
+        {/* 6. BẢN ĐỒ DU LỊCH */}
+        <section className="section">
+          <div className="section-head">
+            <span className="eyebrow">Bản đồ tương tác</span>
+            <h2>Khám Phá Bản Đồ Du Lịch Việt Nam</h2>
+            <p>Chạm vào từng điểm ghim để xem tour nổi bật theo vùng miền</p>
+          </div>
+          <div className="tv-map">
+            <div className="tv-map-art" aria-hidden="true">
+              <span className="tv-map-shape" />
+              {MAP_PINS.map((p) => (
+                <span key={p.label} className="tv-map-pin" style={{ top: p.top, left: p.left }}>
+                  <span className="tv-map-pin-dot">📍</span>
+                  <span className="tv-map-pin-label">{p.label}</span>
+                </span>
+              ))}
+            </div>
+            <div className="tv-map-info">
+              <h3>Ba miền — một hành trình</h3>
+              <p>
+                Từ Sa Pa mờ sương, Đà Nẵng rực rỡ đến Phú Quốc trong xanh —
+                mỗi điểm ghim là một vùng đất với những tour được yêu thích nhất.
+              </p>
+              <ul className="tv-map-list">
+                <li><b>Miền Bắc</b> — núi rừng, di sản và văn hóa ngàn năm</li>
+                <li><b>Miền Trung</b> — biển xanh, phố cổ và lễ hội rực rỡ</li>
+                <li><b>Miền Nam</b> — sông nước, đảo ngọc và ẩm thực đậm đà</li>
+              </ul>
+              <Link className="btn tv-map-btn" to="/destinations">Xem Bản Đồ Đầy Đủ</Link>
+            </div>
+          </div>
+        </section>
+
+        {/* 7. LỊCH KHỞI HÀNH SẮP TỚI */}
+        <section className="section">
+          <div className="section-head">
+            <span className="eyebrow">Giữ chỗ sớm</span>
+            <h2>Lịch khởi hành sắp tới</h2>
+            <p>Những chuyến đi gần nhất còn giữ chỗ — đặt sớm để có giá tốt</p>
+          </div>
+          {departures.length > 0 ? (
+            <div className="tv-dep-grid">
+              {departures.map((dep) => (
+                <div className="tv-dep-card" key={dep.id}>
+                  <div className="tv-dep-date">
+                    <b>{formatDateVi(dep.date)}</b>
+                    {dep.remaining != null && <span>Còn {dep.remaining} chỗ</span>}
+                  </div>
+                  <div className="tv-dep-body">
+                    <Link className="tv-dep-name" to={`/tours/${dep.tourId}`}>{dep.tourName}</Link>
+                    <div className="tv-dep-meta">
+                      {dep.price != null && <span className="price">{formatVND(dep.price)}</span>}
+                    </div>
+                  </div>
+                  <button className="btn btn-sm" onClick={() => navigate(`/booking/${dep.id}?tourId=${dep.tourId}`)}>
+                    Đặt ngay
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="tv-empty">
+              <div className="tv-empty-icon">📅</div>
+              <b>Chưa có lịch khởi hành nào sắp tới</b>
+              <p>Các tour mới đang được cập nhật lịch. Hãy xem chi tiết từng tour để nhận thông báo mở bán sớm nhất.</p>
+              <Link className="btn secondary" to="/tours">Xem tất cả tour</Link>
+            </div>
+          )}
+        </section>
+
+        {/* 8. VÌ SAO TIN TƯỞNG */}
+        <section className="section">
+          <div className="section-head">
+            <span className="eyebrow">Cam kết của chúng tôi</span>
+            <h2>Vì sao hàng ngàn khách hàng tin tưởng chúng tôi</h2>
+            <p>Đặt tour trực tuyến nhanh chóng, minh bạch và an tâm</p>
+          </div>
+          <div className="feature-grid">
+            {WHY_US.map((f) => (
+              <div className="feature-card" key={f.title}>
+                <div className="feature-icon">{f.icon}</div>
+                <b>{f.title}</b>
+                <p>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 9. REVIEW */}
+        <section className="section">
+          <div className="section-head">
+            <span className="eyebrow">Đánh giá thật</span>
+            <h2>Khách hàng nói gì về chúng tôi</h2>
+            <p>Hơn 120.000 lượt khách đã đồng hành cùng Travel Viet</p>
           </div>
           <div className="grid cols-3">
-            {articles.map((a) => (
-              <div className="card" key={a.id}>
-                <Link to={`/articles/${a.id}`}>
-                  <img
-                    src={resolveArticleImg(a)}
-                    alt={a.title} loading="lazy" data-fallback="/images/banner.jpg" onError={handleImgError}
-                  />
-                </Link>
-                <div className="card-body">
-                  <span className="badge">{a.category_name || 'Du lịch'}</span>
-                  <div className="card-title"><Link to={`/articles/${a.id}`}>{a.title}</Link></div>
+            {REVIEWS.map((r) => (
+              <div className="review-card tv-review" key={r.name}>
+                <div className="stars">{'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}</div>
+                <p>“{r.text}”</p>
+                <div className="review-who">
+                  <span className="user-avatar">{r.name.charAt(0)}</span>
+                  <div><b>{r.name}</b><span>{r.tour}</span></div>
                 </div>
               </div>
             ))}
           </div>
-          <div style={{ textAlign: 'center', marginTop: 22 }}>
-            <Link className="btn secondary" to="/articles">Xem tất cả bài viết</Link>
-          </div>
         </section>
-      )}
 
-      <div className="cta-band">
-        <div>
-          <h3>Sẵn sàng cho chuyến đi tiếp theo?</h3>
-          <p>Đặt tour hôm nay — giữ chỗ tức thì, hỗ trợ đổi lịch linh hoạt.</p>
+        {/* 10. CTA BAND */}
+        <div className="cta-band tv-cta">
+          <div>
+            <h3>Bạn cần tư vấn để chọn tour, lịch khởi hành hoặc ngân sách phù hợp?</h3>
+            <p>Đội ngũ Travel Viet luôn sẵn sàng hỗ trợ — hotline 1900 6868 (24/7).</p>
+          </div>
+          <div className="tv-cta-actions">
+            <Link className="btn btn-lg tv-cta-primary" to="/tours">Tìm tour ngay →</Link>
+            <a className="btn btn-lg secondary" href="tel:19006868">Gọi 1900 6868</a>
+          </div>
         </div>
-        <Link className="btn btn-lg" to="/tours">Tìm tour ngay →</Link>
       </div>
     </div>
   );
