@@ -336,6 +336,7 @@ export function EmptyState({ icon = '🧳', title, hint, children }) {
 }
 
 export function LoadError({ error, icon = '📭', title = 'Không tải được dữ liệu', hint, onRetry, children }) {
+  if (!error) return null;
   return (
     <EmptyState
       icon={icon}
