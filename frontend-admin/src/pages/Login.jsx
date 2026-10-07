@@ -49,7 +49,7 @@ export default function Login() {
             <label>Mật khẩu<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nhập mật khẩu" /></label>
             <button className="btn" type="submit">Đăng nhập</button>
           </form>
-          <div className="alert info">Tài khoản demo: admin@gmail.com / Admin123!</div>
+          <div className="alert info">Tài khoản: admin@gmail.com / Admin123!</div>
         </div>
       </div>
     </div>

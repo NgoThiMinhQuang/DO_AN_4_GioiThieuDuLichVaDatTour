@@ -53,7 +53,7 @@ export default function Login() {
               <button className="btn auth-submit" type="submit">Đăng nhập</button>
             </form>
             <p className="auth-switch">Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p>
-            <div className="alert info">Demo: customer@gmail.com / Customer123!</div>
+            <div className="alert info">Tài khoản: customer@gmail.com / Customer123!</div>
           </div>
         </div>
       </div>

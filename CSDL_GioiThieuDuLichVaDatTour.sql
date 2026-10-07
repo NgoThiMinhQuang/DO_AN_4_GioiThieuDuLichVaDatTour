@@ -404,7 +404,7 @@ INSERT IGNORE INTO users (id, full_name, email, phone, password_hash, role_id, s
   (4, 'Tran Van Minh', 'minh.tran@gmail.com', '0901000003', '$2a$10$.NtuE1Lrt9sBKJwM7z7VcOMcyHcnJiIYUySHYHSvCmZrGuaj72JXO', 1, 'ACTIVE'),
   (5, 'Le Thu Ha', 'ha.le@gmail.com', '0901000004', '$2a$10$.NtuE1Lrt9sBKJwM7z7VcOMcyHcnJiIYUySHYHSvCmZrGuaj72JXO', 1, 'ACTIVE'),
   (6, 'Pham Duc Quang', 'quang.pham@gmail.com', '0901000005', '$2a$10$.NtuE1Lrt9sBKJwM7z7VcOMcyHcnJiIYUySHYHSvCmZrGuaj72JXO', 1, 'ACTIVE'),
-  (7, 'Khach Hang Demo', 'customer@gmail.com', '0900000003', '$2a$10$.NtuE1Lrt9sBKJwM7z7VcOMcyHcnJiIYUySHYHSvCmZrGuaj72JXO', 1, 'ACTIVE');
+  (7, 'Ngo Thi Minh Quang', 'customer@gmail.com', '0900000003', '$2a$10$.NtuE1Lrt9sBKJwM7z7VcOMcyHcnJiIYUySHYHSvCmZrGuaj72JXO', 1, 'ACTIVE');
 
 -- Loai tour (mau: Nghi duong / Kham pha / Gia dinh / Cao cap / Quoc te)
 INSERT IGNORE INTO tour_categories (id, name, description, status) VALUES

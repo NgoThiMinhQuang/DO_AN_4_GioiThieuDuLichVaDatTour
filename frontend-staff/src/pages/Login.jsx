@@ -60,7 +60,7 @@ export default function Login() {
             <label>Mật khẩu<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" /></label>
             <button className="btn" type="submit">Đăng nhập</button>
           </form>
-          <div className="demo-box">Tài khoản dùng thử: staff@gmail.com / Staff123!</div>
+          <div className="demo-box">Tài khoản: staff@gmail.com / Staff123!</div>
         </div>
       </div>
     </div>

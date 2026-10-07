@@ -72,7 +72,7 @@ function AdminLayout({ children }) {
           ))}
         </nav>
         <div className="tv-side-foot">
-          <div className="muted">Tài khoản demo:</div>
+          <div className="muted">Đang đăng nhập:</div>
           <div className="muted">admin@gmail.com / Admin123!</div>
         </div>
       </aside>
@@ -98,7 +98,7 @@ function AdminLayout({ children }) {
         <footer className="tv-footer">
           <div className="tv-footer-inner">
             <span><b>TravelViet</b> — Tổng quan, quản lý tour, lịch khởi hành, đơn đặt tour, thanh toán, hoàn tiền, khuyến mãi, đánh giá, người dùng.</span>
-            <span>Tài khoản demo: admin@gmail.com / Admin123!</span>
+            <span>Hotline hỗ trợ: 1900 6868</span>
           </div>
         </footer>
       </div>
