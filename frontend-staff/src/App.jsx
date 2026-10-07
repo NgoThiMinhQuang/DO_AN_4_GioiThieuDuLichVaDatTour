@@ -21,10 +21,12 @@ function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const linkClass = ({ isActive }) => (isActive ? 'active' : '');
+  const displayName = user?.full_name || user?.email || 'Nhân viên';
+  const initial = (displayName || 'N').trim().charAt(0).toUpperCase();
   return (
     <header className="site-header">
       <div className="header-inner">
-        <Link to="/" className="logo">
+        <Link to="/" className="logo" aria-label="TravelViet Nhân viên - Trang chủ">
           <img src="/images/logo.png" alt="TravelViet" className="logo-img" />
           <span className="logo-staff">Nhân viên</span>
         </Link>
@@ -35,13 +37,17 @@ function Header() {
           <NavLink to="/refunds" className={linkClass}>Hoàn tiền</NavLink>
           <NavLink to="/support" className={linkClass}>Hỗ trợ</NavLink>
         </nav>
-        <div className="header-spacer" />
-        <nav className="nav">
+        <div className="header-actions">
           {!user && <NavLink to="/login" className={linkClass}>Đăng nhập</NavLink>}
-          {user && <span className="user-chip">{user.full_name || user.email}</span>}
+          {user && (
+            <span className="user-chip" title={displayName}>
+              <span className="user-chip-avatar">{initial}</span>
+              <span className="user-chip-name">{displayName}</span>
+            </span>
+          )}
           {user && (
             <button
-              className="btn secondary"
+              className="btn secondary btn-sm"
               onClick={() => {
                 logout();
                 navigate('/login');
@@ -50,7 +56,7 @@ function Header() {
               Đăng xuất
             </button>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   );
