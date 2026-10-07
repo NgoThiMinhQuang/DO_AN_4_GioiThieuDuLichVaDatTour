@@ -5,8 +5,8 @@ import {
   TourCard,
   handleImgError,
   fallbackDestImg,
-  formatDateVi,
   formatVND,
+  resolveTourImg,
 } from '../components/ui.jsx';
 
 const CAT_ICONS = ['🏖️', '⛰️', '🏛️', '🚢', '🍜', '🌿', '🏕️', '🛶'];
@@ -120,11 +120,12 @@ export default function Home() {
                 date: dep.departure_date,
                 remaining: Number.isFinite(Number(remaining)) ? Number(remaining) : null,
                 price: dep.adult_price ?? detail.adult_price,
+                img: resolveTourImg(detail),
               });
             });
           });
           all.sort((a, b) => new Date(a.date) - new Date(b.date));
-          setDepartures(all.slice(0, 6));
+          setDepartures(all.slice(0, 8));
         } catch (_) { /* bỏ qua, hiển thị empty-state */ }
       } catch (_) { /* bỏ qua, hiển thị empty-state đẹp */ }
     })();
@@ -315,9 +316,13 @@ export default function Home() {
               <h2>Khám phá theo phong cách du lịch bạn yêu thích</h2>
               <p>Chọn loại tour phù hợp với sở thích của bạn</p>
             </div>
-            <div className="category-grid">
-              {categories.map((c, i) => {
-                const theme = CAT_THEMES[i % CAT_THEMES.length];
+            <div className="category-grid category-grid-3">
+              {categories.slice(0, 3).map((c, i) => {
+                const theme = [
+                  { color: '#2563eb', shadow: 'rgba(37, 99, 235, 0.25)', bg: '#eff6ff', border: '#bfdbfe' },
+                  { color: '#d97706', shadow: 'rgba(217, 119, 6, 0.25)', bg: '#fffbeb', border: '#fde68a' },
+                  { color: '#059669', shadow: 'rgba(5, 150, 105, 0.25)', bg: '#ecfdf5', border: '#a7f3d0' },
+                ][i % 3];
                 const icon = CAT_ICONS[i % CAT_ICONS.length];
                 return (
                   <button
@@ -342,7 +347,7 @@ export default function Home() {
                       {c.description && <span className="category-modern-description">{c.description}</span>}
                     </span>
                     <span className="category-card-footer">
-                      <span className="category-action-text">Khám phá ngay</span>
+                      <span className="category-action-text">Xem chi tiết</span>
                       <span className="category-action-icon-wrapper">
                         <span className="category-action-icon">→</span>
                       </span>
@@ -443,24 +448,49 @@ export default function Home() {
           </div>
           {departures.length > 0 ? (
             <>
-            <div className="tv-dep-grid">
-              {departures.map((dep) => (
-                <div className="tv-dep-card" key={dep.id}>
-                  <div className="tv-dep-date">
-                    <b>{formatDateVi(dep.date)}</b>
-                    {dep.remaining != null && <span>Còn {dep.remaining} chỗ</span>}
-                  </div>
-                  <div className="tv-dep-body">
-                    <Link className="tv-dep-name" to={`/tours/${dep.tourId}`}>{dep.tourName}</Link>
-                    <div className="tv-dep-meta">
-                      {dep.price != null && <span className="price">{formatVND(dep.price)}</span>}
-                    </div>
-                  </div>
-                  <button className="btn btn-sm" onClick={() => navigate(`/booking/${dep.id}?tourId=${dep.tourId}`)}>
-                    Đặt ngay
-                  </button>
-                </div>
-              ))}
+            <div className="tv-dep-photo-grid">
+              {departures.map((dep) => {
+                const dd = new Date(dep.date);
+                const valid = !Number.isNaN(dd.getTime());
+                const day = valid ? dd.getDate() : '—';
+                const mon = valid ? `TH${dd.getMonth() + 1}` : '';
+                const go = () => navigate(`/booking/${dep.id}?tourId=${dep.tourId}`);
+                return (
+                  <article
+                    className="tv-dep-photo-card"
+                    key={dep.id}
+                    onClick={go}
+                    role="link"
+                    tabIndex={0}
+                    title={dep.tourName}
+                    onKeyDown={(e) => { if (e.key === 'Enter') go(); }}
+                  >
+                    <img
+                      src={dep.img || '/images/banner.jpg'}
+                      alt={dep.tourName}
+                      loading="lazy"
+                      data-fallback="/images/banner.jpg"
+                      onError={handleImgError}
+                    />
+                    <span className="tv-dep-photo-overlay" aria-hidden="true" />
+                    <span className="tv-dep-photo-badge" aria-hidden="true">
+                      <b>{day}</b>
+                      <span>{mon}</span>
+                    </span>
+                    <span className="tv-dep-photo-info">
+                      <span className="tv-dep-photo-name">{dep.tourName}</span>
+                      <span className="tv-dep-photo-meta">
+                        {dep.remaining != null && (
+                          <span className="tv-dep-photo-seats">Còn {dep.remaining} chỗ</span>
+                        )}
+                        {dep.price != null && (
+                          <span className="tv-dep-photo-price">{formatVND(dep.price)}</span>
+                        )}
+                      </span>
+                    </span>
+                  </article>
+                );
+              })}
             </div>
             <div style={{ textAlign: 'center', marginTop: 22 }}>
               <Link className="btn secondary" to="/lich-khoi-hanh">Xem tất cả lịch khởi hành</Link>
@@ -485,10 +515,12 @@ export default function Home() {
           </div>
           <div className="feature-grid">
             {WHY_US.map((f) => (
-              <div className="feature-card" key={f.title}>
+              <div className="feature-card tv-why-card" key={f.title}>
                 <div className="feature-icon">{f.icon}</div>
-                <b>{f.title}</b>
-                <p>{f.desc}</p>
+                <div className="tv-why-text">
+                  <b>{f.title}</b>
+                  <p>{f.desc}</p>
+                </div>
               </div>
             ))}
           </div>
