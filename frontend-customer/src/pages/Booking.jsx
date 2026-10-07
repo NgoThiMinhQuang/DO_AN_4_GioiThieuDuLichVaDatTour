@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { formatVND, formatDateVi, handleImgError } from '../components/ui.jsx';
+import { formatVND, formatDateVi, friendlyError, handleImgError } from '../components/ui.jsx';
 
 function emptyPassenger(type) {
   return { full_name: '', date_of_birth: '', gender: '', passenger_type: type, identity_number: '', nationality: '', note: '' };
@@ -68,7 +68,7 @@ export default function Booking() {
         setDepartures(res.data.departures || []);
         if (!selDep && res.data.departures?.[0]) setSelDep(String(res.data.departures[0].id));
       } catch (e) {
-        setError(e.response?.data?.message || e.message);
+        setError(friendlyError(e));
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,7 +103,7 @@ export default function Booking() {
       setPromoMsg(`Áp mã thành công, giảm ${formatVND(res.data.discount || 0)}`);
     } catch (e) {
       setDiscount(0);
-      setPromoMsg(e.response?.data?.message || e.message);
+      setPromoMsg(friendlyError(e));
     }
   }
 
@@ -123,7 +123,7 @@ export default function Booking() {
       });
       navigate(`/my-bookings/${res.data.id}`);
     } catch (e) {
-      setError(e.response?.data?.message || e.message);
+      setError(friendlyError(e));
     } finally {
       setSubmitting(false);
     }

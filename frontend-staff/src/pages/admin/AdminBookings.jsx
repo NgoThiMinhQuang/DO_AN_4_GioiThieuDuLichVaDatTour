@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
 import { ErrorBox, formatVND, statusBadge, viStatus } from '../../components/ui.jsx';
 
-const BSTATES = ['', 'PENDING', 'DEPOSIT_PENDING', 'CONFIRMED', 'ONGOING', 'COMPLETED', 'CANCELLED', 'EXPIRED'];
+// Khớp ENUM bookings.booking_status trong backend/sql/schema.sql
+const BSTATES = ['', 'PENDING', 'DEPOSIT_PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'EXPIRED'];
+// Khớp ENUM bookings.payment_status trong backend/sql/schema.sql
+const PSTATES = ['', 'UNPAID', 'PENDING', 'DEPOSITED', 'PARTIAL', 'PAID', 'FAILED', 'REFUNDED_PARTIAL', 'REFUNDED_FULL'];
 
 export default function AdminBookings() {
   const [rows, setRows] = useState([]);
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('');
+  const [payStatus, setPayStatus] = useState('');
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
   const [selectedId, setSelectedId] = useState(null);
@@ -17,7 +21,14 @@ export default function AdminBookings() {
   async function load() {
     setError('');
     try {
-      const res = await api.get('/admin/bookings', { params: { q: q || undefined, booking_status: status || undefined, limit: 50 } });
+      const res = await api.get('/admin/bookings', {
+        params: {
+          q: q || undefined,
+          booking_status: status || undefined,
+          payment_status: payStatus || undefined,
+          limit: 50,
+        },
+      });
       setRows(res.data.data || []);
     } catch (e) { setError(e.response?.data?.message || e.message); }
   }
@@ -52,6 +63,11 @@ export default function AdminBookings() {
     setDetail(null);
   }
 
+  const up = (v) => String(v || '').toUpperCase();
+  const pendingCount = rows.filter((b) => ['PENDING', 'DEPOSIT_PENDING'].includes(up(b.booking_status))).length;
+  const confirmedCount = rows.filter((b) => up(b.booking_status) === 'CONFIRMED').length;
+  const unpaidCount = rows.filter((b) => ['UNPAID', 'PENDING', 'PARTIAL', 'DEPOSITED'].includes(up(b.payment_status))).length;
+
   return (
     <div className="admin-page">
       <div className="admin-page-header">
@@ -66,13 +82,26 @@ export default function AdminBookings() {
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
+      {rows.length > 0 && (
+        <div className="admin-kpi-grid">
+          <div className="admin-kpi-card"><span className="admin-kpi-icon">📋</span><div className="admin-kpi-body"><span className="admin-muted">Tổng đơn</span><b>{rows.length}</b><div className="admin-muted">Khớp điều kiện lọc</div></div></div>
+          <div className="admin-kpi-card"><span className="admin-kpi-icon g3">⏳</span><div className="admin-kpi-body"><span className="admin-muted">Chờ xác nhận</span><b>{pendingCount}</b><div className="admin-muted">Chờ đặt cọc + chờ duyệt</div></div></div>
+          <div className="admin-kpi-card"><span className="admin-kpi-icon g2">✅</span><div className="admin-kpi-body"><span className="admin-muted">Đã xác nhận</span><b>{confirmedCount}</b><div className="admin-muted">Sẵn sàng phục vụ</div></div></div>
+          <div className="admin-kpi-card"><span className="admin-kpi-icon g4">💳</span><div className="admin-kpi-body"><span className="admin-muted">Chưa thu đủ</span><b>{unpaidCount}</b><div className="admin-muted">Cần đối soát thanh toán</div></div></div>
+        </div>
+      )}
       <div className="admin-filter-toolbar is-compact">
         <div className="admin-filter-field">
           <input placeholder="🔍 Tìm mã đơn / tên / email / số điện thoại..." value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
         <div className="admin-filter-field">
           <select value={status} onChange={(e) => setStatus(e.target.value)}>
-            {BSTATES.map((s) => <option key={s} value={s}>{s === '' ? 'Tất cả trạng thái' : viStatus(s)}</option>)}
+            {BSTATES.map((s) => <option key={s} value={s}>{s === '' ? 'Tất cả trạng thái đơn' : viStatus(s)}</option>)}
+          </select>
+        </div>
+        <div className="admin-filter-field">
+          <select value={payStatus} onChange={(e) => setPayStatus(e.target.value)}>
+            {PSTATES.map((s) => <option key={s} value={s}>{s === '' ? 'Tất cả thanh toán' : viStatus(s)}</option>)}
           </select>
         </div>
         <button className="admin-primary-button" onClick={load}>Tìm kiếm</button>
@@ -131,14 +160,15 @@ export default function AdminBookings() {
               {(detail.passengers || []).length === 0 && <div className="admin-muted">Chưa có thông tin hành khách.</div>}
               {(detail.passengers || []).length > 0 && (
                 <div className="mini-table-wrap"><table>
-                  <thead><tr><th>Họ tên</th><th>Loại vé</th><th>Ngày sinh</th><th>Giấy tờ</th></tr></thead>
+                  <thead><tr><th>Họ tên</th><th>Loại khách</th><th>Giới tính</th><th>Ngày sinh</th><th>Giấy tờ</th></tr></thead>
                   <tbody>
                     {detail.passengers.map((p, i) => (
                       <tr key={p.id || i}>
                         <td>{p.full_name}</td>
-                        <td>{viStatus(p.ticket_type) !== p.ticket_type ? viStatus(p.ticket_type) : (p.passenger_type || p.ticket_type || '—')}</td>
+                        <td>{viStatus(p.passenger_type)}</td>
+                        <td>{p.gender ? viStatus(p.gender) : '—'}</td>
                         <td>{p.date_of_birth ? String(p.date_of_birth).slice(0, 10) : '—'}</td>
-                        <td>{p.id_number || p.passport || '—'}</td>
+                        <td>{p.identity_number || p.passport_number || '—'}</td>
                       </tr>
                     ))}
                   </tbody>

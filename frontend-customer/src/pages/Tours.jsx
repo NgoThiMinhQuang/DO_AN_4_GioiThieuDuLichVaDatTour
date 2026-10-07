@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { TourCard, ErrorBox, formatDateVi } from '../components/ui.jsx';
+import { TourCard, EmptyState, LoadError, formatDateVi } from '../components/ui.jsx';
 
 export default function Tours() {
   const [params] = useSearchParams();
@@ -150,8 +150,17 @@ export default function Tours() {
           </div>
         </div>
       </div>
-      <ErrorBox error={error} />
-      {tours.length === 0 && !error && <div className="empty-box">Không tìm thấy tour phù hợp. Thử nới lỏng điều kiện lọc.</div>}
+      <LoadError
+        error={error}
+        icon="🧳"
+        title="Không tải được danh sách tour"
+        onRetry={() => fetchTours()}
+      />
+      {tours.length === 0 && !error && (
+        <EmptyState icon="🔍" title="Không tìm thấy tour phù hợp" hint="Thử nới lỏng điều kiện lọc hoặc xem tất cả tour đang mở bán.">
+          <button className="btn secondary" type="button" onClick={clearFilter}>Xóa bộ lọc</button>
+        </EmptyState>
+      )}
       <div className="grid tours">
         {tours.map((t) => <TourCard key={t.id} t={t} />)}
       </div>

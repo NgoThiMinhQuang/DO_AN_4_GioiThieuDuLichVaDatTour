@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { ErrorBox, formatVND, TourCard, resolveTourImg, handleImgError, tourStatusVi, formatDateVi } from '../components/ui.jsx';
+import { LoadError, formatVND, TourCard, resolveTourImg, handleImgError, tourStatusVi, formatDateVi, friendlyError } from '../components/ui.jsx';
 
 export default function TourDetail() {
   const { id } = useParams();
@@ -41,11 +41,19 @@ export default function TourDetail() {
       else await api.delete(`/favorites/${id}`);
       setFavMsg(add ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích');
     } catch (e) {
-      setFavMsg(e.response?.data?.message || e.message);
+      setFavMsg(friendlyError(e));
     }
   }
 
-  if (error) return <div className="container"><ErrorBox error={error} /></div>;
+  if (error) {
+    return (
+      <div className="container" style={{ paddingTop: 32 }}>
+        <LoadError error={error} icon="🧳" title="Không tải được chi tiết tour" onRetry={() => window.location.reload()}>
+          <Link className="btn secondary" to="/tours">Về danh sách tour</Link>
+        </LoadError>
+      </div>
+    );
+  }
   if (!tour) return <div className="container"><p>Đang tải...</p></div>;
 
   const old = tour.adult_price ? Math.round(Number(tour.adult_price) * 1.15) : null;

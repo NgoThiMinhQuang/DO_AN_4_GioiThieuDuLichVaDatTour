@@ -54,10 +54,10 @@ export default function AdminPayments() {
       </div>
       <div className="sub-head"><h3>Danh sách thanh toán</h3><span className="admin-muted">{rows.length} giao dịch</span></div>
       <div className="admin-page-card"><table className="admin-table">
-        <thead><tr><th>Mã giao dịch</th><th>Mã đơn</th><th>Số tiền</th><th>Trạng thái</th><th>Xác nhận</th></tr></thead>
+        <thead><tr><th>Mã giao dịch</th><th>Mã đơn</th><th>Số tiền</th><th>Phương thức</th><th>Trạng thái</th><th>Xác nhận</th></tr></thead>
         <tbody>
           {rows.length === 0 && (
-            <tr><td colSpan={5}>
+            <tr><td colSpan={6}>
               <div className="admin-empty-block">
                 <div className="admin-empty-icon">💳</div>
                 <b>Chưa có giao dịch thanh toán nào</b>
@@ -67,7 +67,8 @@ export default function AdminPayments() {
           )}
           {rows.map((p) => (
             <tr key={p.id}>
-              <td><span className="table-code">{p.transaction_code}</span></td><td>{p.booking_code}</td><td><span className="admin-price">{formatVND(p.amount)}</span></td>
+              <td><span className="table-code">{p.transaction_code || `#${p.id}`}</span></td><td>{p.booking_code || `#${p.booking_id}`}</td><td><span className="admin-price">{formatVND(p.amount)}</span></td>
+              <td>{p.payment_method ? viStatus(p.payment_method) : '—'}</td>
               <td><span className={statusBadge(p.status)}>{viStatus(p.status)}</span></td>
               <td>
                 <div className="admin-inline-actions">
@@ -92,7 +93,7 @@ export default function AdminPayments() {
               </div>
             </td></tr>
           )}
-          {refunds.map((r) => <tr key={r.id}><td><span className="table-code">{r.refund_code}</span></td><td>{r.booking_code}</td><td><span className="admin-price">{formatVND(r.amount)}</span></td><td><span className={statusBadge(r.status)}>{viStatus(r.status)}</span></td></tr>)}
+          {refunds.map((r) => <tr key={r.id}><td><span className="table-code">{r.refund_code}</span></td><td>{r.booking_code || (r.booking_id ? `#${r.booking_id}` : '—')}</td><td><span className="admin-price">{formatVND(r.amount)}</span></td><td><span className={statusBadge(r.status)}>{viStatus(r.status)}</span></td></tr>)}
         </tbody>
       </table></div>
     </div>

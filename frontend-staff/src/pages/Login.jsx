@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../api/client.js';
 
-// Trang dang nhap NHAN VIEN: chi chap nhan role STAFF.
-// Login xong goi /auth/me, neu role !== 'STAFF' thi logout + bao loi.
+// Trang dang nhap NHAN VIEN: chi chap nhan role STAFF (ADMIN co toan quyen nen van vao duoc).
+// Login xong goi /auth/me, neu role khong phai STAFF/ADMIN thi logout + bao loi.
 export default function Login() {
   const [identifier, setIdentifier] = useState('staff@gmail.com');
   const [password, setPassword] = useState('Staff123!');
@@ -24,7 +24,7 @@ export default function Login() {
       } catch (_) {
         role = null;
       }
-      if (role !== 'STAFF') {
+      if (role !== 'STAFF' && role !== 'ADMIN') {
         logout();
         setError('Đây là trang dành cho nhân viên. Vui lòng dùng tài khoản nhân viên.');
         return;

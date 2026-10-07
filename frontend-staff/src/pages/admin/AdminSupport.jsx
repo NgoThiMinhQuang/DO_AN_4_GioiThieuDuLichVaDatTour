@@ -114,6 +114,7 @@ export default function AdminSupport() {
   }
 
   const openCount = rows.filter((r) => ['OPEN', 'IN_PROGRESS'].includes(String(r.status || '').toUpperCase())).length;
+  const resolvedCount = rows.filter((r) => String(r.status || '').toUpperCase() === 'RESOLVED').length;
 
   return (
     <div className="admin-page">
@@ -129,6 +130,13 @@ export default function AdminSupport() {
       </div>
       <ErrorBox error={error} />
       {msg && <div className="alert info">{msg}</div>}
+      {rows.length > 0 && (
+        <div className="admin-kpi-grid">
+          <div className="admin-kpi-card"><span className="admin-kpi-icon">💬</span><div className="admin-kpi-body"><span className="admin-muted">Tổng yêu cầu</span><b>{rows.length}</b><div className="admin-muted">Khớp điều kiện lọc</div></div></div>
+          <div className="admin-kpi-card"><span className="admin-kpi-icon g3">⏳</span><div className="admin-kpi-body"><span className="admin-muted">Chờ xử lý</span><b>{openCount}</b><div className="admin-muted">Mới + đang xử lý</div></div></div>
+          <div className="admin-kpi-card"><span className="admin-kpi-icon g2">✅</span><div className="admin-kpi-body"><span className="admin-muted">Đã giải quyết</span><b>{resolvedCount}</b><div className="admin-muted">Khách đã được phản hồi</div></div></div>
+        </div>
+      )}
       <div className="admin-filter-toolbar is-compact">
         <div className="admin-filter-field">
           <input placeholder="🔍 Tìm mã / tiêu đề / tên / email..." value={q} onChange={(e) => setQ(e.target.value)} />

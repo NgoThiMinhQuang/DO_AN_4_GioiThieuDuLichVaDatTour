@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, formatVND, bookingStatusVi, paymentStatusVi, paymentMethodVi, passengerTypeVi, formatDateVi } from '../components/ui.jsx';
+import { LoadError, formatVND, bookingStatusVi, paymentStatusVi, paymentMethodVi, passengerTypeVi, formatDateVi, friendlyError } from '../components/ui.jsx';
 
 function badgeClass(s) {
   const v = String(s || '').toUpperCase();
@@ -36,7 +36,7 @@ export default function BookingDetail() {
       await api.post('/payments', { bookingId: Number(id), amount: Number(pay.amount), method: pay.method });
       setMsg('Thanh toán thành công');
       load();
-    } catch (e) { setMsg(e.response?.data?.message || e.message); }
+    } catch (e) { setMsg(friendlyError(e)); }
   }
 
   async function doCancel() {
@@ -45,7 +45,7 @@ export default function BookingDetail() {
       const res = await api.post(`/bookings/${id}/cancel`);
       setMsg(res.data.message);
       load();
-    } catch (e) { setMsg(e.response?.data?.message || e.message); }
+    } catch (e) { setMsg(friendlyError(e)); }
   }
 
   async function doReview() {
@@ -53,10 +53,18 @@ export default function BookingDetail() {
       await api.post(`/bookings/${id}/reviews`, { rating: Number(review.rating), content: review.content });
       setMsg('Đánh giá thành công');
       load();
-    } catch (e) { setMsg(e.response?.data?.message || e.message); }
+    } catch (e) { setMsg(friendlyError(e)); }
   }
 
-  if (error) return <div className="container"><ErrorBox error={error} /></div>;
+  if (error) {
+    return (
+      <div className="container" style={{ paddingTop: 32 }}>
+        <LoadError error={error} icon="🧾" title="Không tải được chi tiết đặt tour" onRetry={() => window.location.reload()}>
+          <Link className="btn secondary" to="/my-bookings">Về danh sách đặt tour</Link>
+        </LoadError>
+      </div>
+    );
+  }
   if (!b) return <div className="container"><p>Đang tải...</p></div>;
   const canPay = Number(b.remaining_amount) > 0 && !['CANCELLED', 'EXPIRED'].includes(String(b.booking_status).toUpperCase());
   const canCancel = !['CANCELLED', 'COMPLETED', 'EXPIRED'].includes(String(b.booking_status).toUpperCase());

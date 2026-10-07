@@ -27,6 +27,11 @@ const STATUS_VI = {
   // Thanh toán / hoàn tiền
   SUCCESS: 'Thành công',
   PAID: 'Đã thanh toán',
+  UNPAID: 'Chưa thanh toán',
+  PARTIAL: 'Một phần',
+  DEPOSITED: 'Đã đặt cọc',
+  REFUNDED_PARTIAL: 'Đã hoàn một phần',
+  REFUNDED_FULL: 'Đã hoàn toàn bộ',
   FAILED: 'Thất bại',
   PROCESSING: 'Đang xử lý',
   // Khuyến mãi
@@ -59,9 +64,9 @@ export function viStatus(s) {
 // Map backend status -> badge tone class (keeps old `badge` className)
 export function statusTone(s) {
   const v = String(s || '').toUpperCase();
-  if (['SUCCESS', 'CONFIRMED', 'COMPLETED', 'DONE', 'ACTIVE', 'VISIBLE', 'PUBLISHED', 'OPEN', 'PAID'].includes(v)) return 'badge b-green';
-  if (['PENDING', 'DEPOSIT_PENDING', 'PROCESSING', 'ONGOING', 'ALMOST_FULL', 'PAUSED'].includes(v)) return 'badge b-amber';
-  if (['FAILED', 'CANCELLED', 'LOCKED', 'HIDDEN', 'INACTIVE', 'CLOSED', 'EXPIRED'].includes(v)) return 'badge b-red';
+  if (['SUCCESS', 'CONFIRMED', 'COMPLETED', 'DONE', 'ACTIVE', 'VISIBLE', 'PUBLISHED', 'OPEN', 'PAID', 'DEPOSITED'].includes(v)) return 'badge b-green';
+  if (['PENDING', 'DEPOSIT_PENDING', 'PROCESSING', 'ONGOING', 'ALMOST_FULL', 'PAUSED', 'PARTIAL', 'UNPAID'].includes(v)) return 'badge b-amber';
+  if (['FAILED', 'CANCELLED', 'LOCKED', 'HIDDEN', 'INACTIVE', 'CLOSED', 'EXPIRED', 'REFUNDED_FULL', 'REFUNDED_PARTIAL'].includes(v)) return 'badge b-red';
   if (['FULL'].includes(v)) return 'badge b-purple';
   if (['DRAFT'].includes(v)) return 'badge b-gray';
   return 'badge b-blue';

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { ErrorBox, formatDateVi } from '../components/ui.jsx';
+import { EmptyState, LoadError, formatDateVi, friendlyError } from '../components/ui.jsx';
 
 const TYPE_OPTIONS = [
   { value: 'BOOKING', label: 'Đặt tour' },
@@ -104,7 +104,7 @@ export default function LienHe() {
       setForm((prev) => ({ ...prev, title: '', content: '', bookingId: '' }));
       loadMine();
     } catch (err) {
-      setFormError(err.response?.data?.message || err.message);
+      setFormError(friendlyError(err));
     } finally {
       setSending(false);
     }
@@ -194,8 +194,10 @@ export default function LienHe() {
         <h2 style={{ fontSize: 20 }}>Yêu cầu đã gửi của tôi ({rows.length})</h2>
         <p>Theo dõi trạng thái xử lý và phản hồi từ quản trị viên.</p>
       </div>
-      <ErrorBox error={error} />
-      {rows.length === 0 && !error && <div className="empty-box">Bạn chưa gửi yêu cầu nào.</div>}
+      {error && <LoadError error={error} icon="💬" title="Không tải được yêu cầu đã gửi" onRetry={() => loadMine()} />}
+      {rows.length === 0 && !error && (
+        <EmptyState icon="💬" title="Bạn chưa gửi yêu cầu nào" hint="Gửi biểu mẫu phía trên nếu cần hỗ trợ về đặt tour hoặc thanh toán." />
+      )}
       <div className="tv-booking-cards">
         {rows.map((t) => (
           <div className="tv-booking-card" key={t.id} style={{ alignItems: 'flex-start' }}>

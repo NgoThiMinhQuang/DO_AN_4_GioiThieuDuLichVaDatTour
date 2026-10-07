@@ -93,7 +93,8 @@ export default function AdminRefunds() {
               <td>{r.reason}</td><td><StatusBadge value={r.status} /></td>
               <td>
                 <select value={r.status} onChange={(e) => patch(r.id, e.target.value)}>
-                  {RSTATES.map((s) => <option key={s} value={s}>{viStatus(s)}</option>)}
+                  {r.status === 'PENDING' && <option value="PENDING">{viStatus('PENDING')}</option>}
+                  {['PROCESSING', 'SUCCESS', 'FAILED'].map((s) => <option key={s} value={s}>{viStatus(s)}</option>)}
                 </select>
               </td>
             </tr>

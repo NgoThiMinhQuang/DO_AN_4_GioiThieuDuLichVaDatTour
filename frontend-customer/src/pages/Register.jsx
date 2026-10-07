@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { friendlyError } from '../components/ui.jsx';
 
 export default function Register() {
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '' });
@@ -15,7 +16,7 @@ export default function Register() {
       await register(form);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || err.message);
+      setError(friendlyError(err));
     }
   }
 

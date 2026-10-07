@@ -9,11 +9,11 @@ import AdminPayments from './pages/admin/AdminPayments.jsx';
 import AdminRefunds from './pages/admin/AdminRefunds.jsx';
 import AdminSupport from './pages/admin/AdminSupport.jsx';
 
-// Tat ca trang nghiep vu (tru /login) yeu cau role STAFF.
+// Tat ca trang nghiep vu (tru /login) yeu cau role STAFF (ADMIN duoc phep vi co toan quyen backend).
 function RequireStaff({ children }) {
   const { token, role } = useAuth();
   if (!token) return <Navigate to="/login" replace />;
-  if (role && role !== 'STAFF') return <Navigate to="/login" replace />;
+  if (role && role !== 'STAFF' && role !== 'ADMIN') return <Navigate to="/login" replace />;
   return children;
 }
 
@@ -78,7 +78,7 @@ function Home() {
       try {
         const [b, d, p, r, s] = await Promise.all([
           api.get('/admin/bookings', { params: { limit: 100 } }).catch(() => ({ data: { data: [] } })),
-          api.get('/admin/departures').catch(() => ({ data: { data: [] } })),
+          api.get('/admin/departures', { params: { limit: 200 } }).catch(() => ({ data: { data: [] } })),
           api.get('/admin/payments').catch(() => ({ data: { data: [] } })),
           api.get('/admin/refunds').catch(() => ({ data: { data: [] } })),
           api.get('/admin/support').catch(() => ({ data: { data: [] } })),
@@ -91,7 +91,7 @@ function Home() {
         const tickets = s.data.data || [];
         setStats({
           pendingBookings: bookings.filter((x) => ['PENDING', 'DEPOSIT_PENDING'].includes(String(x.booking_status || '').toUpperCase())).length,
-          openDepartures: deps.filter((x) => ['OPEN', 'ALMOST_FULL', 'AVAILABLE'].includes(String(x.status || '').toUpperCase())).length,
+          openDepartures: deps.filter((x) => ['OPEN', 'ALMOST_FULL'].includes(String(x.status || '').toUpperCase())).length,
           pendingPayments: payments.filter((x) => !['SUCCESS', 'FAILED'].includes(String(x.status || '').toUpperCase())).length,
           pendingRefunds: refunds.filter((x) => ['PENDING', 'PROCESSING'].includes(String(x.status || '').toUpperCase())).length,
           openSupport: tickets.filter((x) => ['OPEN', 'IN_PROGRESS'].includes(String(x.status || '').toUpperCase())).length,

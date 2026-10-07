@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, formatVND, bookingStatusVi, paymentStatusVi, formatDateVi } from '../components/ui.jsx';
+import { LoadError, formatVND, bookingStatusVi, paymentStatusVi, formatDateVi } from '../components/ui.jsx';
 
 function statusClass(s) {
   const v = String(s || '').toUpperCase();
@@ -29,7 +29,7 @@ export default function MyBookings() {
         <h2>Đặt tour của tôi ({rows.length})</h2>
         <p>Theo dõi trạng thái đặt tour và thanh toán của bạn.</p>
       </div>
-      <ErrorBox error={error} />
+      {error && <LoadError error={error} icon="🧳" title="Không tải được lịch sử đặt tour" onRetry={() => window.location.reload()} />}
       {rows.length === 0 && !error && (
         <div className="tv-empty">
           <div className="tv-empty-icon">🧳</div>

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
 import {
-  ErrorBox,
+  EmptyState,
+  LoadError,
   formatDateVi,
   formatVND,
   handleImgError,
@@ -108,8 +109,10 @@ export default function LichKhoiHanh() {
         <span className="tv-filter-count">Tìm thấy {visible.length} đợt khởi hành</span>
       </div>
 
-      <ErrorBox error={error} />
-      {loading && <div className="empty-box">Đang tải lịch khởi hành...</div>}
+      {error && <LoadError error={error} icon="📅" title="Không tải được lịch khởi hành" onRetry={() => window.location.reload()} />}
+      {loading && (
+        <EmptyState icon="⏳" title="Đang tải lịch khởi hành..." hint="Vui lòng chờ trong giây lát." />
+      )}
 
       {!loading && visible.length === 0 && !error && (
         <div className="tv-empty">

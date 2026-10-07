@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client.js';
-import { ErrorBox } from '../components/ui.jsx';
+import { friendlyError } from '../components/ui.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Profile() {
@@ -32,7 +32,7 @@ export default function Profile() {
     try {
       await api.put('/auth/me', { ...form, date_of_birth: form.date_of_birth || null, gender: form.gender || null });
       setMsg('Cập nhật hồ sơ thành công');
-    } catch (err) { setMsg(err.response?.data?.message || err.message); }
+    } catch (err) { setMsg(friendlyError(err)); }
   }
 
   async function changePw(e) {
@@ -41,7 +41,7 @@ export default function Profile() {
       await api.post('/auth/change-password', pw);
       setMsg('Đổi mật khẩu thành công');
       setPw({ old_password: '', new_password: '' });
-    } catch (err) { setMsg(err.response?.data?.message || err.message); }
+    } catch (err) { setMsg(friendlyError(err)); }
   }
 
   const initial = ((form.full_name || user?.email || 'T').trim().charAt(0) || 'T').toUpperCase();
@@ -61,7 +61,13 @@ export default function Profile() {
         <div className="muted">{user?.email || ''}</div>
         <div style={{ marginTop: 8 }}><span className="badge green">Thành viên TravelViet</span></div>
       </div>
-      <ErrorBox error={error} />
+      {error && (
+        <div className="alert info">
+          {/network|fetch|timeout|500/i.test(error)
+            ? 'Không tải được hồ sơ lúc này. Vui lòng kiểm tra mạng rồi thử lại.'
+            : error}
+        </div>
+      )}
       {msg && <div className="alert info">{msg}</div>}
       <div className="tv-profile-grid">
         <div className="panel profile-panel" style={{ marginBottom: 0 }}>

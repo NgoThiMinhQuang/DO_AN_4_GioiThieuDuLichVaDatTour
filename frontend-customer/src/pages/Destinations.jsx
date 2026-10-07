@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, handleImgError, fallbackDestImg } from '../components/ui.jsx';
+import { EmptyState, LoadError, handleImgError, fallbackDestImg } from '../components/ui.jsx';
 
 export default function Destinations() {
   const [rows, setRows] = useState([]);
@@ -48,8 +48,10 @@ export default function Destinations() {
         {(q || region) && <button className="btn ghost btn-sm" type="button" onClick={() => { setQ(''); setRegion(''); }}>Xóa lọc</button>}
         <span className="tv-filter-count">{filtered.length}/{rows.length} điểm đến</span>
       </div>
-      <ErrorBox error={error} />
-      {filtered.length === 0 && !error && <div className="empty-box">Không tìm thấy điểm đến phù hợp.</div>}
+      {error && <LoadError error={error} icon="📍" title="Không tải được danh sách điểm đến" onRetry={() => window.location.reload()} />}
+      {filtered.length === 0 && !error && (
+        <EmptyState icon="📍" title="Không tìm thấy điểm đến phù hợp" hint="Thử tìm kiếm với tên khác hoặc xóa bộ lọc hiện tại." />
+      )}
       <div className="bento-grid tv-bento">
         {filtered.map((d, i) => {
           const fb = fallbackDestImg(d.id, i);

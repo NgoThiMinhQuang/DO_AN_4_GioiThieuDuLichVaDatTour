@@ -13,13 +13,14 @@ export default function AdminDepartures() {
   const [deps, setDeps] = useState([]);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
-  const [createForm, setCreateForm] = useState({ departure_date: '', capacity: 30, status: 'OPEN', meeting_point: '' });
+  const [createForm, setCreateForm] = useState({ departure_date: '', return_date: '', capacity: 30, minimum_guests: 1, status: 'OPEN', meeting_point: '' });
 
   async function loadByTour() {
     setError('');
     try {
       const params = {};
       if (tourId) params.tour_id = tourId;
+      if (status) params.status = status;
       const res = await api.get('/admin/departures', { params });
       setDeps(res.data.data || []);
       if (!(res.data.data || []).length) setError('Chưa có lịch khởi hành nào khớp điều kiện.');
@@ -31,8 +32,23 @@ export default function AdminDepartures() {
 
   async function create() {
     setMsg('');
+    if (!tourId) {
+      setMsg('Vui lòng nhập mã tour trước khi thêm lịch khởi hành.');
+      return;
+    }
+    if (!createForm.departure_date) {
+      setMsg('Vui lòng chọn ngày khởi hành.');
+      return;
+    }
     try {
-      const res = await api.post(`/admin/tours/${tourId}/departures`, createForm);
+      const res = await api.post(`/admin/tours/${tourId}/departures`, {
+        departure_date: createForm.departure_date,
+        return_date: createForm.return_date || null,
+        capacity: Number(createForm.capacity) || 30,
+        minimum_guests: Number(createForm.minimum_guests) || 1,
+        meeting_point: createForm.meeting_point || null,
+        status: createForm.status,
+      });
       setMsg(`Thêm lịch khởi hành #${res.data.id} thành công.`);
       loadByTour();
     } catch (e) { setMsg(e.response?.data?.message || e.message); }
@@ -46,7 +62,7 @@ export default function AdminDepartures() {
     } catch (e) { setMsg(e.response?.data?.message || e.message); }
   }
 
-  const filtered = deps.filter((d) => !status || d.status === status);
+  const filtered = deps;
 
   return (
     <div>
@@ -71,6 +87,8 @@ export default function AdminDepartures() {
         {!readOnly && (
         <div className="form-grid-2">
           <input type="number" placeholder="Sức chứa" value={createForm.capacity} onChange={(e) => setCreateForm({ ...createForm, capacity: Number(e.target.value) })} />
+          <input type="number" min="1" placeholder="Số khách tối thiểu" value={createForm.minimum_guests} onChange={(e) => setCreateForm({ ...createForm, minimum_guests: Number(e.target.value) })} />
+          <label>Ngày về<input type="date" value={createForm.return_date} onChange={(e) => setCreateForm({ ...createForm, return_date: e.target.value })} /></label>
           <input placeholder="Điểm tập trung (ví dụ: 123 Nguyễn Huệ, Q.1)" value={createForm.meeting_point} onChange={(e) => setCreateForm({ ...createForm, meeting_point: e.target.value })} />
           <div className="filter-actions">
             <button className="btn secondary sm" onClick={create}>Thêm lịch khởi hành</button>

@@ -48,7 +48,6 @@ export default function AdminReviews() {
             <option value="">Tất cả trạng thái</option>
             <option value="VISIBLE">Hiển thị</option>
             <option value="HIDDEN">Đã ẩn</option>
-            <option value="PUBLISHED">Đã đăng</option>
           </select>
           <select value="" onChange={() => {}} aria-label="Điểm số">
             <option value="">Mọi điểm số</option>

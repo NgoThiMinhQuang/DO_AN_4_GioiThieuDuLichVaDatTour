@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, TourCard } from '../components/ui.jsx';
+import { LoadError, TourCard, friendlyError } from '../components/ui.jsx';
 
 export default function Favorites() {
   const [rows, setRows] = useState([]);
@@ -19,7 +19,7 @@ export default function Favorites() {
       await api.delete(`/favorites/${id}`);
       setMsg('Đã xóa khỏi yêu thích');
       load();
-    } catch (e) { setMsg(e.response?.data?.message || e.message); }
+    } catch (e) { setMsg(friendlyError(e)); }
   }
   return (
     <div className="container">
@@ -28,7 +28,7 @@ export default function Favorites() {
         <h2>Tour yêu thích ({rows.length})</h2>
         <p>Những hành trình bạn đã tim — đặt ngay khi sẵn sàng.</p>
       </div>
-      <ErrorBox error={error} />
+      {error && <LoadError error={error} icon="♡" title="Không tải được tour yêu thích" onRetry={() => load()} />}
       {msg && <div className="alert info">{msg}</div>}
       {rows.length === 0 && !error && (
         <div className="tv-empty">

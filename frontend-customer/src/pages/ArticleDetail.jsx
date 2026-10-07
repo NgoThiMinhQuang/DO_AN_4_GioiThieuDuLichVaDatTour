@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, handleImgError, resolveArticleImg, formatDateVi } from '../components/ui.jsx';
+import { LoadError, handleImgError, resolveArticleImg, formatDateVi } from '../components/ui.jsx';
 
 export default function ArticleDetail() {
   const { id } = useParams();
@@ -21,7 +21,15 @@ export default function ArticleDetail() {
       } catch (e) { setError(e.response?.data?.message || e.message); }
     })();
   }, [id]);
-  if (error) return <div className="container"><ErrorBox error={error} /></div>;
+  if (error) {
+    return (
+      <div className="container" style={{ paddingTop: 32 }}>
+        <LoadError error={error} icon="📰" title="Không tải được bài viết" onRetry={() => window.location.reload()}>
+          <Link className="btn secondary" to="/articles">Về danh sách bài viết</Link>
+        </LoadError>
+      </div>
+    );
+  }
   if (!a) return <div className="container"><p>Đang tải...</p></div>;
   return (
     <div className="container tv-article-body">

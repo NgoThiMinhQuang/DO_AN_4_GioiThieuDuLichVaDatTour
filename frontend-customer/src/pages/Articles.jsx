@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, handleImgError, resolveArticleImg, formatDateVi } from '../components/ui.jsx';
+import { EmptyState, LoadError, handleImgError, resolveArticleImg, formatDateVi } from '../components/ui.jsx';
 
 export default function Articles() {
   const [rows, setRows] = useState([]);
@@ -36,8 +36,10 @@ export default function Articles() {
         <input placeholder="Tìm bài viết..." value={q} onChange={(e) => setQ(e.target.value)} aria-label="Tìm bài viết" />
         <span className="tv-filter-count">{filtered.length}/{rows.length} bài viết</span>
       </div>
-      <ErrorBox error={error} />
-      {filtered.length === 0 && !error && <div className="empty-box">Chưa có bài viết nào.</div>}
+      {error && <LoadError error={error} icon="📰" title="Không tải được danh sách bài viết" onRetry={() => window.location.reload()} />}
+      {filtered.length === 0 && !error && (
+        <EmptyState icon="📰" title="Chưa có bài viết nào" hint="Cẩm nang du lịch đang được cập nhật. Vui lòng quay lại sau." />
+      )}
       {featured && (
         <div className="card" style={{ marginBottom: 20 }}>
           <div className="grid cols-2" style={{ gap: 0 }}>

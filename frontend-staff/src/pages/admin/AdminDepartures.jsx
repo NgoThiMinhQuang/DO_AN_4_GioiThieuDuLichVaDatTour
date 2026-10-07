@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
 import { formatVND, statusBadge, viStatus } from '../../components/ui.jsx';
 
+// Khớp ENUM departures.status trong backend/sql/schema.sql
+const DSTATES = ['', 'NOT_OPEN', 'OPEN', 'ALMOST_FULL', 'FULL', 'CLOSED', 'ONGOING', 'COMPLETED', 'CANCELLED'];
+
 // App nhan vien: LUON chi doc — khong nut tao lich khoi hanh, khong doi trang thai.
-// Chi xem lich khoi hanh + so cho con lai.
+// Chi xem lich khoi hanh + so cho con lai (GET /api/admin/departures).
 export default function AdminDepartures() {
   const [tourId, setTourId] = useState('');
+  const [status, setStatus] = useState('');
   const [deps, setDeps] = useState([]);
   const [error, setError] = useState('');
   const [loaded, setLoaded] = useState(false);
@@ -13,8 +17,9 @@ export default function AdminDepartures() {
   async function loadByTour() {
     setError('');
     try {
-      const params = {};
+      const params = { limit: 200 };
       if (tourId) params.tour_id = tourId;
+      if (status) params.status = status;
       const res = await api.get('/admin/departures', { params });
       setDeps(res.data.data || []);
       setLoaded(true);
@@ -26,9 +31,12 @@ export default function AdminDepartures() {
     }
   }
 
-  const remainingOf = (d) => d.remaining ?? (d.capacity - d.confirmed_seats - d.held_seats);
+  useEffect(() => { loadByTour(); // eslint-disable-next-line
+  }, []);
+
+  const remainingOf = (d) => d.remaining ?? (Number(d.capacity || 0) - Number(d.confirmed_seats || 0) - Number(d.held_seats || 0));
   const totalRemaining = deps.reduce((s, d) => s + (Number(remainingOf(d)) || 0), 0);
-  const openCount = deps.filter((d) => ['OPEN', 'ALMOST_FULL', 'AVAILABLE'].includes(String(d.status || '').toUpperCase())).length;
+  const openCount = deps.filter((d) => ['OPEN', 'ALMOST_FULL'].includes(String(d.status || '').toUpperCase())).length;
 
   return (
     <div className="admin-page">
@@ -55,13 +63,18 @@ export default function AdminDepartures() {
         <div className="admin-filter-field grow">
           <input placeholder="Mã tour (ví dụ: 1, để trống = xem tất cả)" value={tourId} onChange={(e) => setTourId(e.target.value)} />
         </div>
+        <div className="admin-filter-field">
+          <select value={status} onChange={(e) => setStatus(e.target.value)}>
+            {DSTATES.map((s) => <option key={s} value={s}>{s === '' ? 'Tất cả trạng thái' : viStatus(s)}</option>)}
+          </select>
+        </div>
         <button className="admin-primary-button" onClick={loadByTour}>Tải lịch khởi hành</button>
       </div>
       <div className="admin-page-card"><table className="admin-table">
-        <thead><tr><th>Mã</th><th>Ngày đi</th><th>Còn lại</th><th>Giá người lớn</th><th>Trạng thái</th></tr></thead>
+        <thead><tr><th>Mã</th><th>Tour</th><th>Ngày đi</th><th>Còn lại</th><th>Giá người lớn</th><th>Trạng thái</th></tr></thead>
         <tbody>
           {deps.length === 0 && (
-            <tr><td colSpan={5}>
+            <tr><td colSpan={6}>
               <div className="admin-empty-block">
                 <div className="admin-empty-icon">🗓️</div>
                 <b>{loaded ? 'Chưa có lịch khởi hành nào' : 'Chưa tải dữ liệu'}</b>
@@ -72,6 +85,7 @@ export default function AdminDepartures() {
           {deps.map((d) => (
             <tr key={d.id}>
               <td>#{d.id}</td>
+              <td>{d.tour_name || (d.tour_id ? `Tour #${d.tour_id}` : '—')}</td>
               <td>{String(d.departure_date).slice(0, 10)}</td>
               <td><span className="table-code">{remainingOf(d)}</span></td>
               <td><span className="admin-price">{formatVND(d.adult_price)}</span></td>

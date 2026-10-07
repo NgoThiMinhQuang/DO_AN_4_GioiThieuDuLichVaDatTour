@@ -25,7 +25,7 @@ export default function Dashboard() {
     })();
   }, []);
 
-  const upcoming = topTours.slice(0, 5);
+  const upcomingDeps = data?.upcoming_departures || [];
   const maxRevenue = revenue.reduce((m, r) => Math.max(m, Number(r.revenue) || 0), 0);
   const totalTx = revenue.reduce((s, r) => s + (Number(r.transactions) || 0), 0);
 
@@ -41,7 +41,7 @@ export default function Dashboard() {
       {data && (
         <>
           <div className="stat-cards">
-            <div className="stat"><span className="stat-ic">✈</span><div><span className="muted">Tổng số tour</span><b>{data.total_tours}</b><div className="stat-sub">Đang khai thác</div></div></div>
+            <div className="stat"><span className="stat-ic">✈</span><div><span className="muted">Tổng số tour</span><b>{data.total_tours}</b><div className="stat-sub">{data.total_departures} lịch khởi hành</div></div></div>
             <div className="stat"><span className="stat-ic g2">🧾</span><div><span className="muted">Tổng số đơn</span><b>{data.bookings?.total ?? 0}</b><div className="stat-sub">Chờ duyệt {data.bookings?.pending ?? 0} • Đã xác nhận {data.bookings?.confirmed ?? 0}</div></div></div>
             <div className="stat"><span className="stat-ic g3">👥</span><div><span className="muted">Tổng số khách</span><b>{data.total_customers}</b><div className="stat-sub">Đã hủy {data.bookings?.cancelled ?? 0} • Hoàn thành {data.bookings?.completed ?? 0}</div></div></div>
             <div className="stat"><span className="stat-ic g4">💰</span><div><span className="muted">Tổng doanh thu</span><b>{formatVND(data.total_revenue)}</b><div className="stat-sub">Đã hoàn {formatVND(data.total_refunded)}</div></div></div>
@@ -78,12 +78,12 @@ export default function Dashboard() {
           </table></div>
         </div>
         <div className="tv-panel">
-          <h3>🔥 Tour nổi bật <span className="muted">(tỉ lệ lấp đầy)</span></h3>
-          {upcoming.length === 0
+          <h3>🔥 Tour doanh thu cao <span className="muted">(tỉ lệ lấp đầy)</span></h3>
+          {topTours.length === 0
             ? <div className="tv-empty">Chưa có dữ liệu tour nổi bật.</div>
             : (
               <div className="tv-top-list">
-                {upcoming.map((t, idx) => (
+                {topTours.slice(0, 5).map((t, idx) => (
                   <div className="tv-top-item" key={t.id}>
                     <span className="tv-rank-num">{idx + 1}</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -100,14 +100,14 @@ export default function Dashboard() {
       </div>
       <div className="grid dash-2">
         <div className="tv-panel">
-          <h3>🛫 Lịch khởi hành sắp tới <span className="muted">(tour có nhu cầu cao)</span></h3>
+          <h3>🛫 Lịch khởi hành sắp tới</h3>
           <div className="details-card">
-            {upcoming.length === 0
+            {upcomingDeps.length === 0
               ? <span className="muted">Chưa có lịch khởi hành nào sắp tới.</span>
-              : upcoming.map((t) => (
-                <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
-                  <b style={{ color: '#0f172a' }}>{t.name}</b>
-                  <span className="muted">{t.guests} khách • Lấp đầy {t.fill_rate}%</span>
+              : upcomingDeps.map((d) => (
+                <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                  <b style={{ color: '#0f172a' }}>{d.tour_name} — {String(d.departure_date).slice(0, 10)}</b>
+                  <span className="muted">Còn {d.capacity - d.confirmed_seats - d.held_seats} chỗ • {d.status}</span>
                 </div>
               ))}
           </div>

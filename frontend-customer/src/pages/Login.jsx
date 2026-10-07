@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../api/client.js';
+import { friendlyError } from '../components/ui.jsx';
 
 export default function Login() {
   const [identifier, setIdentifier] = useState('customer@gmail.com');
@@ -23,7 +24,7 @@ export default function Login() {
       }
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || err.message);
+      setError(friendlyError(err));
     }
   }
 

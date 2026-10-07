@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-
 export function formatVND(n) {
   const v = Number(n);
   if (Number.isNaN(v)) return '—';
@@ -36,10 +34,26 @@ const STATUS_VI = {
   // Giao dịch / hoàn tiền
   SUCCESS: 'Thành công',
   PROCESSING: 'Đang xử lý',
+  PENDING_REFUND: 'Chờ xử lý',
   AWAITING: 'Đang chờ',
   APPROVED: 'Đã duyệt',
   REJECTED: 'Đã từ chối',
   AVAILABLE: 'Còn chỗ',
+  // Loại hành khách
+  ADULT: 'Người lớn',
+  CHILD: 'Trẻ em',
+  INFANT: 'Em bé',
+  // Giới tính
+  MALE: 'Nam',
+  FEMALE: 'Nữ',
+  OTHER: 'Khác',
+  // Phương thức thanh toán
+  CASH: 'Tiền mặt',
+  BANK_TRANSFER: 'Chuyển khoản',
+  VNPAY: 'VNPay',
+  MOMO: 'MoMo',
+  EWALLET: 'Ví điện tử',
+  ONLINE: 'Trực tuyến',
   // Chung
   ACTIVE: 'Đang áp dụng',
   INACTIVE: 'Ngừng áp dụng',
@@ -74,18 +88,8 @@ export function statusBadge(status) {
   return 'badge b-neutral';
 }
 
-export function TourCard({ t }) {
-  return (
-    <div className="card">
-      {t.thumbnail ? <img src={t.thumbnail} alt={t.name} loading="lazy" /> : <div style={{ height: 170, background: '#cbd5e1' }} />}
-      <div className="card-body">
-        <div className="card-title"><Link to={`/tours/${t.id}`}>{t.name}</Link></div>
-        <div className="muted">{t.departure_location || ''} {t.duration_days ? `• ${t.duration_days}N${t.duration_nights ?? ''}Đ` : ''}</div>
-        <div className="price">{formatVND(t.adult_price)}</div>
-        <div className="muted">⭐ {t.avg_rating ? Number(t.avg_rating).toFixed(1) : '—'} ({t.review_count ?? 0} đánh giá)</div>
-      </div>
-    </div>
-  );
+export function TourCard() {
+  return null;
 }
 
 export function ErrorBox({ error }) {

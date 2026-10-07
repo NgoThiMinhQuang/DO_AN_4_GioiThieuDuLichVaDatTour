@@ -297,3 +297,53 @@ export function ErrorBox({ error }) {
   if (!error) return null;
   return <div className="alert error">{String(error)}</div>;
 }
+
+// Chuyển lỗi kỹ thuật (Network Error, 500...) thành câu thân thiện, không lộ chi tiết hệ thống.
+// Nhận cả axios error object lẫn chuỗi message đã trích trước đó.
+export function friendlyError(error) {
+  if (typeof error === 'string') {
+    if (/network|fetch|timeout|AxiosError|Failed to fetch/i.test(error)) {
+      return 'Không thể kết nối máy chủ. Vui lòng kiểm tra mạng rồi thử lại.';
+    }
+    const m = String(error).match(/status code (\d{3})/i);
+    if (m) {
+      const code = Number(m[1]);
+      if (code === 404) return 'Không tìm thấy dữ liệu yêu cầu.';
+      if (code === 401 || code === 403) return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+      if (code >= 500) return 'Máy chủ đang bận. Vui lòng thử lại sau ít phút.';
+      return 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
+    }
+    return error;
+  }
+  const status = error?.response?.status;
+  const serverMsg = error?.response?.data?.message;
+  if (!error?.response) return 'Không thể kết nối máy chủ. Vui lòng kiểm tra mạng rồi thử lại.';
+  if (status === 404) return serverMsg || 'Không tìm thấy dữ liệu yêu cầu.';
+  if (status === 401 || status === 403) return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+  if (status >= 500) return 'Máy chủ đang bận. Vui lòng thử lại sau ít phút.';
+  return serverMsg || 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
+}
+
+export function EmptyState({ icon = '🧳', title, hint, children }) {
+  return (
+    <div className="tv-empty">
+      <div className="tv-empty-icon">{icon}</div>
+      <b>{title}</b>
+      {hint && <p>{hint}</p>}
+      {children}
+    </div>
+  );
+}
+
+export function LoadError({ error, icon = '📭', title = 'Không tải được dữ liệu', hint, onRetry, children }) {
+  return (
+    <EmptyState
+      icon={icon}
+      title={title}
+      hint={hint || friendlyError(error)}
+    >
+      {onRetry && <button className="btn secondary" type="button" onClick={onRetry}>Thử lại</button>}
+      {children}
+    </EmptyState>
+  );
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client.js';
-import { ErrorBox, notifTypeVi } from '../components/ui.jsx';
+import { EmptyState, LoadError, notifTypeVi } from '../components/ui.jsx';
 
 function notifIcon(type) {
   const v = String(type || '').toUpperCase();
@@ -54,8 +54,10 @@ export default function Notifications() {
         <button className={`tv-chip${filter === 'read' ? ' active' : ''}`} onClick={() => setFilter('read')}>Đã đọc</button>
         {unread > 0 && <button className="btn ghost btn-sm" onClick={markAll} type="button">Đánh dấu tất cả đã đọc</button>}
       </div>
-      <ErrorBox error={error} />
-      {visible.length === 0 && !error && <div className="empty-box">Không có thông báo nào.</div>}
+      {error && <LoadError error={error} icon="🔔" title="Không tải được thông báo" onRetry={() => load()} />}
+      {visible.length === 0 && !error && (
+        <EmptyState icon="🔔" title="Không có thông báo nào" hint="Ưu đãi, trạng thái đặt tour và thanh toán mới nhất sẽ hiện ở đây." />
+      )}
       {visible.map((n) => (
         <div className={`card tv-notif${n.is_read ? ' read' : ' unread'}`} key={n.id} style={{ marginBottom: 12 }}>
           <div className="card-body" style={{ display: 'flex', gap: 14 }}>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { ErrorBox, TourCard, handleImgError, fallbackDestImg, resolveArticleImg, formatDateVi } from '../components/ui.jsx';
+import { LoadError, TourCard, handleImgError, fallbackDestImg, resolveArticleImg, formatDateVi } from '../components/ui.jsx';
 
 const TABS = [
   { id: 'intro', label: 'Giới thiệu' },
@@ -23,7 +23,15 @@ export default function DestinationDetail() {
       } catch (e) { setError(e.response?.data?.message || e.message); }
     })();
   }, [id]);
-  if (error) return <div className="container"><ErrorBox error={error} /></div>;
+  if (error) {
+    return (
+      <div className="container" style={{ paddingTop: 32 }}>
+        <LoadError error={error} icon="📍" title="Không tải được điểm đến" onRetry={() => window.location.reload()}>
+          <Link className="btn secondary" to="/destinations">Về danh sách điểm đến</Link>
+        </LoadError>
+      </div>
+    );
+  }
   if (!d) return <div className="container"><p>Đang tải...</p></div>;
   const fb = fallbackDestImg(d.id, 0);
   const tours = d.tours || [];
