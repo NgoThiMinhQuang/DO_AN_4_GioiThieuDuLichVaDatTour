@@ -23,6 +23,7 @@ router.get('/', async (req, res) => {
     let order = 't.created_at DESC';
     if (sort === 'price_asc') order = 't.adult_price ASC';
     else if (sort === 'price_desc') order = 't.adult_price DESC';
+    else if (sort === 'popular') order = 't.is_featured DESC, t.created_at DESC';
     else if (sort === 'newest') order = 't.created_at DESC';
     const lim = Math.min(Number(limit) || 12, 50);
     const off = (Math.max(Number(page) || 1, 1) - 1) * lim;

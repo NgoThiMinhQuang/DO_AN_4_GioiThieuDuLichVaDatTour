@@ -64,7 +64,7 @@ export default function Home() {
     (async () => {
       try {
         const [t, d, c] = await Promise.all([
-          api.get('/tours', { params: { sort: 'newest', limit: 8 } }).catch(() => ({ data: { data: [] } })),
+          api.get('/tours', { params: { sort: 'popular', limit: 4 } }).catch(() => ({ data: { data: [] } })),
           api.get('/meta/destinations').catch(() => ({ data: { data: [] } })),
           api.get('/meta/tour-categories').catch(() => ({ data: { data: [] } })),
         ]);
@@ -291,7 +291,7 @@ export default function Home() {
           {tours.length > 0 ? (
             <>
               <div className="grid tours">
-                {tours.map((t, i) => <TourCard key={t.id} t={t} hot={i < 2} />)}
+                {tours.slice(0, 4).map((t) => <TourCard key={t.id} t={t} hot={!!t.is_featured} />)}
               </div>
               <div style={{ textAlign: 'center', marginTop: 22 }}>
                 <Link className="btn secondary" to="/tours">Xem tất cả tour</Link>
